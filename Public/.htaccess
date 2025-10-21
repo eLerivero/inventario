@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Redireccionar a public
+RewriteRule ^$ Public/ [L]
+RewriteRule (.*) Public/$1 [L]
+
+# Prevenir acceso directo a archivos sensibles
+<Files ~ "\.(env|log|sql)$">
+    Deny from all
+</Files>
