@@ -1,7 +1,7 @@
 <?php
-require_once 'Models/Dashboard.php';
-require_once 'Models/Producto.php';
-require_once 'Models/Venta.php';
+require_once __DIR__ . '/../Models/Dashboard.php';
+require_once __DIR__ . '/../Models/Producto.php';
+require_once __DIR__ . '/../Models/Venta.php';
 
 class DashboardController
 {

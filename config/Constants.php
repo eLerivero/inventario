@@ -1,4 +1,5 @@
 <?php
+// Constantes de la aplicación
 define('SITE_NAME', 'Sistema de Inventario');
 define('SITE_VERSION', '1.0.0');
 define('DEFAULT_CURRENCY', '$');
@@ -14,3 +15,8 @@ define('MOVIMIENTO_SALIDA', 'salida');
 define('MOVIMIENTO_AJUSTE', 'ajuste');
 define('MOVIMIENTO_VENTA', 'venta');
 define('MOVIMIENTO_COMPRA', 'compra');
+
+// Roles de usuario (si los implementas después)
+define('ROL_ADMIN', 'admin');
+define('ROL_USUARIO', 'usuario');
+define('ROL_VENDEDOR', 'vendedor');

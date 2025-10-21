@@ -1,0 +1,14 @@
+[2025-10-21 14:30:15] [ERROR] WARNING: Constant SITE_NAME already defined en C:\wamp64\www\inventario\Config\Constants.php línea 3
+[2025-10-21 14:30:15] [ERROR] WARNING: Constant SITE_VERSION already defined en C:\wamp64\www\inventario\Config\Constants.php línea 4
+[2025-10-21 14:30:15] [ERROR] WARNING: Constant DEFAULT_CURRENCY already defined en C:\wamp64\www\inventario\Config\Constants.php línea 5
+[2025-10-21 14:30:15] [ERROR] WARNING: Constant VENTA_PENDIENTE already defined en C:\wamp64\www\inventario\Config\Constants.php línea 8
+[2025-10-21 14:30:15] [ERROR] WARNING: Constant VENTA_COMPLETADA already defined en C:\wamp64\www\inventario\Config\Constants.php línea 9
+[2025-10-21 14:30:15] [ERROR] WARNING: Constant VENTA_CANCELADA already defined en C:\wamp64\www\inventario\Config\Constants.php línea 10
+[2025-10-21 14:30:15] [ERROR] WARNING: Constant MOVIMIENTO_ENTRADA already defined en C:\wamp64\www\inventario\Config\Constants.php línea 13
+[2025-10-21 14:30:15] [ERROR] WARNING: Constant MOVIMIENTO_SALIDA already defined en C:\wamp64\www\inventario\Config\Constants.php línea 14
+[2025-10-21 14:30:15] [ERROR] WARNING: Constant MOVIMIENTO_AJUSTE already defined en C:\wamp64\www\inventario\Config\Constants.php línea 15
+[2025-10-21 14:30:15] [ERROR] WARNING: Constant MOVIMIENTO_VENTA already defined en C:\wamp64\www\inventario\Config\Constants.php línea 16
+[2025-10-21 14:30:15] [ERROR] WARNING: Constant MOVIMIENTO_COMPRA already defined en C:\wamp64\www\inventario\Config\Constants.php línea 17
+[2025-10-21 14:30:15] [ERROR] WARNING: Constant ROL_ADMIN already defined en C:\wamp64\www\inventario\Config\Constants.php línea 20
+[2025-10-21 14:30:15] [ERROR] WARNING: Constant ROL_USUARIO already defined en C:\wamp64\www\inventario\Config\Constants.php línea 21
+[2025-10-21 14:30:15] [ERROR] WARNING: Constant ROL_VENDEDOR already defined en C:\wamp64\www\inventario\Config\Constants.php línea 22

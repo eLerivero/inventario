@@ -1,6 +1,7 @@
 <?php
-require_once 'Config/Database.php';
-require_once 'Utils/Ayuda.php';
+//require_once 'Config/Database.php';
+require_once __DIR__ . '/../Config/Database.php';
+require_once __DIR__ . '/../Utils/Ayuda.php';
 
 class Producto
 {
@@ -73,6 +74,11 @@ class Producto
 
     public function crear()
     {
+        // Generar SKU automáticamente si está configurado
+        if (AUTO_GENERATE_SKU && empty($this->codigo_sku)) {
+            $this->codigo_sku = Ayuda::generateSKU($this->nombre);
+        }
+
         $query = "INSERT INTO " . $this->table . " 
                   (codigo_sku, nombre, descripcion, precio, precio_costo, stock_actual, stock_minimo, categoria_id) 
                   VALUES 
@@ -85,6 +91,15 @@ class Producto
         $this->codigo_sku = Ayuda::sanitizeInput($this->codigo_sku);
         $this->nombre = Ayuda::sanitizeInput($this->nombre);
         $this->descripcion = Ayuda::sanitizeInput($this->descripcion);
+
+        // Validar datos requeridos
+        if (empty($this->nombre)) {
+            throw new Exception("El nombre del producto es requerido");
+        }
+
+        if (empty($this->precio) || $this->precio < 0) {
+            throw new Exception("El precio debe ser un valor positivo");
+        }
 
         // Vincular parámetros
         $stmt->bindParam(":codigo_sku", $this->codigo_sku);
@@ -109,6 +124,13 @@ class Producto
                 'entrada',
                 'Stock inicial'
             );
+
+            appLog('INFO', 'Producto creado', [
+                'id' => $producto_id,
+                'nombre' => $this->nombre,
+                'sku' => $this->codigo_sku
+            ]);
+
             return $producto_id;
         }
         return false;
@@ -127,6 +149,11 @@ class Producto
         $this->nombre = Ayuda::sanitizeInput($this->nombre);
         $this->descripcion = Ayuda::sanitizeInput($this->descripcion);
 
+        // Validaciones
+        if (empty($this->nombre)) {
+            throw new Exception("El nombre del producto es requerido");
+        }
+
         $stmt->bindParam(":nombre", $this->nombre);
         $stmt->bindParam(":descripcion", $this->descripcion);
         $stmt->bindParam(":precio", $this->precio);
@@ -135,7 +162,13 @@ class Producto
         $stmt->bindParam(":categoria_id", $this->categoria_id);
         $stmt->bindParam(":id", $id);
 
-        return $stmt->execute();
+        $result = $stmt->execute();
+
+        if ($result) {
+            appLog('INFO', 'Producto actualizado', ['id' => $id, 'nombre' => $this->nombre]);
+        }
+
+        return $result;
     }
 
     public function actualizarStock($producto_id, $nueva_cantidad, $tipo_movimiento = 'ajuste', $observaciones = '')
@@ -167,6 +200,14 @@ class Producto
                     $tipo_movimiento,
                     $observaciones
                 );
+
+                appLog('INFO', 'Stock actualizado', [
+                    'producto_id' => $producto_id,
+                    'anterior' => $cantidad_anterior,
+                    'nuevo' => $nueva_cantidad,
+                    'tipo' => $tipo_movimiento
+                ]);
+
                 return true;
             }
         }
@@ -176,24 +217,34 @@ class Producto
     private function registrarMovimientoStock($producto_id, $cantidad_anterior, $cantidad_nueva, $diferencia, $tipo_movimiento, $observaciones)
     {
         $query = "INSERT INTO historial_stock 
-                  (producto_id, cantidad_anterior, cantidad_nueva, diferencia, tipo_movimiento, observaciones, fecha_hora) 
+                  (producto_id, cantidad_anterior, cantidad_nueva, diferencia, tipo_movimiento, observaciones, fecha_hora, usuario) 
                   VALUES 
-                  (:producto_id, :cantidad_anterior, :cantidad_nueva, :diferencia, :tipo_movimiento, :observaciones, NOW())";
+                  (:producto_id, :cantidad_anterior, :cantidad_nueva, :diferencia, :tipo_movimiento, :observaciones, NOW(), :usuario)";
 
         $stmt = $this->conn->prepare($query);
+
+        // Obtener usuario actual (esto debería venir de la sesión)
+        $usuario = 'sistema'; // Por defecto
+
         $stmt->bindParam(":producto_id", $producto_id);
         $stmt->bindParam(":cantidad_anterior", $cantidad_anterior);
         $stmt->bindParam(":cantidad_nueva", $cantidad_nueva);
         $stmt->bindParam(":diferencia", $diferencia);
         $stmt->bindParam(":tipo_movimiento", $tipo_movimiento);
         $stmt->bindParam(":observaciones", $observaciones);
+        $stmt->bindParam(":usuario", $usuario);
 
         return $stmt->execute();
     }
 
     public function obtenerProductosBajoStock()
     {
-        $query = "SELECT * FROM productos WHERE stock_actual <= stock_minimo AND activo = true";
+        $query = "SELECT p.*, c.nombre as categoria_nombre 
+                  FROM productos p 
+                  LEFT JOIN categorias c ON p.categoria_id = c.id 
+                  WHERE p.stock_actual <= p.stock_minimo AND p.activo = true
+                  ORDER BY (p.stock_actual / p.stock_minimo) ASC";
+
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
@@ -206,7 +257,8 @@ class Producto
                     SUM(stock_actual) as total_stock,
                     COUNT(CASE WHEN stock_actual <= stock_minimo THEN 1 END) as productos_bajo_stock,
                     AVG(precio) as precio_promedio,
-                    SUM(precio * stock_actual) as valor_inventario
+                    SUM(precio * stock_actual) as valor_inventario,
+                    COUNT(CASE WHEN stock_actual = 0 THEN 1 END) as productos_sin_stock
                   FROM productos 
                   WHERE activo = true";
 
@@ -220,6 +272,26 @@ class Producto
         $query = "UPDATE productos SET activo = false WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $id);
-        return $stmt->execute();
+
+        $result = $stmt->execute();
+
+        if ($result) {
+            appLog('INFO', 'Producto eliminado', ['id' => $id]);
+        }
+
+        return $result;
+    }
+
+    public function obtenerPorSKU($sku)
+    {
+        $query = "SELECT * FROM " . $this->table . " WHERE codigo_sku = :sku AND activo = true";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":sku", $sku);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+        return false;
     }
 }
