@@ -1,9 +1,12 @@
 <?php
 // Archivo principal - Punto de entrada de la aplicación
 
-// Cargar configuración
-require_once 'Config/Config.php';
-require_once 'Config/Database.php';
+// Cargar configuración con rutas absolutas
+$configPath = __DIR__ . '/Config/Config.php';
+if (!file_exists($configPath)) {
+    die("Error: No se puede encontrar el archivo de configuración en: $configPath");
+}
+require_once $configPath;
 
 // Verificar requisitos del sistema
 function verificarRequisitos()
@@ -43,86 +46,83 @@ function verificarRequisitos()
 function mostrarPaginaInstalacion($errores = [])
 {
 ?>
-    <!DOCTYPE html>
-    <html lang="es">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instalación - Sistema de Inventario</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="max-w-2xl w-full bg-white rounded-lg shadow-lg p-8">
+        <div class="text-center mb-8">
+            <i class="fas fa-boxes text-6xl text-blue-500 mb-4"></i>
+            <h1 class="text-3xl font-bold text-gray-800">Sistema de Inventario</h1>
+            <p class="text-gray-600 mt-2">Verificación del sistema</p>
+        </div>
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Instalación - Sistema de Inventario</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    </head>
-
-    <body class="bg-gray-100 min-h-screen flex items-center justify-center">
-        <div class="max-w-2xl w-full bg-white rounded-lg shadow-lg p-8">
-            <div class="text-center mb-8">
-                <i class="fas fa-boxes text-6xl text-blue-500 mb-4"></i>
-                <h1 class="text-3xl font-bold text-gray-800">Sistema de Inventario</h1>
-                <p class="text-gray-600 mt-2">Verificación del sistema</p>
+        <?php if (!empty($errores)): ?>
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>Se encontraron los siguientes errores:</strong>
+                </div>
+                <ul class="mt-2 list-disc list-inside">
+                    <?php foreach ($errores as $error): ?>
+                        <li><?php echo htmlspecialchars($error); ?></li>
+                    <?php endforeach; ?>
+                </ul>
             </div>
 
-            <?php if (!empty($errores)): ?>
-                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
-                    <div class="flex items-center">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        <strong>Se encontraron los siguientes errores:</strong>
-                    </div>
-                    <ul class="mt-2 list-disc list-inside">
-                        <?php foreach ($errores as $error): ?>
-                            <li><?php echo htmlspecialchars($error); ?></li>
-                        <?php endforeach; ?>
-                    </ul>
+            <div class="text-center">
+                <p class="text-gray-600 mb-4">Por favor, corrige los errores y actualiza esta página.</p>
+                <button onclick="location.reload()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition duration-200">
+                    <i class="fas fa-redo mr-2"></i>Reintentar
+                </button>
+            </div>
+        <?php else: ?>
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <strong>¡Sistema verificado correctamente!</strong>
+                </div>
+                <p class="mt-2">Todos los requisitos del sistema están satisfechos.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-blue-800 mb-2">
+                        <i class="fas fa-database mr-2"></i>Base de Datos
+                    </h3>
+                    <p class="text-sm text-blue-600">PostgreSQL configurado correctamente</p>
                 </div>
 
-                <div class="text-center">
-                    <p class="text-gray-600 mb-4">Por favor, corrige los errores y actualiza esta página.</p>
-                    <button onclick="location.reload()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition duration-200">
-                        <i class="fas fa-redo mr-2"></i>Reintentar
-                    </button>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-green-800 mb-2">
+                        <i class="fas fa-server mr-2"></i>Servidor
+                    </h3>
+                    <p class="text-sm text-green-600">PHP <?php echo PHP_VERSION; ?></p>
                 </div>
-            <?php else: ?>
-                <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded">
-                    <div class="flex items-center">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        <strong>¡Sistema verificado correctamente!</strong>
-                    </div>
-                    <p class="mt-2">Todos los requisitos del sistema están satisfechos.</p>
-                </div>
+            </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div class="bg-blue-50 p-4 rounded-lg">
-                        <h3 class="font-semibold text-blue-800 mb-2">
-                            <i class="fas fa-database mr-2"></i>Base de Datos
-                        </h3>
-                        <p class="text-sm text-blue-600">PostgreSQL configurado correctamente</p>
-                    </div>
+            <div class="text-center">
+                <a href="Views/dashboard/index.php" class="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg transition duration-200 font-semibold">
+                    <i class="fas fa-rocket mr-2"></i>Iniciar Sistema
+                </a>
+            </div>
+        <?php endif; ?>
 
-                    <div class="bg-green-50 p-4 rounded-lg">
-                        <h3 class="font-semibold text-green-800 mb-2">
-                            <i class="fas fa-server mr-2"></i>Servidor
-                        </h3>
-                        <p class="text-sm text-green-600">PHP <?php echo PHP_VERSION; ?></p>
-                    </div>
-                </div>
-
-                <div class="text-center">
-                    <a href="Public/index.php" class="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-lg transition duration-200 font-semibold">
-                        <i class="fas fa-rocket mr-2"></i>Iniciar Sistema
-                    </a>
-                </div>
-            <?php endif; ?>
-
-            <div class="mt-8 pt-6 border-t border-gray-200">
-                <div class="text-center text-gray-500 text-sm">
-                    <p><strong>Información del Sistema:</strong></p>
-                    <p>PHP <?php echo PHP_VERSION; ?> | PostgreSQL | Arquitectura MVC</p>
-                </div>
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <div class="text-center text-gray-500 text-sm">
+                <p><strong>Información del Sistema:</strong></p>
+                <p>PHP <?php echo PHP_VERSION; ?> | PostgreSQL | Desarrollado por @by Lr</p>
             </div>
         </div>
-    </body>
-
-    </html>
+    </div>
+</body>
+</html>
 <?php
     exit();
 }
@@ -137,6 +137,7 @@ if (!empty($errores)) {
 
 // Verificar conexión a la base de datos
 try {
+    require_once __DIR__ . '/Config/Database.php';
     $database = new Database();
     $db = $database->getConnection();
 
@@ -160,7 +161,7 @@ try {
     mostrarPaginaInstalacion($errores);
 }
 
-// Si todo está bien, redirigir al sistema
-header("Location: Public/index.php");
+// Si todo está bien, redirigir al dashboard
+header("Location: Views/dashboard/index.php");
 exit();
 ?>

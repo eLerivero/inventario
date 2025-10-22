@@ -105,10 +105,8 @@ CREATE INDEX idx_historial_stock_fecha ON historial_stock(fecha_hora);
 
 -- Datos iniciales
 INSERT INTO categorias (nombre, descripcion) VALUES 
-('Electrónicos', 'Productos electrónicos y dispositivos'),
-('Ropa', 'Prendas de vestir y accesorios'),
-('Hogar', 'Artículos para el hogar'),
-('Deportes', 'Equipos y artículos deportivos');
+('Panadería', 'Panes'),
+('Bebidas', 'Cerveza');
 
 INSERT INTO tipos_pago (nombre, descripcion) VALUES 
 ('Efectivo', 'Pago en efectivo'),

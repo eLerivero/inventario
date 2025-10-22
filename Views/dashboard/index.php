@@ -1,172 +1,299 @@
 <?php
 require_once '../../Config/Database.php';
-require_once '../../Config/Constants.php';
 require_once '../../Controllers/DashboardController.php';
+require_once '../../Utils/Ayuda.php';
 
 $database = new Database();
 $db = $database->getConnection();
 
 $controller = new DashboardController($db);
 $data = $controller->obtenerEstadisticasCompletas();
+
+$page_title = "Dashboard";
+include '../layouts/header.php'; 
 ?>
 
-<?php include '../layouts/header.php'; ?>
-
-<div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-800">Dashboard</h1>
-    <p class="text-gray-600">Resumen general del sistema</p>
+<!-- Content Header -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-3 mb-4 border-bottom">
+    <h1 class="h2">
+        <i class="fas fa-tachometer-alt me-2"></i>
+        Dashboard
+    </h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-download me-1"></i> Exportar
+            </button>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
+            <i class="fas fa-calendar me-1"></i>
+            Esta semana
+        </button>
+    </div>
 </div>
 
 <!-- Estadísticas principales -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
-        <div class="flex items-center">
-            <div class="p-3 bg-blue-100 rounded-lg">
-                <i class="fas fa-box text-blue-600 text-xl"></i>
-            </div>
-            <div class="ml-4">
-                <p class="text-sm text-gray-500">Total Productos</p>
-                <p class="text-2xl font-bold"><?php echo $data['resumen']['total_productos']; ?></p>
-            </div>
-        </div>
-    </div>
-
-    <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-        <div class="flex items-center">
-            <div class="p-3 bg-green-100 rounded-lg">
-                <i class="fas fa-shopping-cart text-green-600 text-xl"></i>
-            </div>
-            <div class="ml-4">
-                <p class="text-sm text-gray-500">Ventas del Mes</p>
-                <p class="text-2xl font-bold"><?php echo $data['resumen']['ventas_mes']; ?></p>
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title text-muted mb-2">Total Productos</h5>
+                        <h2 class="text-primary mb-0"><?php echo $data['resumen']['total_productos']; ?></h2>
+                        <small class="text-muted">Activos en inventario</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-box fa-2x text-primary opacity-25"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
-        <div class="flex items-center">
-            <div class="p-3 bg-purple-100 rounded-lg">
-                <i class="fas fa-users text-purple-600 text-xl"></i>
-            </div>
-            <div class="ml-4">
-                <p class="text-sm text-gray-500">Total Clientes</p>
-                <p class="text-2xl font-bold"><?php echo $data['resumen']['total_clientes']; ?></p>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card success h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title text-muted mb-2">Ventas del Mes</h5>
+                        <h2 class="text-success mb-0"><?php echo $data['resumen']['ventas_mes']; ?></h2>
+                        <small class="text-muted">Transacciones completadas</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-shopping-cart fa-2x text-success opacity-25"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
-        <div class="flex items-center">
-            <div class="p-3 bg-red-100 rounded-lg">
-                <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card warning h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title text-muted mb-2">Total Clientes</h5>
+                        <h2 class="text-warning mb-0"><?php echo $data['resumen']['total_clientes']; ?></h2>
+                        <small class="text-muted">Clientes registrados</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-users fa-2x text-warning opacity-25"></i>
+                    </div>
+                </div>
             </div>
-            <div class="ml-4">
-                <p class="text-sm text-gray-500">Stock Bajo</p>
-                <p class="text-2xl font-bold"><?php echo $data['resumen']['productos_bajo_stock']; ?></p>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card stat-card danger h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title text-muted mb-2">Stock Bajo</h5>
+                        <h2 class="text-danger mb-0"><?php echo $data['resumen']['productos_bajo_stock']; ?></h2>
+                        <small class="text-muted">Necesitan reabastecimiento</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-exclamation-triangle fa-2x text-danger opacity-25"></i>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<div class="row">
     <!-- Ventas Recientes -->
-    <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-800">Ventas Recientes</h2>
-        </div>
-        <div class="p-6">
-            <?php if (!empty($data['ventas_recientes'])): ?>
-                <div class="space-y-4">
-                    <?php foreach ($data['ventas_recientes'] as $venta): ?>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                            <div>
-                                <p class="font-medium text-gray-800"><?php echo $venta['numero_venta']; ?></p>
-                                <p class="text-sm text-gray-500"><?php echo $venta['cliente_nombre']; ?></p>
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-receipt me-2"></i>
+                    Ventas Recientes
+                </h5>
+            </div>
+            <div class="card-body">
+                <?php if (!empty($data['ventas_recientes'])): ?>
+                    <div class="list-group list-group-flush">
+                        <?php foreach ($data['ventas_recientes'] as $venta): ?>
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary rounded p-2 me-3">
+                                        <i class="fas fa-shopping-cart text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1"><?php echo htmlspecialchars($venta['numero_venta']); ?></h6>
+                                        <small class="text-muted">
+                                            <?php echo htmlspecialchars($venta['cliente_nombre'] ?? 'Cliente no especificado'); ?>
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <strong class="text-success d-block"><?php echo Ayuda::formatCurrency($venta['total']); ?></strong>
+                                    <small class="text-muted"><?php echo Ayuda::formatDate($venta['created_at']); ?></small>
+                                </div>
                             </div>
-                            <div class="text-right">
-                                <p class="font-semibold text-green-600"><?php echo Helpers::formatCurrency($venta['total']); ?></p>
-                                <p class="text-sm text-gray-500"><?php echo Helpers::formatDate($venta['created_at']); ?></p>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php else: ?>
-                <p class="text-gray-500 text-center py-4">No hay ventas recientes</p>
-            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-4">
+                        <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                        <p class="text-muted mb-0">No hay ventas recientes</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="card-footer bg-white">
+                <a href="../ventas/index.php" class="btn btn-sm btn-outline-primary">
+                    Ver todas las ventas
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- Productos Populares -->
-    <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-800">Productos Más Vendidos</h2>
-        </div>
-        <div class="p-6">
-            <?php if (!empty($data['productos_populares'])): ?>
-                <div class="space-y-4">
-                    <?php foreach ($data['productos_populares'] as $producto): ?>
-                        <div class="flex justify-between items-center py-2 border-b border-gray-100">
-                            <div>
-                                <p class="font-medium text-gray-800"><?php echo $producto['nombre']; ?></p>
-                                <p class="text-sm text-gray-500"><?php echo $producto['codigo_sku']; ?></p>
-                            </div>
-                            <div class="text-right">
-                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">
-                                    <?php echo $producto['total_vendido']; ?> vendidos
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Productos Más Vendidos
+                </h5>
+            </div>
+            <div class="card-body">
+                <?php if (!empty($data['productos_populares'])): ?>
+                    <div class="list-group list-group-flush">
+                        <?php foreach ($data['productos_populares'] as $producto): ?>
+                            <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-success rounded p-2 me-3">
+                                        <i class="fas fa-box text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1"><?php echo htmlspecialchars($producto['nombre']); ?></h6>
+                                        <small class="text-muted"><?php echo htmlspecialchars($producto['codigo_sku']); ?></small>
+                                    </div>
+                                </div>
+                                <span class="badge bg-primary rounded-pill fs-6">
+                                    <?php echo $producto['total_vendido']; ?>
                                 </span>
                             </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php else: ?>
-                <p class="text-gray-500 text-center py-4">No hay datos de productos vendidos</p>
-            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                        <p class="text-muted mb-0">No hay datos de productos vendidos</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <div class="card-footer bg-white">
+                <a href="../productos/index.php" class="btn btn-sm btn-outline-primary">
+                    Ver todos los productos
+                </a>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Alertas de Stock Bajo -->
 <?php if (!empty($data['productos_bajo_stock'])): ?>
-    <div class="mt-8 bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-800 flex items-center">
-                <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
-                Alertas de Stock Bajo
-            </h2>
-        </div>
-        <div class="p-6">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SKU</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Actual</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Mínimo</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <?php foreach ($data['productos_bajo_stock'] as $producto): ?>
-                            <tr class="hover:bg-red-50">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    <?php echo $producto['nombre']; ?>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <?php echo $producto['codigo_sku']; ?>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600 font-semibold">
-                                    <?php echo $producto['stock_actual']; ?>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <?php echo $producto['stock_minimo']; ?>
-                                </td>
+<div class="row">
+    <div class="col-12">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Alertas de Stock Bajo
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>SKU</th>
+                                <th>Stock Actual</th>
+                                <th>Stock Mínimo</th>
+                                <th>Diferencia</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($data['productos_bajo_stock'] as $producto): ?>
+                                <tr class="table-warning">
+                                    <td>
+                                        <strong><?php echo htmlspecialchars($producto['nombre']); ?></strong>
+                                    </td>
+                                    <td>
+                                        <code><?php echo htmlspecialchars($producto['codigo_sku']); ?></code>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger fs-6"><?php echo $producto['stock_actual']; ?></span>
+                                    </td>
+                                    <td><?php echo $producto['stock_minimo']; ?></td>
+                                    <td>
+                                        <?php 
+                                        $diferencia = $producto['stock_minimo'] - $producto['stock_actual'];
+                                        echo '<span class="badge bg-dark">-' . $diferencia . '</span>';
+                                        ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-light">
+                <a href="../productos/index.php" class="btn btn-sm btn-warning">
+                    <i class="fas fa-box me-1"></i> Gestionar Inventario
+                </a>
             </div>
         </div>
     </div>
+</div>
 <?php endif; ?>
+
+<!-- Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3 col-6">
+                        <a href="../productos/crear.php" class="btn btn-outline-primary w-100 h-100 py-3">
+                            <i class="fas fa-plus-circle fa-2x mb-2"></i><br>
+                            Nuevo Producto
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <a href="../ventas/crear.php" class="btn btn-outline-success w-100 h-100 py-3">
+                            <i class="fas fa-cash-register fa-2x mb-2"></i><br>
+                            Nueva Venta
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <a href="../clientes/crear.php" class="btn btn-outline-info w-100 h-100 py-3">
+                            <i class="fas fa-user-plus fa-2x mb-2"></i><br>
+                            Nuevo Cliente
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <a href="../categorias/crear.php" class="btn btn-outline-warning w-100 h-100 py-3">
+                            <i class="fas fa-tag fa-2x mb-2"></i><br>
+                            Nueva Categoría
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <?php include '../layouts/footer.php'; ?>

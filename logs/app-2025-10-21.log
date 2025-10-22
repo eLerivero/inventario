@@ -1,14 +1,8 @@
-[2025-10-21 14:30:15] [ERROR] WARNING: Constant SITE_NAME already defined en C:\wamp64\www\inventario\Config\Constants.php línea 3
-[2025-10-21 14:30:15] [ERROR] WARNING: Constant SITE_VERSION already defined en C:\wamp64\www\inventario\Config\Constants.php línea 4
-[2025-10-21 14:30:15] [ERROR] WARNING: Constant DEFAULT_CURRENCY already defined en C:\wamp64\www\inventario\Config\Constants.php línea 5
-[2025-10-21 14:30:15] [ERROR] WARNING: Constant VENTA_PENDIENTE already defined en C:\wamp64\www\inventario\Config\Constants.php línea 8
-[2025-10-21 14:30:15] [ERROR] WARNING: Constant VENTA_COMPLETADA already defined en C:\wamp64\www\inventario\Config\Constants.php línea 9
-[2025-10-21 14:30:15] [ERROR] WARNING: Constant VENTA_CANCELADA already defined en C:\wamp64\www\inventario\Config\Constants.php línea 10
-[2025-10-21 14:30:15] [ERROR] WARNING: Constant MOVIMIENTO_ENTRADA already defined en C:\wamp64\www\inventario\Config\Constants.php línea 13
-[2025-10-21 14:30:15] [ERROR] WARNING: Constant MOVIMIENTO_SALIDA already defined en C:\wamp64\www\inventario\Config\Constants.php línea 14
-[2025-10-21 14:30:15] [ERROR] WARNING: Constant MOVIMIENTO_AJUSTE already defined en C:\wamp64\www\inventario\Config\Constants.php línea 15
-[2025-10-21 14:30:15] [ERROR] WARNING: Constant MOVIMIENTO_VENTA already defined en C:\wamp64\www\inventario\Config\Constants.php línea 16
-[2025-10-21 14:30:15] [ERROR] WARNING: Constant MOVIMIENTO_COMPRA already defined en C:\wamp64\www\inventario\Config\Constants.php línea 17
-[2025-10-21 14:30:15] [ERROR] WARNING: Constant ROL_ADMIN already defined en C:\wamp64\www\inventario\Config\Constants.php línea 20
-[2025-10-21 14:30:15] [ERROR] WARNING: Constant ROL_USUARIO already defined en C:\wamp64\www\inventario\Config\Constants.php línea 21
-[2025-10-21 14:30:15] [ERROR] WARNING: Constant ROL_VENDEDOR already defined en C:\wamp64\www\inventario\Config\Constants.php línea 22
+[2025-10-21 18:19:29] [ERROR] WARNING: require_once(../Config/Config.php): Failed to open stream: No such file or directory en D:\wamp64\www\inventario\Utils\Auth.php línea 3
+[2025-10-21 18:19:29] [ERROR] Excepción no capturada: Failed opening required '../Config/Config.php' (include_path='.;C:\php\pear') {"file":"D:\\wamp64\\www\\inventario\\Utils\\Auth.php","line":3,"trace":"#0 D:\\wamp64\\www\\inventario\\Views\\layouts\\header.php(7): require_once()\n#1 D:\\wamp64\\www\\inventario\\Views\\dashboard\\index.php(13): include('D:\\\\wamp64\\\\www\\\\i...')\n#2 {main}"}
+[2025-10-21 18:20:37] [ERROR] WARNING: require_once(../Config/Config.php): Failed to open stream: No such file or directory en D:\wamp64\www\inventario\Utils\Auth.php línea 3
+[2025-10-21 18:20:37] [ERROR] Excepción no capturada: Failed opening required '../Config/Config.php' (include_path='.;C:\php\pear') {"file":"D:\\wamp64\\www\\inventario\\Utils\\Auth.php","line":3,"trace":"#0 D:\\wamp64\\www\\inventario\\Views\\layouts\\header.php(7): require_once()\n#1 D:\\wamp64\\www\\inventario\\Views\\dashboard\\index.php(13): include('D:\\\\wamp64\\\\www\\\\i...')\n#2 {main}"}
+[2025-10-21 18:37:34] [ERROR] WARNING: require_once(../Config/Config.php): Failed to open stream: No such file or directory en D:\wamp64\www\inventario\Utils\Auth.php línea 3
+[2025-10-21 18:37:34] [ERROR] Excepción no capturada: Failed opening required '../Config/Config.php' (include_path='.;C:\php\pear') {"file":"D:\\wamp64\\www\\inventario\\Utils\\Auth.php","line":3,"trace":"#0 D:\\wamp64\\www\\inventario\\Views\\layouts\\header.php(7): require_once()\n#1 D:\\wamp64\\www\\inventario\\Views\\dashboard\\index.php(13): include('D:\\\\wamp64\\\\www\\\\i...')\n#2 {main}"}
+[2025-10-21 18:42:45] [ERROR] WARNING: require_once(Models/Categoria.php): Failed to open stream: No such file or directory en D:\wamp64\www\inventario\Controllers\CategoriaController.php línea 2
+[2025-10-21 18:42:45] [ERROR] Excepción no capturada: Failed opening required 'Models/Categoria.php' (include_path='.;C:\php\pear') {"file":"D:\\wamp64\\www\\inventario\\Controllers\\CategoriaController.php","line":2,"trace":"#0 D:\\wamp64\\www\\inventario\\Views\\productos\\crear.php(6): require_once()\n#1 {main}"}

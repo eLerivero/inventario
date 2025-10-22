@@ -1,5 +1,7 @@
 <?php
-require_once 'Models/Categoria.php';
+
+require_once '../../Models/Categoria.php';
+
 
 class CategoriaController
 {
