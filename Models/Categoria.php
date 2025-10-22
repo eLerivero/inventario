@@ -1,4 +1,8 @@
 <?php
+
+require_once '../../Utils/Ayuda.php';
+require_once '../../Utils/Logger.php'; // Incluir logger en el modelo también
+
 class Categoria
 {
     private $conn;
@@ -18,14 +22,24 @@ class Categoria
     public function leer()
     {
         $query = "SELECT c.*, COUNT(p.id) as total_productos
-                  FROM " . $this->table . " c
-                  LEFT JOIN productos p ON c.id = p.categoria_id AND p.activo = true
-                  GROUP BY c.id
-                  ORDER BY c.nombre";
+                FROM " . $this->table . " c
+                LEFT JOIN productos p ON c.id = p.categoria_id AND p.activo = true
+                GROUP BY c.id
+                ORDER BY c.nombre";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
+    }
+
+    public function obtenerPorId($id)
+    {
+        $query = "SELECT * FROM " . $this->table . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $id);
+        $stmt->execute();
+        
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function crear()
@@ -49,6 +63,33 @@ class Categoria
             return $row['id'];
         }
         return false;
+    }
+
+    public function actualizar($id)
+    {
+        $query = "UPDATE " . $this->table . " 
+                  SET nombre = :nombre, descripcion = :descripcion, updated_at = NOW() 
+                  WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+
+        $this->nombre = Ayuda::sanitizeInput($this->nombre);
+        $this->descripcion = Ayuda::sanitizeInput($this->descripcion);
+
+        $stmt->bindParam(":nombre", $this->nombre);
+        $stmt->bindParam(":descripcion", $this->descripcion);
+        $stmt->bindParam(":id", $id);
+
+        return $stmt->execute();
+    }
+
+    public function eliminar($id)
+    {
+        $query = "DELETE FROM " . $this->table . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $id);
+        
+        return $stmt->execute();
     }
 
     public function obtenerTodas()

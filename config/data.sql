@@ -1,11 +1,5 @@
--- Crear la base de datos
-CREATE DATABASE sistema_inventario;
+-- Crear la base de datos de forma local llamada inventario una vez creada genera un query copia y pega todo el script sql
 
--- Conectar a la base de datos
-\c sistema_inventario;
-
--- Extensión para UUID (opcional)
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Tabla de categorías
 CREATE TABLE categorias (

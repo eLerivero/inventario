@@ -2,7 +2,7 @@
 // Configuración de la aplicación
 define('APP_NAME', 'Sistema de Inventario');
 define('APP_VERSION', '1.0.0');
-define('APP_ENV', 'development'); // production, development
+define('APP_ENV', 'development');
 
 // Configuración de base de datos PostgreSQL
 define('DB_HOST', 'localhost');
@@ -23,7 +23,7 @@ define('CURRENCY_SYMBOL', '$');
 define('DECIMAL_SEPARATOR', '.');
 define('THOUSANDS_SEPARATOR', ',');
 
-// Configuración de fecha y hora
+// Configuración de fecha y hora - ACTUALIZADO A CARACAS/VENEZUELA
 define('DATE_FORMAT', 'd/m/Y');
 define('TIME_FORMAT', 'H:i:s');
 define('DATETIME_FORMAT', 'd/m/Y H:i:s');
@@ -56,8 +56,8 @@ if (APP_ENV === 'development') {
     ini_set('log_errors', 1);
 }
 
-// Configuración de zona horaria
-date_default_timezone_set('America/Guatemala');
+// Configuración de zona horaria - ACTUALIZADO A CARACAS/VENEZUELA
+date_default_timezone_set('America/Caracas');
 
 // Iniciar sesión si no está iniciada
 if (session_status() === PHP_SESSION_NONE) {
@@ -70,6 +70,11 @@ if (session_status() === PHP_SESSION_NONE) {
         'samesite' => 'Strict'
     ]);
     session_start();
+}
+
+// Incluir Logger si existe
+if (file_exists(BASE_PATH . '/Utils/Logger.php')) {
+    require_once BASE_PATH . '/Utils/Logger.php';
 }
 
 // Función para cargar clases automáticamente
@@ -89,8 +94,8 @@ spl_autoload_register(function ($className) {
     }
 
     // Log si no se encuentra la clase
-    if (APP_ENV === 'development') {
-        error_log("Clase no encontrada: $className");
+    if (APP_ENV === 'development' && function_exists('appLog')) {
+        appLog('WARNING', "Clase no encontrada: $className");
     }
 });
 
@@ -125,44 +130,6 @@ function validateCSRFToken($token)
     return true;
 }
 
-// Función para log
-function appLog($level, $message, $context = [])
-{
-    if (!in_array($level, ['DEBUG', 'INFO', 'WARNING', 'ERROR'])) {
-        return;
-    }
-
-    $logLevels = ['DEBUG' => 1, 'INFO' => 2, 'WARNING' => 3, 'ERROR' => 4];
-    $currentLevel = $logLevels[LOG_LEVEL];
-    $messageLevel = $logLevels[$level];
-
-    if ($messageLevel >= $currentLevel) {
-        $timestamp = date('Y-m-d H:i:s');
-        $logMessage = "[$timestamp] [$level] $message";
-
-        if (!empty($context)) {
-            $logMessage .= " " . json_encode($context, JSON_UNESCAPED_UNICODE);
-        }
-
-        $logMessage .= PHP_EOL;
-
-        // Escribir en archivo de log
-        $logFile = BASE_PATH . '/logs/app-' . date('Y-m-d') . '.log';
-        $logDir = dirname($logFile);
-
-        if (!is_dir($logDir)) {
-            mkdir($logDir, 0755, true);
-        }
-
-        file_put_contents($logFile, $logMessage, FILE_APPEND | LOCK_EX);
-
-        // También mostrar en desarrollo
-        if (APP_ENV === 'development') {
-            error_log($logMessage);
-        }
-    }
-}
-
 // Función para manejo básico de errores
 function handleError($errno, $errstr, $errfile, $errline)
 {
@@ -180,7 +147,13 @@ function handleError($errno, $errstr, $errfile, $errline)
     ];
 
     $type = isset($errorType[$errno]) ? $errorType[$errno] : 'UNKNOWN';
-    appLog('ERROR', "$type: $errstr en $errfile línea $errline");
+    
+    // Usar appLog si está disponible, si no, error_log normal
+    if (function_exists('appLog')) {
+        appLog('ERROR', "$type: $errstr en $errfile línea $errline");
+    } else {
+        error_log("$type: $errstr en $errfile línea $errline");
+    }
 
     return true;
 }
@@ -190,11 +163,17 @@ set_error_handler('handleError');
 // Función para manejo de excepciones no capturadas
 function handleException($exception)
 {
-    appLog('ERROR', "Excepción no capturada: " . $exception->getMessage(), [
-        'file' => $exception->getFile(),
-        'line' => $exception->getLine(),
-        'trace' => $exception->getTraceAsString()
-    ]);
+    // Usar appLog si está disponible
+    if (function_exists('appLog')) {
+        appLog('ERROR', "Excepción no capturada: " . $exception->getMessage(), [
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine(),
+            'trace' => $exception->getTraceAsString()
+        ]);
+    } else {
+        error_log("Excepción no capturada: " . $exception->getMessage() . 
+                 " en " . $exception->getFile() . " línea " . $exception->getLine());
+    }
 
     if (APP_ENV === 'development') {
         echo "<pre>";

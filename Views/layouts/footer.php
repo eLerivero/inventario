@@ -1,56 +1,85 @@
-            </div> <!-- End content-wrapper -->
+                    </div> <!-- End content-wrapper -->
+                </div> <!-- End px-md-4 -->
+            </div> <!-- End content-area -->
 
-            <!-- Footer -->
-            <footer class="bg-dark text-white py-4 mt-5">
-                <div class="container-fluid">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <p class="mb-0">
-                                &copy; <?php echo date('Y'); ?> <?php echo SITE_NAME; ?> v<?php echo SITE_VERSION; ?>
-                            </p>
-                        </div>
-                        <div class="col-md-6 text-md-end">
-                            <p class="mb-0 text-white-50">
-                                <i class="fas fa-heart text-danger"></i> Desarrollado con PHP y PostgreSQL
-                            </p>
+            <!-- Footer Container -->
+            <div class="footer-container">
+                <footer class="bg-dark text-white py-4">
+                    <div class="container-fluid">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <p class="mb-0">
+                                    <i class="fas fa-copyright me-1"></i>
+                                    <?php echo date('Y'); ?> <?php echo SITE_NAME; ?> 
+                                    <span class="text-white-50">v<?php echo SITE_VERSION; ?></span>
+                                </p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                <p class="mb-0 text-white-50">
+                                    <i class="fas fa-heart text-danger me-1"></i> 
+                                    Desarrollado con PHP y PostgreSQL
+                                    <?php if (defined('APP_ENV') && APP_ENV === 'development'): ?>
+                                        <span class="badge bg-warning text-dark ms-2">Development</span>
+                                    <?php endif; ?>
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </footer>
+                </footer>
+            </div> <!-- End footer-container -->
         </div> <!-- End main-content -->
-    </div> <!-- End wrapper -->
+    </div> <!-- End app-container -->
+
+    <!-- Mobile Overlay (solo para móviles) -->
+    <div class="mobile-overlay d-md-none"></div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
-    
-    <!-- Custom Scripts -->
-    <script>
-        // Toggle Sidebar
-        document.getElementById('sidebarToggle').addEventListener('click', function() {
-            const sidebar = document.querySelector('.sidebar');
-            const mainContent = document.querySelector('.main-content');
-            const navbar = document.querySelector('.navbar');
-            
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('expanded');
-            
-            // Guardar preferencia en localStorage
-            const isCollapsed = sidebar.classList.contains('collapsed');
-            localStorage.setItem('sidebarCollapsed', isCollapsed);
-        });
+    <!-- Custom JS -->
+    <script src="<?php echo $js_path; ?>app.js"></script>
 
-        // Cargar estado del sidebar
+    <script>
+        // Inicializar componentes específicos de la página
         document.addEventListener('DOMContentLoaded', function() {
-            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            const sidebar = document.querySelector('.sidebar');
-            const mainContent = document.querySelector('.main-content');
+            // Sidebar toggle functionality
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebarContainer = document.querySelector('.sidebar-container');
+            const mobileOverlay = document.querySelector('.mobile-overlay');
             
-            if (isCollapsed) {
-                sidebar.classList.add('collapsed');
-                mainContent.classList.add('expanded');
+            if (sidebarToggle && sidebarContainer) {
+                sidebarToggle.addEventListener('click', function() {
+                    const sidebar = document.querySelector('.sidebar');
+                    sidebar.classList.toggle('collapsed');
+                    
+                    // En móvil, mostrar/ocultar sidebar completo
+                    if (window.innerWidth <= 768) {
+                        sidebarContainer.classList.toggle('mobile-open');
+                        if (mobileOverlay) {
+                            mobileOverlay.style.display = sidebarContainer.classList.contains('mobile-open') ? 'block' : 'none';
+                        }
+                    }
+                    
+                    // Guardar estado en localStorage
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    localStorage.setItem('sidebarCollapsed', isCollapsed);
+                });
+
+                // Cargar estado guardado
+                const savedState = localStorage.getItem('sidebarCollapsed');
+                if (savedState === 'true') {
+                    document.querySelector('.sidebar').classList.add('collapsed');
+                }
+
+                // Cerrar sidebar en móvil al hacer clic en overlay
+                if (mobileOverlay) {
+                    mobileOverlay.addEventListener('click', function() {
+                        sidebarContainer.classList.remove('mobile-open');
+                        mobileOverlay.style.display = 'none';
+                    });
+                }
             }
 
             // Inicializar tooltips
@@ -59,88 +88,30 @@
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
 
-            // Auto-hide alerts after 5 seconds
-            const alerts = document.querySelectorAll('.alert');
+            // Auto-cerrar alerts después de 5 segundos
+            const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
             alerts.forEach(alert => {
                 setTimeout(() => {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
+                    if (alert && alert.parentNode) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
                 }, 5000);
             });
-
-            // DataTables Spanish configuration
-            if (typeof $.fn.DataTable !== 'undefined') {
-                $.extend(true, $.fn.dataTable.defaults, {
-                    language: {
-                        "decimal": "",
-                        "emptyTable": "No hay datos disponibles en la tabla",
-                        "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
-                        "infoEmpty": "Mostrando 0 a 0 de 0 registros",
-                        "infoFiltered": "(filtrado de _MAX_ registros totales)",
-                        "infoPostFix": "",
-                        "thousands": ",",
-                        "lengthMenu": "Mostrar _MENU_ registros",
-                        "loadingRecords": "Cargando...",
-                        "processing": "Procesando...",
-                        "search": "Buscar:",
-                        "zeroRecords": "No se encontraron registros coincidentes",
-                        "paginate": {
-                            "first": "Primero",
-                            "last": "Último",
-                            "next": "Siguiente",
-                            "previous": "Anterior"
-                        },
-                        "aria": {
-                            "sortAscending": ": activar para ordenar ascendente",
-                            "sortDescending": ": activar para ordenar descendente"
-                        }
-                    },
-                    pageLength: 10,
-                    responsive: true,
-                    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>'
-                });
-            }
         });
 
-        // Función para mostrar loading
+        // Función global para mostrar loading
         function showLoading() {
             document.body.classList.add('loading');
         }
 
-        // Función para ocultar loading
         function hideLoading() {
             document.body.classList.remove('loading');
         }
 
-        // Confirmación antes de eliminar
+        // Función para confirmar eliminaciones
         function confirmDelete(message = '¿Estás seguro de que deseas eliminar este registro?') {
             return confirm(message);
-        }
-
-        // Formatear números como moneda
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('es-GT', {
-                style: 'currency',
-                currency: 'GTQ'
-            }).format(amount);
-        }
-
-        // Validar formularios
-        function validateForm(formId) {
-            const form = document.getElementById(formId);
-            const requiredFields = form.querySelectorAll('[required]');
-            let isValid = true;
-
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    field.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    field.classList.remove('is-invalid');
-                }
-            });
-
-            return isValid;
         }
     </script>
 </body>

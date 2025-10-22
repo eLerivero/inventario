@@ -1,0 +1,61 @@
+[2025-10-22 13:59:25] [WARNING] Intento de crear categoría con nombre duplicado {"nombre":"Panader\u00eda"}
+[2025-10-22 13:59:52] [INFO] Categoría creada exitosamente {"id":4,"nombre":"RESCATA"}
+[2025-10-22 13:59:54] [INFO] Categorías listadas {"total":4}
+[2025-10-22 14:00:18] [INFO] Categoría eliminada {"id":"3"}
+[2025-10-22 14:00:18] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:00:23] [INFO] Categoría obtenida {"id":"2"}
+[2025-10-22 14:00:27] [INFO] Categoría obtenida {"id":"2"}
+[2025-10-22 14:00:38] [INFO] Categoría obtenida {"id":"2"}
+[2025-10-22 14:00:58] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:01:03] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:03:58] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:13:46] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:14:57] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:15:30] [INFO] Categorías listadas {"total":3}
+[2025-10-22 10:15:30] [ERROR] WARNING: include(../layouts/sidebar.php): Failed to open stream: No such file or directory en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
+[2025-10-22 10:15:30] [ERROR] WARNING: include(): Failed opening '../layouts/sidebar.php' for inclusion (include_path='.;C:\php\pear') en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
+[2025-10-22 14:16:28] [INFO] Categorías listadas {"total":3}
+[2025-10-22 10:16:28] [ERROR] WARNING: include(../layouts/sidebar.php): Failed to open stream: No such file or directory en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
+[2025-10-22 10:16:28] [ERROR] WARNING: include(): Failed opening '../layouts/sidebar.php' for inclusion (include_path='.;C:\php\pear') en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
+[2025-10-22 14:16:50] [INFO] Categorías listadas {"total":3}
+[2025-10-22 10:16:50] [ERROR] WARNING: include(../layouts/sidebar.php): Failed to open stream: No such file or directory en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
+[2025-10-22 10:16:50] [ERROR] WARNING: include(): Failed opening '../layouts/sidebar.php' for inclusion (include_path='.;C:\php\pear') en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
+[2025-10-22 14:17:30] [INFO] Categorías listadas {"total":3}
+[2025-10-22 10:17:30] [ERROR] WARNING: include(../layouts/sidebar.php): Failed to open stream: No such file or directory en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
+[2025-10-22 10:17:30] [ERROR] WARNING: include(): Failed opening '../layouts/sidebar.php' for inclusion (include_path='.;C:\php\pear') en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
+[2025-10-22 14:17:32] [INFO] Categorías listadas {"total":3}
+[2025-10-22 10:17:32] [ERROR] WARNING: include(../layouts/sidebar.php): Failed to open stream: No such file or directory en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
+[2025-10-22 10:17:32] [ERROR] WARNING: include(): Failed opening '../layouts/sidebar.php' for inclusion (include_path='.;C:\php\pear') en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
+[2025-10-22 14:30:13] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:30:35] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:33:50] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:33:56] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:37:15] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:37:24] [INFO] Categoría obtenida {"id":"1"}
+[2025-10-22 14:37:26] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:40:22] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:40:30] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:42:58] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:43:10] [INFO] Categorías listadas {"total":3}
+[2025-10-22 14:45:23] [INFO] Categorías listadas {"total":3}
+[2025-10-22 15:30:09] [INFO] Categorías listadas {"total":3}
+[2025-10-22 15:30:25] [INFO] Categorías listadas {"total":3}
+[2025-10-22 15:31:51] [INFO] Categorías listadas {"total":3}
+[2025-10-22 15:31:56] [INFO] Categorías listadas {"total":3}
+[2025-10-22 15:35:51] [INFO] Categorías listadas {"total":3}
+[2025-10-22 15:37:43] [INFO] Estadísticas de categorías obtenidas {"total":3}
+[2025-10-22 11:37:43] [ERROR] WARNING: Undefined variable $categorias en C:\wamp64\www\inventario\Views\categorias\index.php línea 160 
+[2025-10-22 11:37:43] [ERROR] Excepción no capturada: count(): Argument #1 ($value) must be of type Countable|array, null given {"file":"C:\\wamp64\\www\\inventario\\Views\\categorias\\index.php","line":160,"trace":"#0 {main}"}
+[2025-10-22 15:37:53] [INFO] Estadísticas de categorías obtenidas {"total":3}
+[2025-10-22 11:37:53] [ERROR] WARNING: Undefined variable $categorias en C:\wamp64\www\inventario\Views\categorias\index.php línea 160 
+[2025-10-22 11:37:53] [ERROR] Excepción no capturada: count(): Argument #1 ($value) must be of type Countable|array, null given {"file":"C:\\wamp64\\www\\inventario\\Views\\categorias\\index.php","line":160,"trace":"#0 {main}"}
+[2025-10-22 15:38:00] [INFO] Categorías listadas {"total":3}
+[2025-10-22 15:38:40] [INFO] Categorías listadas {"total":3}
+[2025-10-22 15:41:56] [INFO] Categorías listadas {"total":3}
+[2025-10-22 15:42:09] [INFO] Categorías listadas {"total":3}
+[2025-10-22 15:42:56] [INFO] Categorías listadas {"total":3}
+[2025-10-22 15:43:26] [INFO] Categorías listadas {"total":3}
+[2025-10-22 15:43:31] [INFO] Categorías listadas {"total":3}
+[2025-10-22 15:43:48] [INFO] Categoría obtenida {"id":"2"}
+[2025-10-22 15:43:52] [INFO] Categorías listadas {"total":3}
+[2025-10-22 15:44:23] [INFO] Categorías listadas {"total":3}

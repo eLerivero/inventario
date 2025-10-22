@@ -12,14 +12,19 @@ $success_message = '';
 
 // Procesar formulario
 if ($_POST) {
-    $result = $controller->crear($_POST);
-    
-    if ($result['success']) {
-        $success_message = $result['message'];
-        // Redirigir después de 2 segundos
-        header("Refresh: 2; URL=index.php");
-    } else {
-        $error_message = $result['message'];
+    try {
+        $result = $controller->crear($_POST);
+        
+        if ($result['success']) {
+            $success_message = $result['message'];
+            // Redirigir después de 2 segundos
+            header("Refresh: 2; URL=index.php");
+        } else {
+            $error_message = $result['message'];
+        }
+    } catch (Exception $e) {
+        $error_message = "Error inesperado: " . $e->getMessage();
+        appLog('ERROR', 'Error en crear.php', ['error' => $e->getMessage(), 'post_data' => $_POST]);
     }
 }
 ?>
@@ -50,7 +55,10 @@ include '../layouts/header.php';
             <?php if ($success_message): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fas fa-check-circle me-2"></i>
-                    <?php echo $success_message; ?>
+                    <?php echo htmlspecialchars($success_message); ?>
+                    <div class="mt-2">
+                        <small>Serás redirigido automáticamente al listado de categorías...</small>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             <?php endif; ?>
@@ -58,7 +66,7 @@ include '../layouts/header.php';
             <?php if ($error_message): ?>
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    <?php echo $error_message; ?>
+                    <?php echo htmlspecialchars($error_message); ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             <?php endif; ?>
@@ -72,7 +80,7 @@ include '../layouts/header.php';
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" id="formCategoria">
+                    <form method="POST" id="formCategoria" novalidate>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -80,13 +88,18 @@ include '../layouts/header.php';
                                         <i class="fas fa-tag me-1"></i>Nombre de la Categoría *
                                     </label>
                                     <input type="text" 
-                                           class="form-control" 
+                                           class="form-control <?php echo isset($_POST['nombre']) && empty($_POST['nombre']) ? 'is-invalid' : ''; ?>" 
                                            id="nombre" 
                                            name="nombre" 
-                                           value="<?php echo $_POST['nombre'] ?? ''; ?>"
+                                           value="<?php echo htmlspecialchars($_POST['nombre'] ?? ''); ?>"
                                            required
                                            maxlength="100"
                                            placeholder="Ej: Electrónicos, Ropa, Hogar...">
+                                    <?php if (isset($_POST['nombre']) && empty($_POST['nombre'])): ?>
+                                        <div class="invalid-feedback">
+                                            El nombre de la categoría es obligatorio.
+                                        </div>
+                                    <?php endif; ?>
                                     <div class="form-text">El nombre debe ser único y descriptivo.</div>
                                 </div>
                             </div>
@@ -103,8 +116,8 @@ include '../layouts/header.php';
                                               name="descripcion" 
                                               rows="4"
                                               maxlength="500"
-                                              placeholder="Describe brevemente esta categoría..."><?php echo $_POST['descripcion'] ?? ''; ?></textarea>
-                                    <div class="form-text">Máximo 500 caracteres.</div>
+                                              placeholder="Describe brevemente esta categoría..."><?php echo htmlspecialchars($_POST['descripcion'] ?? ''); ?></textarea>
+                                    <div class="form-text">Máximo 500 caracteres. <span id="charCount">0</span>/500</div>
                                 </div>
                             </div>
                         </div>
@@ -117,6 +130,9 @@ include '../layouts/header.php';
                                 <a href="index.php" class="btn btn-secondary">
                                     <i class="fas fa-times me-1"></i> Cancelar
                                 </a>
+                                <button type="button" class="btn btn-outline-info" onclick="limpiarFormulario()">
+                                    <i class="fas fa-broom me-1"></i> Limpiar
+                                </button>
                             </div>
                         </div>
                     </form>
@@ -132,11 +148,24 @@ include '../layouts/header.php';
                     </h6>
                 </div>
                 <div class="card-body">
-                    <ul class="mb-0">
-                        <li>Las categorías te ayudan a organizar tus productos de manera eficiente.</li>
-                        <li>Puedes asignar productos a categorías para facilitar su búsqueda y gestión.</li>
-                        <li>Solo se pueden eliminar categorías que no tengan productos asociados.</li>
-                    </ul>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Beneficios de usar categorías:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i> Organización eficiente de productos</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Búsqueda y filtrado más rápido</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Reportes y estadísticas organizadas</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-warning">Consideraciones:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-exclamation-triangle text-warning me-2"></i> No se pueden eliminar categorías con productos</li>
+                                <li><i class="fas fa-exclamation-triangle text-warning me-2"></i> Los nombres deben ser únicos</li>
+                                <li><i class="fas fa-exclamation-triangle text-warning me-2"></i> Planifica la estructura antes de crear</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -145,20 +174,145 @@ include '../layouts/header.php';
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const descripcion = document.getElementById('descripcion');
+    const charCount = document.getElementById('charCount');
+    
+    // Contador de caracteres para descripción
+    descripcion.addEventListener('input', function() {
+        charCount.textContent = this.value.length;
+        
+        if (this.value.length > 450) {
+            charCount.className = 'text-warning';
+        } else {
+            charCount.className = 'text-muted';
+        }
+    });
+    
+    // Inicializar contador
+    charCount.textContent = descripcion.value.length;
+    if (descripcion.value.length > 450) {
+        charCount.className = 'text-warning';
+    }
+    
     // Validación del formulario
     const form = document.getElementById('formCategoria');
+    const nombreInput = document.getElementById('nombre');
+    
     form.addEventListener('submit', function(e) {
-        const nombre = document.getElementById('nombre').value.trim();
+        const nombre = nombreInput.value.trim();
         
+        // Validación básica
         if (!nombre) {
             e.preventDefault();
-            alert('Por favor, ingresa el nombre de la categoría.');
+            nombreInput.classList.add('is-invalid');
+            
+            // Mostrar toast de error
+            showToast('error', 'Por favor, ingresa el nombre de la categoría.');
             return false;
         }
         
+        // Validación de longitud
+        if (nombre.length > 100) {
+            e.preventDefault();
+            nombreInput.classList.add('is-invalid');
+            showToast('error', 'El nombre no puede tener más de 100 caracteres.');
+            return false;
+        }
+        
+        // Mostrar indicador de carga
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Guardando...';
+        
         return true;
     });
+    
+    // Validación en tiempo real
+    nombreInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        } else {
+            this.classList.remove('is-valid');
+        }
+    });
+    
+    // Limpiar validación al cambiar
+    nombreInput.addEventListener('change', function() {
+        if (!this.value.trim()) {
+            this.classList.remove('is-valid');
+        }
+    });
 });
+
+function limpiarFormulario() {
+    if (confirm('¿Estás seguro de que deseas limpiar el formulario? Se perderán todos los datos ingresados.')) {
+        document.getElementById('formCategoria').reset();
+        document.getElementById('charCount').textContent = '0';
+        document.getElementById('charCount').className = 'text-muted';
+        
+        // Remover clases de validación
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.classList.remove('is-valid', 'is-invalid');
+        });
+        
+        showToast('info', 'Formulario limpiado correctamente.');
+    }
+}
+
+function showToast(type, message) {
+    // Crear toast dinámicamente
+    const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+    const toast = document.createElement('div');
+    
+    toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                ${message}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    `;
+    
+    toastContainer.appendChild(toast);
+    
+    // Mostrar toast
+    const bsToast = new bootstrap.Toast(toast);
+    bsToast.show();
+    
+    // Remover toast después de ocultar
+    toast.addEventListener('hidden.bs.toast', function() {
+        toast.remove();
+    });
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toastContainer';
+    container.className = 'toast-container position-fixed top-0 end-0 p-3';
+    container.style.zIndex = '9999';
+    document.body.appendChild(container);
+    return container;
+}
 </script>
+
+<style>
+.form-control.is-valid {
+    border-color: #198754;
+    padding-right: calc(1.5em + 0.75rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.toast {
+    font-size: 0.875rem;
+}
+</style>
 
 <?php include '../layouts/footer.php'; ?>

@@ -2,7 +2,6 @@
 
 require_once '../../Models/Categoria.php';
 
-
 class CategoriaController
 {
     private $categoria;
@@ -37,7 +36,13 @@ class CategoriaController
     public function obtener($id)
     {
         try {
-            $categoria = $this->categoria->obtenerPorId($id);
+            // Método temporal hasta que implementemos obtenerPorId en el modelo
+            $query = "SELECT * FROM categorias WHERE id = :id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":id", $id);
+            $stmt->execute();
+            
+            $categoria = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($categoria) {
                 appLog('INFO', 'Categoría obtenida', ['id' => $id]);
@@ -46,6 +51,7 @@ class CategoriaController
                     "data" => $categoria
                 ];
             } else {
+                appLog('WARNING', 'Categoría no encontrada', ['id' => $id]);
                 return [
                     "success" => false,
                     "message" => "Categoría no encontrada"
@@ -65,29 +71,55 @@ class CategoriaController
         try {
             // Validar datos requeridos
             if (empty($data['nombre'])) {
+                appLog('WARNING', 'Intento de crear categoría sin nombre');
                 return [
                     "success" => false,
                     "message" => "El nombre de la categoría es requerido"
                 ];
             }
 
-            $this->categoria->nombre = $data['nombre'];
-            $this->categoria->descripcion = $data['descripcion'] ?? '';
+            // Sanitizar datos
+            $nombre = trim($data['nombre']);
+            $descripcion = trim($data['descripcion'] ?? '');
+
+            // Verificar si ya existe una categoría con el mismo nombre
+            $query = "SELECT COUNT(*) as total FROM categorias WHERE LOWER(nombre) = LOWER(:nombre)";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":nombre", $nombre);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($result['total'] > 0) {
+                appLog('WARNING', 'Intento de crear categoría con nombre duplicado', ['nombre' => $nombre]);
+                return [
+                    "success" => false,
+                    "message" => "Ya existe una categoría con ese nombre"
+                ];
+            }
+
+            $this->categoria->nombre = $nombre;
+            $this->categoria->descripcion = $descripcion;
 
             $categoria_id = $this->categoria->crear();
 
             if ($categoria_id) {
-                appLog('INFO', 'Categoría creada exitosamente', ['id' => $categoria_id, 'nombre' => $data['nombre']]);
+                appLog('INFO', 'Categoría creada exitosamente', [
+                    'id' => $categoria_id, 
+                    'nombre' => $nombre
+                ]);
                 return [
                     "success" => true,
                     "message" => "Categoría creada exitosamente",
                     "id" => $categoria_id
                 ];
             } else {
-                throw new Exception("No se pudo crear la categoría");
+                throw new Exception("No se pudo crear la categoría en la base de datos");
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al crear categoría', ['data' => $data, 'error' => $e->getMessage()]);
+            appLog('ERROR', 'Error al crear categoría', [
+                'data' => $data, 
+                'error' => $e->getMessage()
+            ]);
             return [
                 "success" => false,
                 "message" => "Error al crear la categoría: " . $e->getMessage()
@@ -100,16 +132,21 @@ class CategoriaController
         try {
             // Validar datos requeridos
             if (empty($data['nombre'])) {
+                appLog('WARNING', 'Intento de actualizar categoría sin nombre', ['id' => $id]);
                 return [
                     "success" => false,
                     "message" => "El nombre de la categoría es requerido"
                 ];
             }
 
-            $this->categoria->nombre = $data['nombre'];
-            $this->categoria->descripcion = $data['descripcion'] ?? '';
+            // Método temporal para actualizar
+            $query = "UPDATE categorias SET nombre = :nombre, descripcion = :descripcion, updated_at = NOW() WHERE id = :id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":nombre", $data['nombre']);
+            $stmt->bindParam(":descripcion", $data['descripcion'] ?? '');
+            $stmt->bindParam(":id", $id);
 
-            if ($this->categoria->actualizar($id)) {
+            if ($stmt->execute()) {
                 appLog('INFO', 'Categoría actualizada', ['id' => $id, 'nombre' => $data['nombre']]);
                 return [
                     "success" => true,
@@ -119,7 +156,11 @@ class CategoriaController
                 throw new Exception("No se pudo actualizar la categoría");
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al actualizar categoría', ['id' => $id, 'data' => $data, 'error' => $e->getMessage()]);
+            appLog('ERROR', 'Error al actualizar categoría', [
+                'id' => $id, 
+                'data' => $data, 
+                'error' => $e->getMessage()
+            ]);
             return [
                 "success" => false,
                 "message" => "Error al actualizar la categoría: " . $e->getMessage()
@@ -138,13 +179,22 @@ class CategoriaController
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($result['total'] > 0) {
+                appLog('WARNING', 'Intento de eliminar categoría con productos', [
+                    'id' => $id, 
+                    'productos_asociados' => $result['total']
+                ]);
                 return [
                     "success" => false,
                     "message" => "No se puede eliminar la categoría porque tiene productos asociados"
                 ];
             }
 
-            if ($this->categoria->eliminar($id)) {
+            // Método temporal para eliminar
+            $query = "DELETE FROM categorias WHERE id = :id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":id", $id);
+
+            if ($stmt->execute() && $stmt->rowCount() > 0) {
                 appLog('INFO', 'Categoría eliminada', ['id' => $id]);
                 return [
                     "success" => true,
@@ -154,7 +204,10 @@ class CategoriaController
                 throw new Exception("No se pudo eliminar la categoría");
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al eliminar categoría', ['id' => $id, 'error' => $e->getMessage()]);
+            appLog('ERROR', 'Error al eliminar categoría', [
+                'id' => $id, 
+                'error' => $e->getMessage()
+            ]);
             return [
                 "success" => false,
                 "message" => "Error al eliminar la categoría: " . $e->getMessage()
@@ -166,7 +219,7 @@ class CategoriaController
     {
         try {
             $categorias = $this->categoria->obtenerTodas();
-            appLog('DEBUG', 'Todas las categorías obtenidas');
+            appLog('DEBUG', 'Todas las categorías obtenidas', ['total' => count($categorias)]);
             return $categorias;
         } catch (Exception $e) {
             appLog('ERROR', 'Error al obtener todas las categorías', ['error' => $e->getMessage()]);
@@ -190,7 +243,7 @@ class CategoriaController
             $stmt->execute();
             $categorias = $stmt->fetchAll();
 
-            appLog('INFO', 'Estadísticas de categorías obtenidas');
+            appLog('INFO', 'Estadísticas de categorías obtenidas', ['total' => count($categorias)]);
             return [
                 "success" => true,
                 "data" => $categorias
@@ -203,4 +256,6 @@ class CategoriaController
             ];
         }
     }
+
+    
 }
