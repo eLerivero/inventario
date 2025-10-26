@@ -16,7 +16,7 @@ define('MOVIMIENTO_AJUSTE', 'ajuste');
 define('MOVIMIENTO_VENTA', 'venta');
 define('MOVIMIENTO_COMPRA', 'compra');
 
-// Roles de usuario (si los implementas después)
+// Roles de usuario 
 define('ROL_ADMIN', 'admin');
 define('ROL_USUARIO', 'usuario');
 define('ROL_VENDEDOR', 'vendedor');

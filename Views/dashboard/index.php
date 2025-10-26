@@ -10,27 +10,8 @@ $controller = new DashboardController($db);
 $data = $controller->obtenerEstadisticasCompletas();
 
 $page_title = "Dashboard";
-include '../layouts/header.php'; 
+include '../layouts/header.php';
 ?>
-
-<!-- Content Header -->
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center py-3 mb-4 border-bottom">
-    <h1 class="h2">
-        <i class="fas fa-tachometer-alt me-2"></i>
-        Dashboard
-    </h1>
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <div class="btn-group me-2">
-            <button type="button" class="btn btn-sm btn-outline-secondary">
-                <i class="fas fa-download me-1"></i> Exportar
-            </button>
-        </div>
-        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
-            <i class="fas fa-calendar me-1"></i>
-            Esta semana
-        </button>
-    </div>
-</div>
 
 <!-- Estadísticas principales -->
 <div class="row mb-4">
@@ -198,63 +179,63 @@ include '../layouts/header.php';
 
 <!-- Alertas de Stock Bajo -->
 <?php if (!empty($data['productos_bajo_stock'])): ?>
-<div class="row">
-    <div class="col-12">
-        <div class="card border-warning">
-            <div class="card-header bg-warning text-white">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Alertas de Stock Bajo
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover">
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>SKU</th>
-                                <th>Stock Actual</th>
-                                <th>Stock Mínimo</th>
-                                <th>Diferencia</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($data['productos_bajo_stock'] as $producto): ?>
-                                <tr class="table-warning">
-                                    <td>
-                                        <strong><?php echo htmlspecialchars($producto['nombre']); ?></strong>
-                                    </td>
-                                    <td>
-                                        <code><?php echo htmlspecialchars($producto['codigo_sku']); ?></code>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-danger fs-6"><?php echo $producto['stock_actual']; ?></span>
-                                    </td>
-                                    <td><?php echo $producto['stock_minimo']; ?></td>
-                                    <td>
-                                        <?php 
-                                        $diferencia = $producto['stock_minimo'] - $producto['stock_actual'];
-                                        echo '<span class="badge bg-dark">-' . $diferencia . '</span>';
-                                        ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Alertas de Stock Bajo
+                    </h5>
                 </div>
-            </div>
-            <div class="card-footer bg-light">
-                <a href="../productos/index.php" class="btn btn-sm btn-warning">
-                    <i class="fas fa-box me-1"></i> Gestionar Inventario
-                </a>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>SKU</th>
+                                    <th>Stock Actual</th>
+                                    <th>Stock Mínimo</th>
+                                    <th>Diferencia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($data['productos_bajo_stock'] as $producto): ?>
+                                    <tr class="table-warning">
+                                        <td>
+                                            <strong><?php echo htmlspecialchars($producto['nombre']); ?></strong>
+                                        </td>
+                                        <td>
+                                            <code><?php echo htmlspecialchars($producto['codigo_sku']); ?></code>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-danger fs-6"><?php echo $producto['stock_actual']; ?></span>
+                                        </td>
+                                        <td><?php echo $producto['stock_minimo']; ?></td>
+                                        <td>
+                                            <?php
+                                            $diferencia = $producto['stock_minimo'] - $producto['stock_actual'];
+                                            echo '<span class="badge bg-dark">-' . $diferencia . '</span>';
+                                            ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <a href="../productos/index.php" class="btn btn-sm btn-warning">
+                        <i class="fas fa-box me-1"></i> Gestionar Inventario
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 <?php endif; ?>
 
-<!-- Quick Actions -->
+<!-- Acciones rápidas -->
 <div class="row mt-4">
     <div class="col-12">
         <div class="card">

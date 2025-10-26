@@ -56,7 +56,7 @@ if (APP_ENV === 'development') {
     ini_set('log_errors', 1);
 }
 
-// Configuración de zona horaria - ACTUALIZADO A CARACAS/VENEZUELA
+// Configuración de zona horaria
 date_default_timezone_set('America/Caracas');
 
 // Iniciar sesión si no está iniciada

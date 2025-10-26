@@ -59,3 +59,44 @@
 [2025-10-22 15:43:48] [INFO] Categoría obtenida {"id":"2"}
 [2025-10-22 15:43:52] [INFO] Categorías listadas {"total":3}
 [2025-10-22 15:44:23] [INFO] Categorías listadas {"total":3}
+[2025-10-22 17:15:18] [INFO] Categorías listadas {"total":4}
+[2025-10-22 17:15:31] [INFO] Categorías listadas {"total":4}
+[2025-10-22 17:16:29] [INFO] Categoría creada exitosamente {"id":5,"nombre":"Panaderia"}
+[2025-10-22 17:16:31] [INFO] Categorías listadas {"total":5}
+[2025-10-22 17:17:06] [INFO] Categorías listadas {"total":5}
+[2025-10-22 18:58:05] [INFO] Categorías listadas {"total":5}
+[2025-10-22 19:00:00] [INFO] Categorías listadas {"total":5}
+[2025-10-22 19:00:29] [INFO] Categorías listadas {"total":5}
+[2025-10-22 19:00:34] [INFO] Categorías listadas {"total":5}
+[2025-10-22 19:00:51] [INFO] Categorías listadas {"total":5}
+[2025-10-22 19:01:11] [INFO] Categorías listadas {"total":5}
+[2025-10-22 15:05:50] [ERROR] WARNING: require_once(Models/Venta.php): Failed to open stream: No such file or directory en C:\wamp64\www\inventario\Controllers\VentaController.php línea 2 
+[2025-10-22 15:05:50] [ERROR] Excepción no capturada: Failed opening required 'Models/Venta.php' (include_path='.;C:\php\pear') {"file":"C:\\wamp64\\www\\inventario\\Controllers\\VentaController.php","line":2,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\ventas\\index.php(5): require_once()\n#1 {main}"}
+[2025-10-22 19:05:56] [INFO] Categorías listadas {"total":5}
+[2025-10-23 14:19:01] [INFO] Categorías listadas {"total":5}
+[2025-10-23 14:19:25] [INFO] Categorías listadas {"total":5}
+[2025-10-26 17:11:51] [DEBUG] Todas las categorías obtenidas {"total":5}
+[2025-10-26 17:12:01] [DEBUG] Todas las categorías obtenidas {"total":5}
+[2025-10-26 21:12:04] [INFO] Categorías listadas {"total":5}
+[2025-10-26 21:12:07] [INFO] Categorías listadas {"total":5}
+[2025-10-26 17:12:09] [ERROR] WARNING: require_once(Models/Venta.php): Failed to open stream: No such file or directory en C:\wamp64\www\inventario\Controllers\VentaController.php línea 2 
+[2025-10-26 17:12:09] [ERROR] Excepción no capturada: Failed opening required 'Models/Venta.php' (include_path='.;C:\php\pear') {"file":"C:\\wamp64\\www\\inventario\\Controllers\\VentaController.php","line":2,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\ventas\\index.php(5): require_once()\n#1 {main}"}
+[2025-10-26 17:12:22] [DEBUG] Todas las categorías obtenidas {"total":5}
+[2025-10-26 21:12:41] [INFO] Categorías listadas {"total":5}
+[2025-10-26 21:12:48] [INFO] Categoría obtenida {"id":"1"}
+[2025-10-26 21:12:52] [INFO] Categoría obtenida {"id":"1"}
+[2025-10-26 21:12:53] [INFO] Categoría obtenida {"id":"1"}
+[2025-10-26 21:12:54] [INFO] Categoría obtenida {"id":"1"}
+[2025-10-26 21:16:18] [INFO] Categorías listadas {"total":5}
+[2025-10-26 21:16:25] [INFO] Categorías listadas {"total":5}
+[2025-10-26 17:16:41] [DEBUG] Todas las categorías obtenidas {"total":5}
+[2025-10-26 17:16:55] [DEBUG] Todas las categorías obtenidas {"total":5}
+[2025-10-26 21:26:23] [INFO] Categorías listadas {"total":5}
+[2025-10-26 21:39:42] [INFO] Categorías listadas {"total":5}
+[2025-10-26 21:46:40] [INFO] Categorías listadas {"total":5}
+[2025-10-26 21:48:07] [INFO] Categorías listadas {"total":5}
+[2025-10-26 21:48:21] [INFO] Categorías listadas {"total":5}
+[2025-10-26 21:48:41] [INFO] Categorías listadas {"total":5}
+[2025-10-26 21:48:43] [INFO] Categorías listadas {"total":5}
+[2025-10-26 21:52:19] [INFO] Categorías listadas {"total":5}
+[2025-10-26 21:54:15] [INFO] Categorías listadas {"total":5}

@@ -55,7 +55,7 @@ $js_path = $relative_path . 'Public/js/';
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?php echo $css_path; ?>layouts.css">
-    
+
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
@@ -64,7 +64,7 @@ $js_path = $relative_path . 'Public/js/';
     <div class="app-container">
         <!-- Sidebar Container -->
         <div class="sidebar-container">
-            <?php 
+            <?php
             // Incluir sidebar con la ruta correcta
             $sidebar_path = __DIR__ . '/sidebar.php';
             if (file_exists($sidebar_path)) {
@@ -77,6 +77,20 @@ $js_path = $relative_path . 'Public/js/';
 
         <!-- Main Content Area -->
         <div class="main-content">
+            <!-- Header Container -->
+            <div class="header-container">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+                    <h1 class="h2"><?php echo isset($page_title) ? $page_title : 'Dashboard'; ?></h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="sidebarToggle">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="content-area">
                 <div class="px-md-4">
                     <!-- Page Content Start -->
