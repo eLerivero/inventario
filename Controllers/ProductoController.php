@@ -1,7 +1,5 @@
 <?php
-//require_once 'Models/Producto.php';
 require_once __DIR__ . '/../Models/Producto.php';
-
 
 class ProductoController
 {
@@ -33,49 +31,71 @@ class ProductoController
 
     public function crear($data)
     {
-        $this->producto->codigo_sku = $data['codigo_sku'];
-        $this->producto->nombre = $data['nombre'];
-        $this->producto->descripcion = $data['descripcion'];
-        $this->producto->precio = $data['precio'];
-        $this->producto->precio_costo = $data['precio_costo'];
-        $this->producto->stock_actual = $data['stock_actual'];
-        $this->producto->stock_minimo = $data['stock_minimo'];
-        $this->producto->categoria_id = $data['categoria_id'];
+        try {
+            // Validar datos requeridos
+            if (empty($data['codigo_sku']) || empty($data['nombre']) || empty($data['precio'])) {
+                return [
+                    "success" => false,
+                    "message" => "SKU, nombre y precio son campos requeridos"
+                ];
+            }
 
-        $producto_id = $this->producto->crear();
+            $this->producto->codigo_sku = $data['codigo_sku'];
+            $this->producto->nombre = $data['nombre'];
+            $this->producto->descripcion = $data['descripcion'] ?? '';
+            $this->producto->precio = $data['precio'];
+            $this->producto->precio_costo = $data['precio_costo'] ?? 0;
+            $this->producto->stock_actual = $data['stock_actual'] ?? 0;
+            $this->producto->stock_minimo = $data['stock_minimo'] ?? 0;
+            $this->producto->categoria_id = $data['categoria_id'] ?? null;
 
-        if ($producto_id) {
-            return [
-                "success" => true,
-                "message" => "Producto creado exitosamente",
-                "id" => $producto_id
-            ];
-        } else {
+            $producto_id = $this->producto->crear();
+
+            if ($producto_id) {
+                return [
+                    "success" => true,
+                    "message" => "Producto creado exitosamente",
+                    "id" => $producto_id
+                ];
+            } else {
+                return [
+                    "success" => false,
+                    "message" => "Error al crear producto"
+                ];
+            }
+        } catch (Exception $e) {
             return [
                 "success" => false,
-                "message" => "Error al crear producto"
+                "message" => $e->getMessage()
             ];
         }
     }
 
     public function actualizar($id, $data)
     {
-        $this->producto->nombre = $data['nombre'];
-        $this->producto->descripcion = $data['descripcion'];
-        $this->producto->precio = $data['precio'];
-        $this->producto->precio_costo = $data['precio_costo'];
-        $this->producto->stock_minimo = $data['stock_minimo'];
-        $this->producto->categoria_id = $data['categoria_id'];
+        try {
+            $this->producto->nombre = $data['nombre'];
+            $this->producto->descripcion = $data['descripcion'] ?? '';
+            $this->producto->precio = $data['precio'];
+            $this->producto->precio_costo = $data['precio_costo'] ?? 0;
+            $this->producto->stock_minimo = $data['stock_minimo'] ?? 0;
+            $this->producto->categoria_id = $data['categoria_id'] ?? null;
 
-        if ($this->producto->actualizar($id)) {
-            return [
-                "success" => true,
-                "message" => "Producto actualizado exitosamente"
-            ];
-        } else {
+            if ($this->producto->actualizar($id)) {
+                return [
+                    "success" => true,
+                    "message" => "Producto actualizado exitosamente"
+                ];
+            } else {
+                return [
+                    "success" => false,
+                    "message" => "Error al actualizar producto"
+                ];
+            }
+        } catch (Exception $e) {
             return [
                 "success" => false,
-                "message" => "Error al actualizar producto"
+                "message" => $e->getMessage()
             ];
         }
     }

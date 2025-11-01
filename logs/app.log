@@ -1,102 +1,165 @@
-[2025-10-22 13:59:25] [WARNING] Intento de crear categoría con nombre duplicado {"nombre":"Panader\u00eda"}
-[2025-10-22 13:59:52] [INFO] Categoría creada exitosamente {"id":4,"nombre":"RESCATA"}
-[2025-10-22 13:59:54] [INFO] Categorías listadas {"total":4}
-[2025-10-22 14:00:18] [INFO] Categoría eliminada {"id":"3"}
-[2025-10-22 14:00:18] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:00:23] [INFO] Categoría obtenida {"id":"2"}
-[2025-10-22 14:00:27] [INFO] Categoría obtenida {"id":"2"}
-[2025-10-22 14:00:38] [INFO] Categoría obtenida {"id":"2"}
-[2025-10-22 14:00:58] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:01:03] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:03:58] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:13:46] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:14:57] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:15:30] [INFO] Categorías listadas {"total":3}
-[2025-10-22 10:15:30] [ERROR] WARNING: include(../layouts/sidebar.php): Failed to open stream: No such file or directory en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
-[2025-10-22 10:15:30] [ERROR] WARNING: include(): Failed opening '../layouts/sidebar.php' for inclusion (include_path='.;C:\php\pear') en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
-[2025-10-22 14:16:28] [INFO] Categorías listadas {"total":3}
-[2025-10-22 10:16:28] [ERROR] WARNING: include(../layouts/sidebar.php): Failed to open stream: No such file or directory en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
-[2025-10-22 10:16:28] [ERROR] WARNING: include(): Failed opening '../layouts/sidebar.php' for inclusion (include_path='.;C:\php\pear') en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
-[2025-10-22 14:16:50] [INFO] Categorías listadas {"total":3}
-[2025-10-22 10:16:50] [ERROR] WARNING: include(../layouts/sidebar.php): Failed to open stream: No such file or directory en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
-[2025-10-22 10:16:50] [ERROR] WARNING: include(): Failed opening '../layouts/sidebar.php' for inclusion (include_path='.;C:\php\pear') en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
-[2025-10-22 14:17:30] [INFO] Categorías listadas {"total":3}
-[2025-10-22 10:17:30] [ERROR] WARNING: include(../layouts/sidebar.php): Failed to open stream: No such file or directory en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
-[2025-10-22 10:17:30] [ERROR] WARNING: include(): Failed opening '../layouts/sidebar.php' for inclusion (include_path='.;C:\php\pear') en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
-[2025-10-22 14:17:32] [INFO] Categorías listadas {"total":3}
-[2025-10-22 10:17:32] [ERROR] WARNING: include(../layouts/sidebar.php): Failed to open stream: No such file or directory en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
-[2025-10-22 10:17:32] [ERROR] WARNING: include(): Failed opening '../layouts/sidebar.php' for inclusion (include_path='.;C:\php\pear') en C:\wamp64\www\inventario\Views\categorias\index.php línea 42 
-[2025-10-22 14:30:13] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:30:35] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:33:50] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:33:56] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:37:15] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:37:24] [INFO] Categoría obtenida {"id":"1"}
-[2025-10-22 14:37:26] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:40:22] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:40:30] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:42:58] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:43:10] [INFO] Categorías listadas {"total":3}
-[2025-10-22 14:45:23] [INFO] Categorías listadas {"total":3}
-[2025-10-22 15:30:09] [INFO] Categorías listadas {"total":3}
-[2025-10-22 15:30:25] [INFO] Categorías listadas {"total":3}
-[2025-10-22 15:31:51] [INFO] Categorías listadas {"total":3}
-[2025-10-22 15:31:56] [INFO] Categorías listadas {"total":3}
-[2025-10-22 15:35:51] [INFO] Categorías listadas {"total":3}
-[2025-10-22 15:37:43] [INFO] Estadísticas de categorías obtenidas {"total":3}
-[2025-10-22 11:37:43] [ERROR] WARNING: Undefined variable $categorias en C:\wamp64\www\inventario\Views\categorias\index.php línea 160 
-[2025-10-22 11:37:43] [ERROR] Excepción no capturada: count(): Argument #1 ($value) must be of type Countable|array, null given {"file":"C:\\wamp64\\www\\inventario\\Views\\categorias\\index.php","line":160,"trace":"#0 {main}"}
-[2025-10-22 15:37:53] [INFO] Estadísticas de categorías obtenidas {"total":3}
-[2025-10-22 11:37:53] [ERROR] WARNING: Undefined variable $categorias en C:\wamp64\www\inventario\Views\categorias\index.php línea 160 
-[2025-10-22 11:37:53] [ERROR] Excepción no capturada: count(): Argument #1 ($value) must be of type Countable|array, null given {"file":"C:\\wamp64\\www\\inventario\\Views\\categorias\\index.php","line":160,"trace":"#0 {main}"}
-[2025-10-22 15:38:00] [INFO] Categorías listadas {"total":3}
-[2025-10-22 15:38:40] [INFO] Categorías listadas {"total":3}
-[2025-10-22 15:41:56] [INFO] Categorías listadas {"total":3}
-[2025-10-22 15:42:09] [INFO] Categorías listadas {"total":3}
-[2025-10-22 15:42:56] [INFO] Categorías listadas {"total":3}
-[2025-10-22 15:43:26] [INFO] Categorías listadas {"total":3}
-[2025-10-22 15:43:31] [INFO] Categorías listadas {"total":3}
-[2025-10-22 15:43:48] [INFO] Categoría obtenida {"id":"2"}
-[2025-10-22 15:43:52] [INFO] Categorías listadas {"total":3}
-[2025-10-22 15:44:23] [INFO] Categorías listadas {"total":3}
-[2025-10-22 17:15:18] [INFO] Categorías listadas {"total":4}
-[2025-10-22 17:15:31] [INFO] Categorías listadas {"total":4}
-[2025-10-22 17:16:29] [INFO] Categoría creada exitosamente {"id":5,"nombre":"Panaderia"}
-[2025-10-22 17:16:31] [INFO] Categorías listadas {"total":5}
-[2025-10-22 17:17:06] [INFO] Categorías listadas {"total":5}
-[2025-10-22 18:58:05] [INFO] Categorías listadas {"total":5}
-[2025-10-22 19:00:00] [INFO] Categorías listadas {"total":5}
-[2025-10-22 19:00:29] [INFO] Categorías listadas {"total":5}
-[2025-10-22 19:00:34] [INFO] Categorías listadas {"total":5}
-[2025-10-22 19:00:51] [INFO] Categorías listadas {"total":5}
-[2025-10-22 19:01:11] [INFO] Categorías listadas {"total":5}
-[2025-10-22 15:05:50] [ERROR] WARNING: require_once(Models/Venta.php): Failed to open stream: No such file or directory en C:\wamp64\www\inventario\Controllers\VentaController.php línea 2 
-[2025-10-22 15:05:50] [ERROR] Excepción no capturada: Failed opening required 'Models/Venta.php' (include_path='.;C:\php\pear') {"file":"C:\\wamp64\\www\\inventario\\Controllers\\VentaController.php","line":2,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\ventas\\index.php(5): require_once()\n#1 {main}"}
-[2025-10-22 19:05:56] [INFO] Categorías listadas {"total":5}
-[2025-10-23 14:19:01] [INFO] Categorías listadas {"total":5}
-[2025-10-23 14:19:25] [INFO] Categorías listadas {"total":5}
-[2025-10-26 17:11:51] [DEBUG] Todas las categorías obtenidas {"total":5}
-[2025-10-26 17:12:01] [DEBUG] Todas las categorías obtenidas {"total":5}
-[2025-10-26 21:12:04] [INFO] Categorías listadas {"total":5}
-[2025-10-26 21:12:07] [INFO] Categorías listadas {"total":5}
-[2025-10-26 17:12:09] [ERROR] WARNING: require_once(Models/Venta.php): Failed to open stream: No such file or directory en C:\wamp64\www\inventario\Controllers\VentaController.php línea 2 
-[2025-10-26 17:12:09] [ERROR] Excepción no capturada: Failed opening required 'Models/Venta.php' (include_path='.;C:\php\pear') {"file":"C:\\wamp64\\www\\inventario\\Controllers\\VentaController.php","line":2,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\ventas\\index.php(5): require_once()\n#1 {main}"}
-[2025-10-26 17:12:22] [DEBUG] Todas las categorías obtenidas {"total":5}
-[2025-10-26 21:12:41] [INFO] Categorías listadas {"total":5}
-[2025-10-26 21:12:48] [INFO] Categoría obtenida {"id":"1"}
-[2025-10-26 21:12:52] [INFO] Categoría obtenida {"id":"1"}
-[2025-10-26 21:12:53] [INFO] Categoría obtenida {"id":"1"}
-[2025-10-26 21:12:54] [INFO] Categoría obtenida {"id":"1"}
-[2025-10-26 21:16:18] [INFO] Categorías listadas {"total":5}
-[2025-10-26 21:16:25] [INFO] Categorías listadas {"total":5}
-[2025-10-26 17:16:41] [DEBUG] Todas las categorías obtenidas {"total":5}
-[2025-10-26 17:16:55] [DEBUG] Todas las categorías obtenidas {"total":5}
-[2025-10-26 21:26:23] [INFO] Categorías listadas {"total":5}
-[2025-10-26 21:39:42] [INFO] Categorías listadas {"total":5}
-[2025-10-26 21:46:40] [INFO] Categorías listadas {"total":5}
-[2025-10-26 21:48:07] [INFO] Categorías listadas {"total":5}
-[2025-10-26 21:48:21] [INFO] Categorías listadas {"total":5}
-[2025-10-26 21:48:41] [INFO] Categorías listadas {"total":5}
-[2025-10-26 21:48:43] [INFO] Categorías listadas {"total":5}
-[2025-10-26 21:52:19] [INFO] Categorías listadas {"total":5}
-[2025-10-26 21:54:15] [INFO] Categorías listadas {"total":5}
+[2025-11-01 17:38:19] [INFO] Categorías listadas {"total":1}
+[2025-11-01 13:39:10] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:43:25] [INFO] Productos listados {"total":0}
+[2025-11-01 17:43:25] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 13:43:40] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:44:04] [INFO] Productos listados {"total":0}
+[2025-11-01 17:44:04] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:44:11] [INFO] Categorías listadas {"total":1}
+[2025-11-01 17:44:23] [INFO] Productos listados {"total":0}
+[2025-11-01 17:44:23] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:45:51] [INFO] Productos listados {"total":0}
+[2025-11-01 17:45:51] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:45:58] [INFO] Productos listados {"total":0}
+[2025-11-01 17:45:58] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:46:10] [INFO] Productos listados {"total":0}
+[2025-11-01 17:46:10] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:46:14] [INFO] Productos listados {"total":0}
+[2025-11-01 17:46:14] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:46:38] [INFO] Productos listados {"total":0}
+[2025-11-01 17:46:38] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:46:57] [INFO] Productos listados {"total":0}
+[2025-11-01 17:46:57] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:47:23] [INFO] Productos listados {"total":0}
+[2025-11-01 17:47:23] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:48:17] [INFO] Productos listados {"total":0}
+[2025-11-01 17:48:17] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:48:22] [INFO] Productos listados {"total":0}
+[2025-11-01 17:48:22] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 13:48:44] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 13:51:53] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 13:53:12] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 13:53:12] [INFO] Producto creado {"id":1,"nombre":"PAN FRANCES","sku":"PRD-001"}
+[2025-11-01 13:53:12] [INFO] Producto creado exitosamente {"id":1,"nombre":"PAN FRANCES"}
+[2025-11-01 17:53:14] [INFO] Productos listados {"total":1}
+[2025-11-01 17:53:14] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:53:32] [INFO] Productos listados {"total":1}
+[2025-11-01 17:53:32] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:53:45] [INFO] Categorías listadas {"total":1}
+[2025-11-01 17:54:02] [INFO] Productos listados {"total":1}
+[2025-11-01 17:54:02] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 13:54:39] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 13:56:18] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 13:56:18] [INFO] Producto creado {"id":2,"nombre":"PAN NORMAL","sku":"PRD-002"}
+[2025-11-01 13:56:18] [INFO] Producto creado exitosamente {"id":2,"nombre":"PAN NORMAL"}
+[2025-11-01 17:56:20] [INFO] Productos listados {"total":2}
+[2025-11-01 17:56:20] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:56:29] [INFO] Productos listados {"total":2}
+[2025-11-01 17:56:29] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:56:29] [INFO] Producto eliminado {"id":"2"}
+[2025-11-01 17:56:29] [INFO] Producto eliminado exitosamente {"id":"2"}
+[2025-11-01 17:56:32] [INFO] Productos listados {"total":1}
+[2025-11-01 17:56:32] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:56:54] [INFO] Categorías listadas {"total":1}
+[2025-11-01 17:56:55] [INFO] Productos listados {"total":1}
+[2025-11-01 17:56:55] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 17:56:57] [INFO] Categorías listadas {"total":1}
+[2025-11-01 17:56:58] [INFO] Productos listados {"total":1}
+[2025-11-01 17:56:58] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:00:11] [INFO] Productos listados {"total":1}
+[2025-11-01 18:00:11] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:01:10] [INFO] Productos listados {"total":1}
+[2025-11-01 18:01:10] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:01:20] [INFO] Categorías listadas {"total":1}
+[2025-11-01 18:01:39] [INFO] Categorías listadas {"total":1}
+[2025-11-01 18:01:46] [INFO] Productos listados {"total":1}
+[2025-11-01 18:01:46] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:06:09] [INFO] Productos listados {"total":1}
+[2025-11-01 18:06:09] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:07:24] [INFO] Productos listados {"total":1}
+[2025-11-01 18:07:24] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 14:16:19] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:29:09] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:29:23] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:30:55] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:32:09] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:32:47] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:33:24] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:36:54] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:37:13] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:40:44] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:40:52] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:47:05] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:47:09] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:48:17] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:53:51] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:53:56] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:53:57] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:53:57] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:53:57] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:53:57] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:58:08] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:58:13] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 18:58:48] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:03:09] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:03:48] [INFO] Categorías listadas {"total":1}
+[2025-11-01 19:07:43] [INFO] Productos listados {"total":1}
+[2025-11-01 19:07:43] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:07:46] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:08:43] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:13:57] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:14:36] [INFO] Productos listados {"total":1}
+[2025-11-01 19:14:36] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:14:40] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:14:45] [INFO] Categorías listadas {"total":1}
+[2025-11-01 19:16:19] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:16:35] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:17:04] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:17:54] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:19:40] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:21:59] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:23:24] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:24:01] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:24:11] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:24:53] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:25:20] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:25:38] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:25:53] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:29:17] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:30:08] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:31:54] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:31:55] [INFO] Productos listados {"total":1}
+[2025-11-01 19:31:55] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:32:02] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:36:13] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 15:36:13] [ERROR] WARNING: Constant AUTO_GENERATE_SKU already defined en D:\wamp64\www\inventario\config\Constants.php línea 26 
+[2025-11-01 15:36:45] [ERROR] WARNING: Constant AUTO_GENERATE_SKU already defined en D:\wamp64\www\inventario\config\Constants.php línea 26 
+[2025-11-01 15:36:45] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 15:36:56] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:38:10] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:39:51] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:40:08] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:40:58] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:41:02] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:41:05] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:41:07] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:45:26] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:45:28] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:45:48] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:45:48] [ERROR] Error al crear producto {"sku":"PRD-002","nombre":"ANAV","error":"SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricci\u00f3n de unicidad \u00abproductos_codigo_sku_key\u00bb\nDETAIL:  Ya existe la llave (codigo_sku)=(PRD-002)."}
+[2025-11-01 19:45:57] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:45:57] [ERROR] Error al crear producto {"sku":"PRD-002","nombre":"ANAV","error":"SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricci\u00f3n de unicidad \u00abproductos_codigo_sku_key\u00bb\nDETAIL:  Ya existe la llave (codigo_sku)=(PRD-002)."}
+[2025-11-01 19:46:52] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:46:57] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:47:22] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:47:22] [INFO] Producto creado {"id":5,"nombre":"rescata","sku":"PRD-003"}
+[2025-11-01 19:47:24] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:47:29] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:49:33] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:49:42] [INFO] Categorías listadas {"total":1}
+[2025-11-01 19:49:50] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:56:40] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:57:26] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:58:21] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:58:21] [INFO] Producto actualizado {"id":"1","nombre":"PAN FRANCES"}
+[2025-11-01 19:58:24] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:58:49] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:58:49] [INFO] Producto eliminado {"id":"5"}
+[2025-11-01 19:58:52] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 19:59:03] [DEBUG] Todas las categorías obtenidas {"total":1}
+[2025-11-01 20:22:36] [INFO] Categorías listadas {"total":1}
+[2025-11-01 20:22:48] [INFO] Categorías listadas {"total":1}
+[2025-11-01 16:22:56] [ERROR] WARNING: require_once(Models/Venta.php): Failed to open stream: No such file or directory en D:\wamp64\www\inventario\Controllers\VentaController.php línea 2 
+[2025-11-01 16:22:56] [ERROR] Excepción no capturada: Failed opening required 'Models/Venta.php' (include_path='.;C:\php\pear') {"file":"D:\\wamp64\\www\\inventario\\Controllers\\VentaController.php","line":2,"trace":"#0 D:\\wamp64\\www\\inventario\\Views\\ventas\\index.php(5): require_once()\n#1 {main}"}
+[2025-11-01 16:23:00] [ERROR] WARNING: require_once(Models/Venta.php): Failed to open stream: No such file or directory en D:\wamp64\www\inventario\Controllers\VentaController.php línea 2 
+[2025-11-01 16:23:00] [ERROR] Excepción no capturada: Failed opening required 'Models/Venta.php' (include_path='.;C:\php\pear') {"file":"D:\\wamp64\\www\\inventario\\Controllers\\VentaController.php","line":2,"trace":"#0 D:\\wamp64\\www\\inventario\\Views\\ventas\\index.php(5): require_once()\n#1 {main}"}

@@ -41,7 +41,7 @@ class CategoriaController
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(":id", $id);
             $stmt->execute();
-            
+
             $categoria = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($categoria) {
@@ -104,7 +104,7 @@ class CategoriaController
 
             if ($categoria_id) {
                 appLog('INFO', 'Categoría creada exitosamente', [
-                    'id' => $categoria_id, 
+                    'id' => $categoria_id,
                     'nombre' => $nombre
                 ]);
                 return [
@@ -117,7 +117,7 @@ class CategoriaController
             }
         } catch (Exception $e) {
             appLog('ERROR', 'Error al crear categoría', [
-                'data' => $data, 
+                'data' => $data,
                 'error' => $e->getMessage()
             ]);
             return [
@@ -142,9 +142,11 @@ class CategoriaController
             // Método temporal para actualizar
             $query = "UPDATE categorias SET nombre = :nombre, descripcion = :descripcion, updated_at = NOW() WHERE id = :id";
             $stmt = $this->db->prepare($query);
-            $stmt->bindParam(":nombre", $data['nombre']);
-            $stmt->bindParam(":descripcion", $data['descripcion'] ?? '');
-            $stmt->bindParam(":id", $id);
+
+            // Usar bindValue() en lugar de bindParam()
+            $stmt->bindValue(":nombre", $data['nombre']);
+            $stmt->bindValue(":descripcion", $data['descripcion'] ?? '');
+            $stmt->bindValue(":id", $id);
 
             if ($stmt->execute()) {
                 appLog('INFO', 'Categoría actualizada', ['id' => $id, 'nombre' => $data['nombre']]);
@@ -157,8 +159,8 @@ class CategoriaController
             }
         } catch (Exception $e) {
             appLog('ERROR', 'Error al actualizar categoría', [
-                'id' => $id, 
-                'data' => $data, 
+                'id' => $id,
+                'data' => $data,
                 'error' => $e->getMessage()
             ]);
             return [
@@ -171,16 +173,31 @@ class CategoriaController
     public function eliminar($id)
     {
         try {
+            // Verificar si la categoría existe
+            $queryCheck = "SELECT COUNT(*) as total FROM categorias WHERE id = :id";
+            $stmtCheck = $this->db->prepare($queryCheck);
+            $stmtCheck->bindValue(":id", $id);
+            $stmtCheck->execute();
+            $categoriaExists = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+            if ($categoriaExists['total'] == 0) {
+                appLog('WARNING', 'Intento de eliminar categoría inexistente', ['id' => $id]);
+                return [
+                    "success" => false,
+                    "message" => "La categoría no existe"
+                ];
+            }
+
             // Verificar si la categoría tiene productos asociados
             $query = "SELECT COUNT(*) as total FROM productos WHERE categoria_id = :categoria_id AND activo = true";
             $stmt = $this->db->prepare($query);
-            $stmt->bindParam(":categoria_id", $id);
+            $stmt->bindValue(":categoria_id", $id);
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($result['total'] > 0) {
                 appLog('WARNING', 'Intento de eliminar categoría con productos', [
-                    'id' => $id, 
+                    'id' => $id,
                     'productos_asociados' => $result['total']
                 ]);
                 return [
@@ -189,23 +206,49 @@ class CategoriaController
                 ];
             }
 
-            // Método temporal para eliminar
+            // Eliminar la categoría
             $query = "DELETE FROM categorias WHERE id = :id";
             $stmt = $this->db->prepare($query);
-            $stmt->bindParam(":id", $id);
+            $stmt->bindValue(":id", $id);
 
-            if ($stmt->execute() && $stmt->rowCount() > 0) {
-                appLog('INFO', 'Categoría eliminada', ['id' => $id]);
-                return [
-                    "success" => true,
-                    "message" => "Categoría eliminada exitosamente"
-                ];
+            if ($stmt->execute()) {
+                $rowCount = $stmt->rowCount();
+                if ($rowCount > 0) {
+                    appLog('INFO', 'Categoría eliminada', ['id' => $id]);
+                    return [
+                        "success" => true,
+                        "message" => "Categoría eliminada exitosamente"
+                    ];
+                } else {
+                    throw new Exception("No se afectaron filas al eliminar");
+                }
             } else {
-                throw new Exception("No se pudo eliminar la categoría");
+                throw new Exception("Error en la ejecución de la consulta");
             }
+        } catch (PDOException $e) {
+            // Manejar error de integridad referencial
+            if ($e->getCode() == '23000') {
+                appLog('ERROR', 'Error de integridad referencial al eliminar categoría', [
+                    'id' => $id,
+                    'error' => $e->getMessage()
+                ]);
+                return [
+                    "success" => false,
+                    "message" => "No se puede eliminar la categoría porque tiene productos asociados"
+                ];
+            }
+
+            appLog('ERROR', 'Error al eliminar categoría', [
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            return [
+                "success" => false,
+                "message" => "Error al eliminar la categoría: " . $e->getMessage()
+            ];
         } catch (Exception $e) {
             appLog('ERROR', 'Error al eliminar categoría', [
-                'id' => $id, 
+                'id' => $id,
                 'error' => $e->getMessage()
             ]);
             return [
@@ -256,6 +299,4 @@ class CategoriaController
             ];
         }
     }
-
-    
 }

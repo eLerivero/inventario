@@ -20,3 +20,4 @@ define('MOVIMIENTO_COMPRA', 'compra');
 define('ROL_ADMIN', 'admin');
 define('ROL_USUARIO', 'usuario');
 define('ROL_VENDEDOR', 'vendedor');
+

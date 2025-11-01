@@ -1,5 +1,5 @@
 <?php
-//require_once 'Config/Database.php';
+
 require_once __DIR__ . '/../Config/Database.php';
 require_once __DIR__ . '/../Utils/Ayuda.php';
 
@@ -74,66 +74,91 @@ class Producto
 
     public function crear()
     {
-        // Generar SKU automáticamente si está configurado
-        if (AUTO_GENERATE_SKU && empty($this->codigo_sku)) {
-            $this->codigo_sku = Ayuda::generateSKU($this->nombre);
-        }
+        try {
+            // Validar que tenemos un SKU (siempre requerido manualmente)
+            if (empty($this->codigo_sku)) {
+                throw new Exception("El código SKU es requerido");
+            }
 
-        $query = "INSERT INTO " . $this->table . " 
-                  (codigo_sku, nombre, descripcion, precio, precio_costo, stock_actual, stock_minimo, categoria_id) 
-                  VALUES 
-                  (:codigo_sku, :nombre, :descripcion, :precio, :precio_costo, :stock_actual, :stock_minimo, :categoria_id)
-                  RETURNING id";
+            // Verificar si el SKU ya existe
+            if ($this->existeSKU($this->codigo_sku)) {
+                throw new Exception("El código SKU '{$this->codigo_sku}' ya existe en el sistema");
+            }
 
-        $stmt = $this->conn->prepare($query);
+            $query = "INSERT INTO " . $this->table . " 
+                      (codigo_sku, nombre, descripcion, precio, precio_costo, stock_actual, stock_minimo, categoria_id) 
+                      VALUES 
+                      (:codigo_sku, :nombre, :descripcion, :precio, :precio_costo, :stock_actual, :stock_minimo, :categoria_id)
+                      RETURNING id";
 
-        // Limpiar datos
-        $this->codigo_sku = Ayuda::sanitizeInput($this->codigo_sku);
-        $this->nombre = Ayuda::sanitizeInput($this->nombre);
-        $this->descripcion = Ayuda::sanitizeInput($this->descripcion);
+            $stmt = $this->conn->prepare($query);
 
-        // Validar datos requeridos
-        if (empty($this->nombre)) {
-            throw new Exception("El nombre del producto es requerido");
-        }
+            // Limpiar datos
+            $this->codigo_sku = Ayuda::sanitizeInput($this->codigo_sku);
+            $this->nombre = Ayuda::sanitizeInput($this->nombre);
+            $this->descripcion = Ayuda::sanitizeInput($this->descripcion);
 
-        if (empty($this->precio) || $this->precio < 0) {
-            throw new Exception("El precio debe ser un valor positivo");
-        }
+            // Validar datos requeridos
+            if (empty($this->nombre)) {
+                throw new Exception("El nombre del producto es requerido");
+            }
 
-        // Vincular parámetros
-        $stmt->bindParam(":codigo_sku", $this->codigo_sku);
-        $stmt->bindParam(":nombre", $this->nombre);
-        $stmt->bindParam(":descripcion", $this->descripcion);
-        $stmt->bindParam(":precio", $this->precio);
-        $stmt->bindParam(":precio_costo", $this->precio_costo);
-        $stmt->bindParam(":stock_actual", $this->stock_actual);
-        $stmt->bindParam(":stock_minimo", $this->stock_minimo);
-        $stmt->bindParam(":categoria_id", $this->categoria_id);
+            if (empty($this->precio) || $this->precio < 0) {
+                throw new Exception("El precio debe ser un valor positivo");
+            }
 
-        if ($stmt->execute()) {
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            $producto_id = $row['id'];
+            // Vincular parámetros
+            $stmt->bindParam(":codigo_sku", $this->codigo_sku);
+            $stmt->bindParam(":nombre", $this->nombre);
+            $stmt->bindParam(":descripcion", $this->descripcion);
+            $stmt->bindParam(":precio", $this->precio);
+            $stmt->bindParam(":precio_costo", $this->precio_costo);
+            $stmt->bindParam(":stock_actual", $this->stock_actual);
+            $stmt->bindParam(":stock_minimo", $this->stock_minimo);
+            $stmt->bindParam(":categoria_id", $this->categoria_id);
 
-            // Registrar en historial de stock
-            $this->registrarMovimientoStock(
-                $producto_id,
-                0,
-                $this->stock_actual,
-                $this->stock_actual,
-                'entrada',
-                'Stock inicial'
-            );
+            if ($stmt->execute()) {
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                $producto_id = $row['id'];
 
-            appLog('INFO', 'Producto creado', [
-                'id' => $producto_id,
-                'nombre' => $this->nombre,
-                'sku' => $this->codigo_sku
+                // Registrar en historial de stock
+                $this->registrarMovimientoStock(
+                    $producto_id,
+                    0,
+                    $this->stock_actual,
+                    $this->stock_actual,
+                    'entrada',
+                    'Stock inicial'
+                );
+
+                appLog('INFO', 'Producto creado', [
+                    'id' => $producto_id,
+                    'nombre' => $this->nombre,
+                    'sku' => $this->codigo_sku
+                ]);
+
+                return $producto_id;
+            } else {
+                throw new Exception("Error al ejecutar la consulta de inserción");
+            }
+        } catch (Exception $e) {
+            appLog('ERROR', 'Error al crear producto', [
+                'sku' => $this->codigo_sku ?? '',
+                'nombre' => $this->nombre ?? '',
+                'error' => $e->getMessage()
             ]);
-
-            return $producto_id;
+            throw $e;
         }
-        return false;
+    }
+
+    private function existeSKU($sku)
+    {
+        $query = "SELECT id FROM productos WHERE codigo_sku = :sku AND activo = true";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":sku", $sku);
+        $stmt->execute();
+        
+        return $stmt->rowCount() > 0;
     }
 
     public function actualizar($id)

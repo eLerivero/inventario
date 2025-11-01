@@ -30,26 +30,25 @@ if ($_POST) {
 ?>
 
 <?php 
-$page_title = "Crear Categoría";
+$page_title = "Crear Nuevas Categorías";
 include '../layouts/header.php'; 
 ?>
+<div class="content-wrapper">
 
+<!-- Header de la página -->
 <div class="container-fluid">
     <div class="row">
-        <?php include '../layouts/sidebar.php'; ?>
-        
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">
-                    <i class="fas fa-plus me-2"></i>
-                    Crear Nueva Categoría
-                </h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <a href="index.php" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left me-1"></i> Volver al Listado
-                    </a>
-                </div>
-            </div>
+               <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">
+            <i class="fas fa-plus me-2"></i>Crear Nueva Categoria
+        </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="index.php" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Listado
+            </a>
+        </div>
+    </div>
 
             <!-- Alertas -->
             <?php if ($success_message): ?>
@@ -171,7 +170,7 @@ include '../layouts/header.php';
         </main>
     </div>
 </div>
-
+</div>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const descripcion = document.getElementById('descripcion');
