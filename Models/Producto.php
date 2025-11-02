@@ -1,6 +1,4 @@
 <?php
-
-require_once __DIR__ . '/../Config/Database.php';
 require_once __DIR__ . '/../Utils/Ayuda.php';
 
 class Producto
@@ -131,22 +129,11 @@ class Producto
                     'Stock inicial'
                 );
 
-                appLog('INFO', 'Producto creado', [
-                    'id' => $producto_id,
-                    'nombre' => $this->nombre,
-                    'sku' => $this->codigo_sku
-                ]);
-
                 return $producto_id;
             } else {
                 throw new Exception("Error al ejecutar la consulta de inserción");
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al crear producto', [
-                'sku' => $this->codigo_sku ?? '',
-                'nombre' => $this->nombre ?? '',
-                'error' => $e->getMessage()
-            ]);
             throw $e;
         }
     }
@@ -187,13 +174,7 @@ class Producto
         $stmt->bindParam(":categoria_id", $this->categoria_id);
         $stmt->bindParam(":id", $id);
 
-        $result = $stmt->execute();
-
-        if ($result) {
-            appLog('INFO', 'Producto actualizado', ['id' => $id, 'nombre' => $this->nombre]);
-        }
-
-        return $result;
+        return $stmt->execute();
     }
 
     public function actualizarStock($producto_id, $nueva_cantidad, $tipo_movimiento = 'ajuste', $observaciones = '')
@@ -225,13 +206,6 @@ class Producto
                     $tipo_movimiento,
                     $observaciones
                 );
-
-                appLog('INFO', 'Stock actualizado', [
-                    'producto_id' => $producto_id,
-                    'anterior' => $cantidad_anterior,
-                    'nuevo' => $nueva_cantidad,
-                    'tipo' => $tipo_movimiento
-                ]);
 
                 return true;
             }
@@ -298,13 +272,7 @@ class Producto
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $id);
 
-        $result = $stmt->execute();
-
-        if ($result) {
-            appLog('INFO', 'Producto eliminado', ['id' => $id]);
-        }
-
-        return $result;
+        return $stmt->execute();
     }
 
     public function obtenerPorSKU($sku)
@@ -318,5 +286,21 @@ class Producto
             return $stmt->fetch(PDO::FETCH_ASSOC);
         }
         return false;
+    }
+
+    public function obtenerTodos()
+    {
+        $query = "SELECT * FROM " . $this->table . " WHERE activo = true ORDER BY nombre";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    public function obtenerProductosActivos()
+    {
+        $query = "SELECT * FROM " . $this->table . " WHERE activo = true ORDER BY nombre";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 }

@@ -1,7 +1,9 @@
 <?php
-require_once 'Models/Venta.php';
-require_once 'Models/DetalleVenta.php';
-require_once 'Models/Producto.php';
+
+require_once __DIR__ . '/../Models/Venta.php';
+require_once __DIR__ . '/../Models/DetalleVenta.php';
+require_once __DIR__ . '/../Models/Producto.php';
+
 
 class VentaController
 {
@@ -24,13 +26,11 @@ class VentaController
             $stmt = $this->venta->leer();
             $ventas = $stmt->fetchAll();
 
-            appLog('INFO', 'Ventas listadas', ['total' => count($ventas)]);
             return [
                 "success" => true,
                 "data" => $ventas
             ];
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al listar ventas', ['error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al obtener las ventas: " . $e->getMessage()
@@ -45,7 +45,6 @@ class VentaController
 
             if ($venta) {
                 $venta['detalles'] = $this->obtenerDetalles($id);
-                appLog('INFO', 'Venta obtenida', ['id' => $id]);
                 return [
                     "success" => true,
                     "data" => $venta
@@ -57,7 +56,6 @@ class VentaController
                 ];
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al obtener venta', ['id' => $id, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al obtener la venta: " . $e->getMessage()
@@ -65,13 +63,13 @@ class VentaController
         }
     }
 
+
     public function obtenerDetalles($venta_id)
     {
         try {
             $detalles = $this->venta->obtenerDetalles($venta_id);
             return $detalles;
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al obtener detalles de venta', ['venta_id' => $venta_id, 'error' => $e->getMessage()]);
             return [];
         }
     }
@@ -93,7 +91,7 @@ class VentaController
                     throw new Exception("Producto no encontrado: " . $detalle['producto_id']);
                 }
 
-                if ($producto['stock_actual'] < $detalle['cantidad'] && !ALLOW_BACKORDERS) {
+                if ($producto['stock_actual'] < $detalle['cantidad']) {
                     throw new Exception("Stock insuficiente para el producto: " . $producto['nombre']);
                 }
             }
@@ -102,7 +100,7 @@ class VentaController
             $this->venta->cliente_id = $data['cliente_id'];
             $this->venta->total = $data['total'];
             $this->venta->tipo_pago_id = $data['tipo_pago_id'];
-            $this->venta->estado = $data['estado'] ?? VENTA_PENDIENTE;
+            $this->venta->estado = $data['estado'] ?? 'pendiente';
             $this->venta->fecha_hora = $data['fecha_hora'] ?? date('Y-m-d H:i:s');
             $this->venta->observaciones = $data['observaciones'] ?? '';
 
@@ -123,7 +121,7 @@ class VentaController
             }
 
             // Actualizar stock si la venta está completada
-            if (($data['estado'] ?? VENTA_PENDIENTE) === VENTA_COMPLETADA && AUTO_UPDATE_STOCK) {
+            if (($data['estado'] ?? 'pendiente') === 'completada') {
                 foreach ($data['detalles'] as $detalle) {
                     $producto_actual = $this->producto->obtenerPorId($detalle['producto_id']);
                     $nuevo_stock = $producto_actual['stock_actual'] - $detalle['cantidad'];
@@ -131,20 +129,13 @@ class VentaController
                     $this->producto->actualizarStock(
                         $detalle['producto_id'],
                         $nuevo_stock,
-                        MOVIMIENTO_VENTA,
+                        'venta',
                         "Venta #$numero_venta"
                     );
                 }
             }
 
             $this->db->commit();
-
-            appLog('INFO', 'Venta creada exitosamente', [
-                'venta_id' => $venta_id,
-                'numero_venta' => $numero_venta,
-                'cliente_id' => $data['cliente_id'],
-                'total' => $data['total']
-            ]);
 
             return [
                 "success" => true,
@@ -154,13 +145,13 @@ class VentaController
             ];
         } catch (Exception $e) {
             $this->db->rollBack();
-            appLog('ERROR', 'Error al crear venta', ['data' => $data, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al crear la venta: " . $e->getMessage()
             ];
         }
     }
+
 
     public function actualizarEstado($id, $estado)
     {
@@ -183,7 +174,7 @@ class VentaController
             }
 
             // Si se completa la venta, actualizar stock
-            if ($estado === VENTA_COMPLETADA && $venta['estado'] !== VENTA_COMPLETADA && AUTO_UPDATE_STOCK) {
+            if ($estado === 'completada' && $venta['estado'] !== 'completada') {
                 $detalles = $this->obtenerDetalles($id);
                 foreach ($detalles as $detalle) {
                     $producto_actual = $this->producto->obtenerPorId($detalle['producto_id']);
@@ -192,7 +183,7 @@ class VentaController
                     $this->producto->actualizarStock(
                         $detalle['producto_id'],
                         $nuevo_stock,
-                        MOVIMIENTO_VENTA,
+                        'venta',
                         "Venta completada #{$venta['numero_venta']}"
                     );
                 }
@@ -200,14 +191,12 @@ class VentaController
 
             $this->db->commit();
 
-            appLog('INFO', 'Estado de venta actualizado', ['id' => $id, 'estado' => $estado]);
             return [
                 "success" => true,
                 "message" => "Estado de venta actualizado exitosamente"
             ];
         } catch (Exception $e) {
             $this->db->rollBack();
-            appLog('ERROR', 'Error al actualizar estado de venta', ['id' => $id, 'estado' => $estado, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al actualizar estado: " . $e->getMessage()
@@ -219,13 +208,13 @@ class VentaController
     {
         try {
             $estadisticas = $this->venta->obtenerEstadisticas();
-            appLog('DEBUG', 'Estadísticas de ventas obtenidas');
+          //  appLog('DEBUG', 'Estadísticas de ventas obtenidas');
             return [
                 "success" => true,
                 "data" => $estadisticas
             ];
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al obtener estadísticas de ventas', ['error' => $e->getMessage()]);
+        //    appLog('ERROR', 'Error al obtener estadísticas de ventas', ['error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al obtener estadísticas: " . $e->getMessage()
@@ -237,13 +226,13 @@ class VentaController
     {
         try {
             $ventas_mes = $this->venta->obtenerVentasPorMes();
-            appLog('DEBUG', 'Ventas por mes obtenidas');
+         //   appLog('DEBUG', 'Ventas por mes obtenidas');
             return [
                 "success" => true,
                 "data" => $ventas_mes
             ];
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al obtener ventas por mes', ['error' => $e->getMessage()]);
+         //   appLog('ERROR', 'Error al obtener ventas por mes', ['error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al obtener ventas por mes: " . $e->getMessage()
@@ -269,13 +258,13 @@ class VentaController
             $stmt->execute();
             $ventas = $stmt->fetchAll();
 
-            appLog('INFO', 'Búsqueda de ventas', ['termino' => $search, 'resultados' => count($ventas)]);
+         //   appLog('INFO', 'Búsqueda de ventas', ['termino' => $search, 'resultados' => count($ventas)]);
             return [
                 "success" => true,
                 "data" => $ventas
             ];
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al buscar ventas', ['termino' => $search, 'error' => $e->getMessage()]);
+        //    appLog('ERROR', 'Error al buscar ventas', ['termino' => $search, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al buscar ventas: " . $e->getMessage()

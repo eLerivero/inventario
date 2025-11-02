@@ -30,147 +30,144 @@ if ($_POST) {
 ?>
 
 <?php 
-$page_title = "Crear Nuevas Categorías";
+$page_title = "Crear Nueva Categoría";
 include '../layouts/header.php'; 
 ?>
-<div class="content-wrapper">
 
-<!-- Header de la página -->
-<div class="container-fluid">
-    <div class="row">
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-               <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-        <h1 class="h2">
-            <i class="fas fa-plus me-2"></i>Crear Nueva Categoria
+<!-- Header con Botón de Volver -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0">
+            <i class="fas fa-plus me-2"></i>
+            Crear Nueva Categoría
         </h1>
-        <div class="btn-toolbar mb-2 mb-md-0">
-            <a href="index.php" class="btn btn-secondary">
-                <i class="fas fa-arrow-left me-2"></i>Volver al Listado
-            </a>
+        <p class="text-muted mb-0">Agrega una nueva categoría al sistema de inventario</p>
+    </div>
+    <div>
+        <a href="index.php" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Volver al Listado
+        </a>
+    </div>
+</div>
+
+<!-- Alertas -->
+<?php if ($success_message): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <?php echo htmlspecialchars($success_message); ?>
+        <div class="mt-2">
+            <small>Serás redirigido automáticamente al listado de categorías...</small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
+<?php if ($error_message): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <?php echo htmlspecialchars($error_message); ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+<?php endif; ?>
+
+<!-- Formulario -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-edit me-2"></i>
+            Información de la Categoría
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" id="formCategoria" novalidate>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">
+                            <i class="fas fa-tag me-1"></i>Nombre de la Categoría *
+                        </label>
+                        <input type="text" 
+                               class="form-control <?php echo isset($_POST['nombre']) && empty($_POST['nombre']) ? 'is-invalid' : ''; ?>" 
+                               id="nombre" 
+                               name="nombre" 
+                               value="<?php echo htmlspecialchars($_POST['nombre'] ?? ''); ?>"
+                               required
+                               maxlength="100"
+                               placeholder="Ej: Electrónicos, Ropa, Hogar...">
+                        <?php if (isset($_POST['nombre']) && empty($_POST['nombre'])): ?>
+                            <div class="invalid-feedback">
+                                El nombre de la categoría es obligatorio.
+                            </div>
+                        <?php endif; ?>
+                        <div class="form-text">El nombre debe ser único y descriptivo.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">
+                            <i class="fas fa-align-left me-1"></i>Descripción
+                        </label>
+                        <textarea class="form-control" 
+                                  id="descripcion" 
+                                  name="descripcion" 
+                                  rows="4"
+                                  maxlength="500"
+                                  placeholder="Describe brevemente esta categoría..."><?php echo htmlspecialchars($_POST['descripcion'] ?? ''); ?></textarea>
+                        <div class="form-text">Máximo 500 caracteres. <span id="charCount">0</span>/500</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i> Guardar Categoría
+                    </button>
+                    <a href="index.php" class="btn btn-secondary">
+                        <i class="fas fa-times me-1"></i> Cancelar
+                    </a>
+                    <button type="button" class="btn btn-outline-info" onclick="limpiarFormulario()">
+                        <i class="fas fa-broom me-1"></i> Limpiar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Información Adicional -->
+<div class="card mt-4">
+    <div class="card-header bg-light">
+        <h6 class="card-title mb-0">
+            <i class="fas fa-info-circle me-2"></i>
+            Información Importante
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h6 class="text-primary">Beneficios de usar categorías:</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i> Organización eficiente de productos</li>
+                    <li><i class="fas fa-check text-success me-2"></i> Búsqueda y filtrado más rápido</li>
+                    <li><i class="fas fa-check text-success me-2"></i> Reportes y estadísticas organizadas</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6 class="text-warning">Consideraciones:</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-exclamation-triangle text-warning me-2"></i> No se pueden eliminar categorías con productos</li>
+                    <li><i class="fas fa-exclamation-triangle text-warning me-2"></i> Los nombres deben ser únicos</li>
+                    <li><i class="fas fa-exclamation-triangle text-warning me-2"></i> Planifica la estructura antes de crear</li>
+                </ul>
+            </div>
         </div>
     </div>
-
-            <!-- Alertas -->
-            <?php if ($success_message): ?>
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i>
-                    <?php echo htmlspecialchars($success_message); ?>
-                    <div class="mt-2">
-                        <small>Serás redirigido automáticamente al listado de categorías...</small>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
-
-            <?php if ($error_message): ?>
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    <?php echo htmlspecialchars($error_message); ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
-
-            <!-- Formulario -->
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-edit me-2"></i>
-                        Información de la Categoría
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST" id="formCategoria" novalidate>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="nombre" class="form-label">
-                                        <i class="fas fa-tag me-1"></i>Nombre de la Categoría *
-                                    </label>
-                                    <input type="text" 
-                                           class="form-control <?php echo isset($_POST['nombre']) && empty($_POST['nombre']) ? 'is-invalid' : ''; ?>" 
-                                           id="nombre" 
-                                           name="nombre" 
-                                           value="<?php echo htmlspecialchars($_POST['nombre'] ?? ''); ?>"
-                                           required
-                                           maxlength="100"
-                                           placeholder="Ej: Electrónicos, Ropa, Hogar...">
-                                    <?php if (isset($_POST['nombre']) && empty($_POST['nombre'])): ?>
-                                        <div class="invalid-feedback">
-                                            El nombre de la categoría es obligatorio.
-                                        </div>
-                                    <?php endif; ?>
-                                    <div class="form-text">El nombre debe ser único y descriptivo.</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="mb-3">
-                                    <label for="descripcion" class="form-label">
-                                        <i class="fas fa-align-left me-1"></i>Descripción
-                                    </label>
-                                    <textarea class="form-control" 
-                                              id="descripcion" 
-                                              name="descripcion" 
-                                              rows="4"
-                                              maxlength="500"
-                                              placeholder="Describe brevemente esta categoría..."><?php echo htmlspecialchars($_POST['descripcion'] ?? ''); ?></textarea>
-                                    <div class="form-text">Máximo 500 caracteres. <span id="charCount">0</span>/500</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fas fa-save me-1"></i> Guardar Categoría
-                                </button>
-                                <a href="index.php" class="btn btn-secondary">
-                                    <i class="fas fa-times me-1"></i> Cancelar
-                                </a>
-                                <button type="button" class="btn btn-outline-info" onclick="limpiarFormulario()">
-                                    <i class="fas fa-broom me-1"></i> Limpiar
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Información Adicional -->
-            <div class="card mt-4">
-                <div class="card-header bg-light">
-                    <h6 class="card-title mb-0">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Información Importante
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6 class="text-primary">Beneficios de usar categorías:</h6>
-                            <ul class="list-unstyled">
-                                <li><i class="fas fa-check text-success me-2"></i> Organización eficiente de productos</li>
-                                <li><i class="fas fa-check text-success me-2"></i> Búsqueda y filtrado más rápido</li>
-                                <li><i class="fas fa-check text-success me-2"></i> Reportes y estadísticas organizadas</li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="text-warning">Consideraciones:</h6>
-                            <ul class="list-unstyled">
-                                <li><i class="fas fa-exclamation-triangle text-warning me-2"></i> No se pueden eliminar categorías con productos</li>
-                                <li><i class="fas fa-exclamation-triangle text-warning me-2"></i> Los nombres deben ser únicos</li>
-                                <li><i class="fas fa-exclamation-triangle text-warning me-2"></i> Planifica la estructura antes de crear</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
 </div>
-</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const descripcion = document.getElementById('descripcion');

@@ -12,20 +12,23 @@ CREATE TABLE categorias (
 
 -- Tabla de tipos de pago
 CREATE TABLE tipos_pago (
-    id SERIAL PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     nombre VARCHAR(50) NOT NULL UNIQUE,
     descripcion TEXT,
-    activo BOOLEAN DEFAULT true,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    activo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- Tabla de clientes
 CREATE TABLE clientes (
     id SERIAL PRIMARY KEY,
     nombre VARCHAR(200) NOT NULL,
+    documento_identidad VARCHAR(35),
     email VARCHAR(100),
     telefono VARCHAR(20),
     direccion TEXT,
+    activo BOOLEAN DEFAULT true,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -72,18 +75,22 @@ CREATE TABLE detalle_ventas (
 
 -- Tabla de historial de stock
 CREATE TABLE historial_stock (
-    id SERIAL PRIMARY KEY,
-    producto_id INTEGER REFERENCES productos(id),
-    cantidad_anterior INTEGER NOT NULL,
-    cantidad_nueva INTEGER NOT NULL,
-    diferencia INTEGER NOT NULL,
-    tipo_movimiento VARCHAR(20) NOT NULL CHECK (tipo_movimiento IN ('entrada', 'salida', 'ajuste', 'venta', 'compra')),
-    referencia_id INTEGER,
-    tipo_referencia VARCHAR(50),
+     id INT PRIMARY KEY AUTO_INCREMENT,
+    producto_id INT NOT NULL,
+    cantidad_anterior INT NOT NULL DEFAULT 0,
+    cantidad_nueva INT NOT NULL DEFAULT 0,
+    diferencia INT NOT NULL DEFAULT 0,
+    tipo_movimiento ENUM('entrada', 'salida', 'ajuste', 'sin_cambio') NOT NULL,
+    referencia_id INT NULL,
+    tipo_referencia VARCHAR(50) NULL,
     observaciones TEXT,
-    usuario VARCHAR(100) DEFAULT 'sistema',
-    fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    usuario VARCHAR(100) NOT NULL DEFAULT 'Sistema',
+    fecha_hora DATETIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (producto_id) REFERENCES productos(id) ON DELETE CASCADE,
+    INDEX idx_producto_id (producto_id),
+    INDEX idx_fecha_hora (fecha_hora),
+    INDEX idx_tipo_movimiento (tipo_movimiento)
 );
 
 -- Índices para mejorar el rendimiento

@@ -1,165 +1,59 @@
-[2025-11-01 17:38:19] [INFO] Categorías listadas {"total":1}
-[2025-11-01 13:39:10] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:43:25] [INFO] Productos listados {"total":0}
-[2025-11-01 17:43:25] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 13:43:40] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:44:04] [INFO] Productos listados {"total":0}
-[2025-11-01 17:44:04] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:44:11] [INFO] Categorías listadas {"total":1}
-[2025-11-01 17:44:23] [INFO] Productos listados {"total":0}
-[2025-11-01 17:44:23] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:45:51] [INFO] Productos listados {"total":0}
-[2025-11-01 17:45:51] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:45:58] [INFO] Productos listados {"total":0}
-[2025-11-01 17:45:58] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:46:10] [INFO] Productos listados {"total":0}
-[2025-11-01 17:46:10] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:46:14] [INFO] Productos listados {"total":0}
-[2025-11-01 17:46:14] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:46:38] [INFO] Productos listados {"total":0}
-[2025-11-01 17:46:38] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:46:57] [INFO] Productos listados {"total":0}
-[2025-11-01 17:46:57] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:47:23] [INFO] Productos listados {"total":0}
-[2025-11-01 17:47:23] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:48:17] [INFO] Productos listados {"total":0}
-[2025-11-01 17:48:17] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:48:22] [INFO] Productos listados {"total":0}
-[2025-11-01 17:48:22] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 13:48:44] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 13:51:53] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 13:53:12] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 13:53:12] [INFO] Producto creado {"id":1,"nombre":"PAN FRANCES","sku":"PRD-001"}
-[2025-11-01 13:53:12] [INFO] Producto creado exitosamente {"id":1,"nombre":"PAN FRANCES"}
-[2025-11-01 17:53:14] [INFO] Productos listados {"total":1}
-[2025-11-01 17:53:14] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:53:32] [INFO] Productos listados {"total":1}
-[2025-11-01 17:53:32] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:53:45] [INFO] Categorías listadas {"total":1}
-[2025-11-01 17:54:02] [INFO] Productos listados {"total":1}
-[2025-11-01 17:54:02] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 13:54:39] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 13:56:18] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 13:56:18] [INFO] Producto creado {"id":2,"nombre":"PAN NORMAL","sku":"PRD-002"}
-[2025-11-01 13:56:18] [INFO] Producto creado exitosamente {"id":2,"nombre":"PAN NORMAL"}
-[2025-11-01 17:56:20] [INFO] Productos listados {"total":2}
-[2025-11-01 17:56:20] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:56:29] [INFO] Productos listados {"total":2}
-[2025-11-01 17:56:29] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:56:29] [INFO] Producto eliminado {"id":"2"}
-[2025-11-01 17:56:29] [INFO] Producto eliminado exitosamente {"id":"2"}
-[2025-11-01 17:56:32] [INFO] Productos listados {"total":1}
-[2025-11-01 17:56:32] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:56:54] [INFO] Categorías listadas {"total":1}
-[2025-11-01 17:56:55] [INFO] Productos listados {"total":1}
-[2025-11-01 17:56:55] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 17:56:57] [INFO] Categorías listadas {"total":1}
-[2025-11-01 17:56:58] [INFO] Productos listados {"total":1}
-[2025-11-01 17:56:58] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:00:11] [INFO] Productos listados {"total":1}
-[2025-11-01 18:00:11] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:01:10] [INFO] Productos listados {"total":1}
-[2025-11-01 18:01:10] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:01:20] [INFO] Categorías listadas {"total":1}
-[2025-11-01 18:01:39] [INFO] Categorías listadas {"total":1}
-[2025-11-01 18:01:46] [INFO] Productos listados {"total":1}
-[2025-11-01 18:01:46] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:06:09] [INFO] Productos listados {"total":1}
-[2025-11-01 18:06:09] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:07:24] [INFO] Productos listados {"total":1}
-[2025-11-01 18:07:24] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 14:16:19] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:29:09] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:29:23] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:30:55] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:32:09] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:32:47] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:33:24] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:36:54] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:37:13] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:40:44] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:40:52] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:47:05] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:47:09] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:48:17] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:53:51] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:53:56] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:53:57] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:53:57] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:53:57] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:53:57] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:58:08] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:58:13] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 18:58:48] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:03:09] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:03:48] [INFO] Categorías listadas {"total":1}
-[2025-11-01 19:07:43] [INFO] Productos listados {"total":1}
-[2025-11-01 19:07:43] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:07:46] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:08:43] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:13:57] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:14:36] [INFO] Productos listados {"total":1}
-[2025-11-01 19:14:36] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:14:40] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:14:45] [INFO] Categorías listadas {"total":1}
-[2025-11-01 19:16:19] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:16:35] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:17:04] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:17:54] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:19:40] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:21:59] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:23:24] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:24:01] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:24:11] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:24:53] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:25:20] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:25:38] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:25:53] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:29:17] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:30:08] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:31:54] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:31:55] [INFO] Productos listados {"total":1}
-[2025-11-01 19:31:55] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:32:02] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:36:13] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 15:36:13] [ERROR] WARNING: Constant AUTO_GENERATE_SKU already defined en D:\wamp64\www\inventario\config\Constants.php línea 26 
-[2025-11-01 15:36:45] [ERROR] WARNING: Constant AUTO_GENERATE_SKU already defined en D:\wamp64\www\inventario\config\Constants.php línea 26 
-[2025-11-01 15:36:45] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 15:36:56] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:38:10] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:39:51] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:40:08] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:40:58] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:41:02] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:41:05] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:41:07] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:45:26] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:45:28] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:45:48] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:45:48] [ERROR] Error al crear producto {"sku":"PRD-002","nombre":"ANAV","error":"SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricci\u00f3n de unicidad \u00abproductos_codigo_sku_key\u00bb\nDETAIL:  Ya existe la llave (codigo_sku)=(PRD-002)."}
-[2025-11-01 19:45:57] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:45:57] [ERROR] Error al crear producto {"sku":"PRD-002","nombre":"ANAV","error":"SQLSTATE[23505]: Unique violation: 7 ERROR:  llave duplicada viola restricci\u00f3n de unicidad \u00abproductos_codigo_sku_key\u00bb\nDETAIL:  Ya existe la llave (codigo_sku)=(PRD-002)."}
-[2025-11-01 19:46:52] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:46:57] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:47:22] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:47:22] [INFO] Producto creado {"id":5,"nombre":"rescata","sku":"PRD-003"}
-[2025-11-01 19:47:24] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:47:29] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:49:33] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:49:42] [INFO] Categorías listadas {"total":1}
-[2025-11-01 19:49:50] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:56:40] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:57:26] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:58:21] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:58:21] [INFO] Producto actualizado {"id":"1","nombre":"PAN FRANCES"}
-[2025-11-01 19:58:24] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:58:49] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:58:49] [INFO] Producto eliminado {"id":"5"}
-[2025-11-01 19:58:52] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 19:59:03] [DEBUG] Todas las categorías obtenidas {"total":1}
-[2025-11-01 20:22:36] [INFO] Categorías listadas {"total":1}
-[2025-11-01 20:22:48] [INFO] Categorías listadas {"total":1}
-[2025-11-01 16:22:56] [ERROR] WARNING: require_once(Models/Venta.php): Failed to open stream: No such file or directory en D:\wamp64\www\inventario\Controllers\VentaController.php línea 2 
-[2025-11-01 16:22:56] [ERROR] Excepción no capturada: Failed opening required 'Models/Venta.php' (include_path='.;C:\php\pear') {"file":"D:\\wamp64\\www\\inventario\\Controllers\\VentaController.php","line":2,"trace":"#0 D:\\wamp64\\www\\inventario\\Views\\ventas\\index.php(5): require_once()\n#1 {main}"}
-[2025-11-01 16:23:00] [ERROR] WARNING: require_once(Models/Venta.php): Failed to open stream: No such file or directory en D:\wamp64\www\inventario\Controllers\VentaController.php línea 2 
-[2025-11-01 16:23:00] [ERROR] Excepción no capturada: Failed opening required 'Models/Venta.php' (include_path='.;C:\php\pear') {"file":"D:\\wamp64\\www\\inventario\\Controllers\\VentaController.php","line":2,"trace":"#0 D:\\wamp64\\www\\inventario\\Views\\ventas\\index.php(5): require_once()\n#1 {main}"}
+[2025-11-02 18:49:23] [DEBUG] Todas las categorías obtenidas {"total":2}
+[2025-11-02 14:49:26] [ERROR] WARNING: require_once(Models/Venta.php): Failed to open stream: No such file or directory en D:\wamp64\www\inventario\Controllers\VentaController.php línea 2 
+[2025-11-02 14:49:26] [ERROR] Excepción no capturada: Failed opening required 'Models/Venta.php' (include_path='.;C:\php\pear') {"file":"D:\\wamp64\\www\\inventario\\Controllers\\VentaController.php","line":2,"trace":"#0 D:\\wamp64\\www\\inventario\\Views\\ventas\\index.php(5): require_once()\n#1 {main}"}
+[2025-11-02 19:12:24] [DEBUG] Todas las categorías obtenidas {"total":2}
+[2025-11-02 19:31:03] [DEBUG] Todas las categorías obtenidas {"total":2}
+[2025-11-02 15:31:03] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
+[2025-11-02 15:31:03] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
+[2025-11-02 15:31:03] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
+[2025-11-02 15:31:03] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
+[2025-11-02 15:31:03] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
+[2025-11-02 15:31:03] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
+[2025-11-02 19:40:29] [DEBUG] Todas las categorías obtenidas {"total":2}
+[2025-11-02 15:40:29] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
+[2025-11-02 15:40:29] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
+[2025-11-02 15:40:29] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
+[2025-11-02 15:40:29] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
+[2025-11-02 15:40:29] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
+[2025-11-02 15:40:29] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
+[2025-11-02 19:41:02] [DEBUG] Todas las categorías obtenidas {"total":2}
+[2025-11-02 15:41:02] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
+[2025-11-02 15:41:02] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
+[2025-11-02 15:41:02] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
+[2025-11-02 15:41:02] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
+[2025-11-02 15:41:02] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
+[2025-11-02 15:41:02] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
+[2025-11-02 19:41:03] [INFO] Categorías listadas {"total":2}
+[2025-11-02 16:06:37] [ERROR] WARNING: Undefined array key "csrf_token" en D:\wamp64\www\inventario\Views\tipos-pago\crear.php línea 100 
+[2025-11-02 16:30:52] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
+[2025-11-02 16:30:52] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
+[2025-11-02 16:30:52] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:30:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:30:52] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:30:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:30:52] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
+[2025-11-02 16:30:52] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
+[2025-11-02 16:30:52] [ERROR] WARNING: Undefined array key "nombre" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:30:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:30:52] [ERROR] WARNING: Undefined array key "codigo_sku" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:30:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:31:57] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
+[2025-11-02 16:31:57] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
+[2025-11-02 16:31:57] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:31:57] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:31:57] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:31:57] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:31:57] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
+[2025-11-02 16:31:57] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
+[2025-11-02 16:31:57] [ERROR] WARNING: Undefined array key "nombre" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:31:57] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:31:57] [ERROR] WARNING: Undefined array key "codigo_sku" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 16:31:57] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
+[2025-11-02 20:32:36] [INFO] Categorías listadas {"total":2}
+[2025-11-02 20:32:37] [DEBUG] Todas las categorías obtenidas {"total":2}
+[2025-11-02 16:32:37] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
+[2025-11-02 16:32:37] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
+[2025-11-02 16:32:37] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
+[2025-11-02 16:32:37] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
+[2025-11-02 16:32:37] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
+[2025-11-02 16:32:37] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 292 

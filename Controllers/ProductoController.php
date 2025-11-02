@@ -14,19 +14,62 @@ class ProductoController
 
     public function listar()
     {
-        $stmt = $this->producto->leer();
-        return $stmt->fetchAll();
+        try {
+            $stmt = $this->producto->leer();
+            $productos = $stmt->fetchAll();
+
+            return [
+                "success" => true,
+                "data" => $productos
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener los productos: " . $e->getMessage()
+            ];
+        }
     }
 
     public function buscar($searchTerm)
     {
-        $stmt = $this->producto->buscar($searchTerm);
-        return $stmt->fetchAll();
+        try {
+            $stmt = $this->producto->buscar($searchTerm);
+            $productos = $stmt->fetchAll();
+
+            return [
+                "success" => true,
+                "data" => $productos
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al buscar productos: " . $e->getMessage()
+            ];
+        }
     }
 
     public function obtener($id)
     {
-        return $this->producto->obtenerPorId($id);
+        try {
+            $producto = $this->producto->obtenerPorId($id);
+
+            if ($producto) {
+                return [
+                    "success" => true,
+                    "data" => $producto
+                ];
+            } else {
+                return [
+                    "success" => false,
+                    "message" => "Producto no encontrado"
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener el producto: " . $e->getMessage()
+            ];
+        }
     }
 
     public function crear($data)
@@ -102,32 +145,123 @@ class ProductoController
 
     public function eliminar($id)
     {
-        if ($this->producto->eliminar($id)) {
-            return [
-                "success" => true,
-                "message" => "Producto eliminado exitosamente"
-            ];
-        } else {
+        try {
+            if ($this->producto->eliminar($id)) {
+                return [
+                    "success" => true,
+                    "message" => "Producto eliminado exitosamente"
+                ];
+            } else {
+                return [
+                    "success" => false,
+                    "message" => "Error al eliminar producto"
+                ];
+            }
+        } catch (Exception $e) {
             return [
                 "success" => false,
-                "message" => "Error al eliminar producto"
+                "message" => $e->getMessage()
             ];
         }
     }
 
     public function obtenerProductosBajoStock()
     {
-        $stmt = $this->producto->obtenerProductosBajoStock();
-        return $stmt->fetchAll();
+        try {
+            $stmt = $this->producto->obtenerProductosBajoStock();
+            $productos = $stmt->fetchAll();
+
+            return [
+                "success" => true,
+                "data" => $productos
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener productos bajo stock: " . $e->getMessage()
+            ];
+        }
     }
 
     public function obtenerEstadisticas()
     {
-        return $this->producto->obtenerEstadisticas();
+        try {
+            $estadisticas = $this->producto->obtenerEstadisticas();
+            return [
+                "success" => true,
+                "data" => $estadisticas
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener estadísticas: " . $e->getMessage()
+            ];
+        }
     }
 
     public function actualizarStock($producto_id, $nueva_cantidad, $tipo_movimiento = 'ajuste', $observaciones = '')
     {
-        return $this->producto->actualizarStock($producto_id, $nueva_cantidad, $tipo_movimiento, $observaciones);
+        try {
+            $result = $this->producto->actualizarStock($producto_id, $nueva_cantidad, $tipo_movimiento, $observaciones);
+            
+            if ($result) {
+                return [
+                    "success" => true,
+                    "message" => "Stock actualizado exitosamente"
+                ];
+            } else {
+                return [
+                    "success" => false,
+                    "message" => "Error al actualizar stock"
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => $e->getMessage()
+            ];
+        }
     }
+
+    public function obtenerProductosActivos()
+    {
+        try {
+            $query = "SELECT * FROM productos WHERE activo = true ORDER BY nombre";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $productos = $stmt->fetchAll();
+
+            return [
+                "success" => true,
+                "data" => $productos
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener productos activos: " . $e->getMessage()
+            ];
+        }
+    }
+
+
+    public function obtenerTodos()
+{
+    try {
+        $query = "SELECT * FROM productos WHERE activo = true ORDER BY nombre";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        $productos = $stmt->fetchAll();
+
+        return [
+            "success" => true,
+            "data" => $productos
+        ];
+    } catch (Exception $e) {
+        return [
+            "success" => false,
+            "message" => "Error al obtener productos: " . $e->getMessage(),
+            "data" => []
+        ];
+    }
+}
 }

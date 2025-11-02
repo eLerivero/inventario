@@ -1,5 +1,5 @@
 <?php
-require_once 'Models/Cliente.php';
+require_once __DIR__ . '/../Models/Cliente.php';
 
 class ClienteController
 {
@@ -18,13 +18,11 @@ class ClienteController
             $stmt = $this->cliente->leer();
             $clientes = $stmt->fetchAll();
 
-            appLog('INFO', 'Clientes listados', ['total' => count($clientes)]);
             return [
                 "success" => true,
                 "data" => $clientes
             ];
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al listar clientes', ['error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al obtener los clientes: " . $e->getMessage()
@@ -38,7 +36,6 @@ class ClienteController
             $cliente = $this->cliente->obtenerPorId($id);
 
             if ($cliente) {
-                appLog('INFO', 'Cliente obtenido', ['id' => $id]);
                 return [
                     "success" => true,
                     "data" => $cliente
@@ -50,7 +47,6 @@ class ClienteController
                 ];
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al obtener cliente', ['id' => $id, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al obtener el cliente: " . $e->getMessage()
@@ -73,24 +69,27 @@ class ClienteController
             $this->cliente->email = $data['email'] ?? '';
             $this->cliente->telefono = $data['telefono'] ?? '';
             $this->cliente->direccion = $data['direccion'] ?? '';
+            $this->cliente->documento_identidad = $data['documento_identidad'] ?? '';
+            $this->cliente->activo = $data['activo'] ?? 1;
 
             $cliente_id = $this->cliente->crear();
 
             if ($cliente_id) {
-                appLog('INFO', 'Cliente creado exitosamente', ['id' => $cliente_id, 'nombre' => $data['nombre']]);
                 return [
                     "success" => true,
                     "message" => "Cliente creado exitosamente",
                     "id" => $cliente_id
                 ];
             } else {
-                throw new Exception("No se pudo crear el cliente");
+                return [
+                    "success" => false,
+                    "message" => "Error al crear cliente"
+                ];
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al crear cliente', ['data' => $data, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
-                "message" => "Error al crear el cliente: " . $e->getMessage()
+                "message" => $e->getMessage()
             ];
         }
     }
@@ -110,21 +109,24 @@ class ClienteController
             $this->cliente->email = $data['email'] ?? '';
             $this->cliente->telefono = $data['telefono'] ?? '';
             $this->cliente->direccion = $data['direccion'] ?? '';
+            $this->cliente->documento_identidad = $data['documento_identidad'] ?? '';
+            $this->cliente->activo = $data['activo'] ?? 1;
 
             if ($this->cliente->actualizar($id)) {
-                appLog('INFO', 'Cliente actualizado', ['id' => $id, 'nombre' => $data['nombre']]);
                 return [
                     "success" => true,
                     "message" => "Cliente actualizado exitosamente"
                 ];
             } else {
-                throw new Exception("No se pudo actualizar el cliente");
+                return [
+                    "success" => false,
+                    "message" => "Error al actualizar cliente"
+                ];
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al actualizar cliente', ['id' => $id, 'data' => $data, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
-                "message" => "Error al actualizar el cliente: " . $e->getMessage()
+                "message" => $e->getMessage()
             ];
         }
     }
@@ -147,19 +149,38 @@ class ClienteController
             }
 
             if ($this->cliente->eliminar($id)) {
-                appLog('INFO', 'Cliente eliminado', ['id' => $id]);
                 return [
                     "success" => true,
                     "message" => "Cliente eliminado exitosamente"
                 ];
             } else {
-                throw new Exception("No se pudo eliminar el cliente");
+                return [
+                    "success" => false,
+                    "message" => "Error al eliminar cliente"
+                ];
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al eliminar cliente', ['id' => $id, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
-                "message" => "Error al eliminar el cliente: " . $e->getMessage()
+                "message" => $e->getMessage()
+            ];
+        }
+    }
+
+    public function buscar($searchTerm)
+    {
+        try {
+            $stmt = $this->cliente->buscar($searchTerm);
+            $clientes = $stmt->fetchAll();
+
+            return [
+                "success" => true,
+                "data" => $clientes
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al buscar clientes: " . $e->getMessage()
             ];
         }
     }
@@ -168,39 +189,61 @@ class ClienteController
     {
         try {
             $clientes = $this->cliente->obtenerTodos();
-            appLog('DEBUG', 'Todos los clientes obtenidos');
-            return $clientes;
-        } catch (Exception $e) {
-            appLog('ERROR', 'Error al obtener todos los clientes', ['error' => $e->getMessage()]);
-            return [];
-        }
-    }
-
-    public function buscar($search)
-    {
-        try {
-            $query = "SELECT * FROM clientes 
-                      WHERE nombre ILIKE :search 
-                         OR email ILIKE :search 
-                         OR telefono ILIKE :search
-                      ORDER BY nombre";
-
-            $stmt = $this->db->prepare($query);
-            $searchTerm = "%" . $search . "%";
-            $stmt->bindParam(":search", $searchTerm);
-            $stmt->execute();
-            $clientes = $stmt->fetchAll();
-
-            appLog('INFO', 'Búsqueda de clientes', ['termino' => $search, 'resultados' => count($clientes)]);
             return [
                 "success" => true,
                 "data" => $clientes
             ];
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al buscar clientes', ['termino' => $search, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
-                "message" => "Error al buscar clientes: " . $e->getMessage()
+                "message" => "Error al obtener todos los clientes: " . $e->getMessage()
+            ];
+        }
+    }
+
+    public function obtenerClientesActivos()
+    {
+        try {
+            $query = "SELECT * FROM clientes WHERE activo = true ORDER BY nombre";
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $clientes = $stmt->fetchAll();
+
+            return [
+                "success" => true,
+                "data" => $clientes
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener clientes activos: " . $e->getMessage()
+            ];
+        }
+    }
+
+    public function obtenerEstadisticas()
+    {
+        try {
+            $query = "SELECT 
+                        COUNT(*) as total_clientes,
+                        COUNT(CASE WHEN activo = true THEN 1 END) as clientes_activos,
+                        COUNT(CASE WHEN activo = false THEN 1 END) as clientes_inactivos,
+                        COUNT(CASE WHEN email IS NOT NULL AND email != '' THEN 1 END) as clientes_con_email,
+                        COUNT(CASE WHEN telefono IS NOT NULL AND telefono != '' THEN 1 END) as clientes_con_telefono
+                      FROM clientes";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $estadisticas = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return [
+                "success" => true,
+                "data" => $estadisticas
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener estadísticas: " . $e->getMessage()
             ];
         }
     }
@@ -223,16 +266,42 @@ class ClienteController
             $stmt->execute();
             $clientes = $stmt->fetchAll();
 
-            appLog('INFO', 'Clientes top obtenidos', ['limite' => $limite]);
             return [
                 "success" => true,
                 "data" => $clientes
             ];
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al obtener clientes top', ['error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al obtener clientes top: " . $e->getMessage()
+            ];
+        }
+    }
+
+    public function cambiarEstado($id, $activo)
+    {
+        try {
+            $query = "UPDATE clientes SET activo = :activo, updated_at = NOW() WHERE id = :id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":activo", $activo, PDO::PARAM_BOOL);
+            $stmt->bindParam(":id", $id);
+
+            if ($stmt->execute()) {
+                $estado = $activo ? 'activado' : 'desactivado';
+                return [
+                    "success" => true,
+                    "message" => "Cliente {$estado} exitosamente"
+                ];
+            } else {
+                return [
+                    "success" => false,
+                    "message" => "Error al cambiar estado del cliente"
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => $e->getMessage()
             ];
         }
     }

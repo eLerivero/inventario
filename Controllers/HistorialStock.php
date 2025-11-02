@@ -1,201 +1,296 @@
 <?php
-class HistorialStock
-{
-    private $conn;
-    private $table = "historial_stock";
 
-    public $id;
-    public $producto_id;
-    public $cantidad_anterior;
-    public $cantidad_nueva;
-    public $diferencia;
-    public $tipo_movimiento;
-    public $referencia_id;
-    public $tipo_referencia;
-    public $observaciones;
-    public $usuario;
-    public $fecha_hora;
-    public $created_at;
+
+require_once __DIR__ . '/../Models/HistorialStock.php';
+require_once __DIR__ . '/../Models/Producto.php';
+
+
+class HistorialStockController
+{
+    private $historialStock;
+    private $producto;
+    private $db;
 
     public function __construct($db)
     {
-        $this->conn = $db;
+        $this->db = $db;
+        $this->historialStock = new HistorialStock($db);
+        $this->producto = new Producto($db);
     }
 
-    public function leer()
+    public function listar()
     {
-        $query = "SELECT hs.*, p.nombre as producto_nombre, p.codigo_sku
-                  FROM " . $this->table . " hs
-                  JOIN productos p ON hs.producto_id = p.id
-                  ORDER BY hs.fecha_hora DESC";
+        try {
+            $stmt = $this->historialStock->leer();
+            $movimientos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        return $stmt;
+            return [
+                "success" => true,
+                "data" => $movimientos
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener el historial de stock: " . $e->getMessage()
+            ];
+        }
     }
 
     public function obtenerPorProducto($producto_id)
     {
-        $query = "SELECT hs.*, p.nombre as producto_nombre, p.codigo_sku
-                  FROM " . $this->table . " hs
-                  JOIN productos p ON hs.producto_id = p.id
-                  WHERE hs.producto_id = :producto_id
-                  ORDER BY hs.fecha_hora DESC";
+        try {
+            if (empty($producto_id)) {
+                return [
+                    "success" => false,
+                    "message" => "ID de producto no especificado"
+                ];
+            }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":producto_id", $producto_id);
-        $stmt->execute();
-        return $stmt;
+            // Verificar si el producto existe
+            $producto = $this->producto->obtenerPorId($producto_id);
+            if (!$producto) {
+                return [
+                    "success" => false,
+                    "message" => "Producto no encontrado"
+                ];
+            }
+
+            $stmt = $this->historialStock->obtenerPorProducto($producto_id);
+            $movimientos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            return [
+                "success" => true,
+                "data" => $movimientos,
+                "producto" => $producto
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener el historial del producto: " . $e->getMessage()
+            ];
+        }
     }
 
-    public function crear()
+    public function crearAjusteManual($data)
     {
-        $query = "INSERT INTO " . $this->table . " 
-                  (producto_id, cantidad_anterior, cantidad_nueva, diferencia, 
-                   tipo_movimiento, referencia_id, tipo_referencia, observaciones, usuario, fecha_hora) 
-                  VALUES 
-                  (:producto_id, :cantidad_anterior, :cantidad_nueva, :diferencia, 
-                   :tipo_movimiento, :referencia_id, :tipo_referencia, :observaciones, :usuario, :fecha_hora)
-                  RETURNING id";
+        try {
+            // Validar datos requeridos
+            if (empty($data['producto_id']) || !isset($data['cantidad_nueva'])) {
+                return [
+                    "success" => false,
+                    "message" => "Datos incompletos para el ajuste de stock"
+                ];
+            }
 
-        $stmt = $this->conn->prepare($query);
+            // Obtener producto actual
+            $producto_actual = $this->producto->obtenerPorId($data['producto_id']);
+            if (!$producto_actual) {
+                return [
+                    "success" => false,
+                    "message" => "Producto no encontrado"
+                ];
+            }
 
-        $stmt->bindParam(":producto_id", $this->producto_id);
-        $stmt->bindParam(":cantidad_anterior", $this->cantidad_anterior);
-        $stmt->bindParam(":cantidad_nueva", $this->cantidad_nueva);
-        $stmt->bindParam(":diferencia", $this->diferencia);
-        $stmt->bindParam(":tipo_movimiento", $this->tipo_movimiento);
-        $stmt->bindParam(":referencia_id", $this->referencia_id);
-        $stmt->bindParam(":tipo_referencia", $this->tipo_referencia);
-        $stmt->bindParam(":observaciones", $this->observaciones);
-        $stmt->bindParam(":usuario", $this->usuario);
-        $stmt->bindParam(":fecha_hora", $this->fecha_hora);
+            $cantidad_anterior = $producto_actual['stock_actual'];
+            $cantidad_nueva = intval($data['cantidad_nueva']);
+            $diferencia = $cantidad_nueva - $cantidad_anterior;
 
-        if ($stmt->execute()) {
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $row['id'];
+            // Validar que la cantidad nueva sea válida
+            if ($cantidad_nueva < 0) {
+                return [
+                    "success" => false,
+                    "message" => "La cantidad no puede ser negativa"
+                ];
+            }
+
+            // Determinar tipo de movimiento
+            $tipo_movimiento = $diferencia > 0 ? 'entrada' : ($diferencia < 0 ? 'salida' : 'sin_cambio');
+
+            // Crear registro en historial
+            $this->historialStock->producto_id = $data['producto_id'];
+            $this->historialStock->cantidad_anterior = $cantidad_anterior;
+            $this->historialStock->cantidad_nueva = $cantidad_nueva;
+            $this->historialStock->diferencia = $diferencia;
+            $this->historialStock->tipo_movimiento = $tipo_movimiento;
+            $this->historialStock->referencia_id = null;
+            $this->historialStock->tipo_referencia = 'ajuste_manual';
+            $this->historialStock->observaciones = $data['observaciones'] ?? 'Ajuste manual de stock';
+            $this->historialStock->usuario = $data['usuario'] ?? 'Sistema';
+            $this->historialStock->fecha_hora = date('Y-m-d H:i:s');
+
+            $historial_id = $this->historialStock->crear();
+
+            if ($historial_id) {
+                // Actualizar stock del producto
+                $update_result = $this->producto->actualizarStock($data['producto_id'], $cantidad_nueva);
+
+                if ($update_result) {
+                    return [
+                        "success" => true,
+                        "message" => "Stock ajustado exitosamente",
+                        "data" => [
+                            "historial_id" => $historial_id,
+                            "cantidad_anterior" => $cantidad_anterior,
+                            "cantidad_nueva" => $cantidad_nueva,
+                            "diferencia" => $diferencia
+                        ]
+                    ];
+                } else {
+                    // Revertir el registro de historial si falla la actualización
+                    $this->historialStock->eliminar($historial_id);
+                    throw new Exception("Error al actualizar el stock del producto");
+                }
+            } else {
+                throw new Exception("No se pudo crear el registro en el historial");
+            }
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al realizar el ajuste de stock: " . $e->getMessage()
+            ];
         }
-        return false;
     }
 
     public function obtenerMovimientosPorFecha($fecha_inicio, $fecha_fin)
     {
-        $query = "SELECT hs.*, p.nombre as producto_nombre, p.codigo_sku
-                  FROM " . $this->table . " hs
-                  JOIN productos p ON hs.producto_id = p.id
-                  WHERE hs.fecha_hora BETWEEN :fecha_inicio AND :fecha_fin
-                  ORDER BY hs.fecha_hora DESC";
+        try {
+            if (empty($fecha_inicio) || empty($fecha_fin)) {
+                return [
+                    "success" => false,
+                    "message" => "Fechas de inicio y fin son requeridas"
+                ];
+            }
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":fecha_inicio", $fecha_inicio);
-        $stmt->bindParam(":fecha_fin", $fecha_fin);
-        $stmt->execute();
-        return $stmt->fetchAll();
+            $movimientos = $this->historialStock->obtenerMovimientosPorFecha($fecha_inicio, $fecha_fin);
+
+            return [
+                "success" => true,
+                "data" => $movimientos
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener movimientos por fecha: " . $e->getMessage()
+            ];
+        }
     }
 
     public function obtenerResumenMovimientos($fecha_inicio = null, $fecha_fin = null)
     {
-        $where = "";
-        $params = [];
+        try {
+            $resumen = $this->historialStock->obtenerResumenMovimientos($fecha_inicio, $fecha_fin);
 
-        if ($fecha_inicio && $fecha_fin) {
-            $where = "WHERE hs.fecha_hora BETWEEN :fecha_inicio AND :fecha_fin";
-            $params[':fecha_inicio'] = $fecha_inicio;
-            $params[':fecha_fin'] = $fecha_fin;
+            return [
+                "success" => true,
+                "data" => $resumen
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener resumen de movimientos: " . $e->getMessage()
+            ];
         }
-
-        $query = "SELECT 
-                    hs.tipo_movimiento,
-                    COUNT(*) as total_movimientos,
-                    SUM(CASE WHEN hs.diferencia > 0 THEN hs.diferencia ELSE 0 END) as total_entradas,
-                    SUM(CASE WHEN hs.diferencia < 0 THEN ABS(hs.diferencia) ELSE 0 END) as total_salidas
-                  FROM " . $this->table . " hs
-                  $where
-                  GROUP BY hs.tipo_movimiento
-                  ORDER BY total_movimientos DESC";
-
-        $stmt = $this->conn->prepare($query);
-
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-
-        $stmt->execute();
-        return $stmt->fetchAll();
     }
 
     public function obtenerMovimientosRecientes($limite = 10)
     {
-        $query = "SELECT hs.*, p.nombre as producto_nombre, p.codigo_sku
-                  FROM " . $this->table . " hs
-                  JOIN productos p ON hs.producto_id = p.id
-                  ORDER BY hs.fecha_hora DESC
-                  LIMIT :limite";
+        try {
+            $movimientos = $this->historialStock->obtenerMovimientosRecientes($limite);
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":limite", $limite, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll();
+            return [
+                "success" => true,
+                "data" => $movimientos
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener movimientos recientes: " . $e->getMessage()
+            ];
+        }
     }
 
-    public function buscar($search)
+    public function buscar($termino)
     {
-        $query = "SELECT hs.*, p.nombre as producto_nombre, p.codigo_sku
-                  FROM " . $this->table . " hs
-                  JOIN productos p ON hs.producto_id = p.id
-                  WHERE p.nombre ILIKE :search 
-                     OR p.codigo_sku ILIKE :search
-                     OR hs.tipo_movimiento ILIKE :search
-                     OR hs.observaciones ILIKE :search
-                  ORDER BY hs.fecha_hora DESC";
+        try {
+            if (empty($termino)) {
+                return [
+                    "success" => false,
+                    "message" => "Término de búsqueda requerido"
+                ];
+            }
 
-        $stmt = $this->conn->prepare($query);
-        $searchTerm = "%" . $search . "%";
-        $stmt->bindParam(":search", $searchTerm);
-        $stmt->execute();
-        return $stmt->fetchAll();
+            $resultados = $this->historialStock->buscar($termino);
+
+            return [
+                "success" => true,
+                "data" => $resultados
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al buscar en el historial: " . $e->getMessage()
+            ];
+        }
     }
 
-    public function obtenerMovimientosPorTipo($tipo_movimiento, $limite = 50)
+    public function obtenerEstadisticas()
     {
-        $query = "SELECT hs.*, p.nombre as producto_nombre, p.codigo_sku
-                  FROM " . $this->table . " hs
-                  JOIN productos p ON hs.producto_id = p.id
-                  WHERE hs.tipo_movimiento = :tipo_movimiento
-                  ORDER BY hs.fecha_hora DESC
-                  LIMIT :limite";
+        try {
+            // Obtener total de movimientos
+            $query_total = "SELECT COUNT(*) as total FROM historial_stock";
+            $stmt_total = $this->db->prepare($query_total);
+            $stmt_total->execute();
+            $total_movimientos = $stmt_total->fetch(PDO::FETCH_ASSOC)['total'];
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":tipo_movimiento", $tipo_movimiento);
-        $stmt->bindParam(":limite", $limite, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll();
+            // Obtener movimientos del mes actual
+            $mes_actual = date('Y-m-01');
+            $query_mes = "SELECT COUNT(*) as total FROM historial_stock WHERE fecha_hora >= :mes_actual";
+            $stmt_mes = $this->db->prepare($query_mes);
+            $stmt_mes->bindParam(":mes_actual", $mes_actual);
+            $stmt_mes->execute();
+            $movimientos_mes = $stmt_mes->fetch(PDO::FETCH_ASSOC)['total'];
+
+            // Obtener productos con más movimientos
+            $query_top = "SELECT p.nombre, COUNT(hs.id) as total_movimientos 
+                         FROM historial_stock hs 
+                         JOIN productos p ON hs.producto_id = p.id 
+                         GROUP BY p.id, p.nombre 
+                         ORDER BY total_movimientos DESC 
+                         LIMIT 5";
+            $stmt_top = $this->db->prepare($query_top);
+            $stmt_top->execute();
+            $top_productos = $stmt_top->fetchAll(PDO::FETCH_ASSOC);
+
+            return [
+                "success" => true,
+                "data" => [
+                    "total_movimientos" => $total_movimientos,
+                    "movimientos_mes" => $movimientos_mes,
+                    "top_productos" => $top_productos
+                ]
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener estadísticas: " . $e->getMessage()
+            ];
+        }
     }
 
     public function obtenerAjustesManuales($fecha_inicio = null, $fecha_fin = null)
     {
-        $where = "WHERE hs.tipo_referencia = 'ajuste_manual'";
-        $params = [];
+        try {
+            $ajustes = $this->historialStock->obtenerAjustesManuales($fecha_inicio, $fecha_fin);
 
-        if ($fecha_inicio && $fecha_fin) {
-            $where .= " AND hs.fecha_hora BETWEEN :fecha_inicio AND :fecha_fin";
-            $params[':fecha_inicio'] = $fecha_inicio;
-            $params[':fecha_fin'] = $fecha_fin;
+            return [
+                "success" => true,
+                "data" => $ajustes
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener ajustes manuales: " . $e->getMessage()
+            ];
         }
-
-        $query = "SELECT hs.*, p.nombre as producto_nombre, p.codigo_sku
-                  FROM " . $this->table . " hs
-                  JOIN productos p ON hs.producto_id = p.id
-                  $where
-                  ORDER BY hs.fecha_hora DESC";
-
-        $stmt = $this->conn->prepare($query);
-
-        foreach ($params as $key => $value) {
-            $stmt->bindValue($key, $value);
-        }
-
-        $stmt->execute();
-        return $stmt->fetchAll();
     }
 }

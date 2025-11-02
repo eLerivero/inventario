@@ -1,5 +1,5 @@
 <?php
-require_once 'Models/TipoPago.php';
+require_once __DIR__ . '/../Models/TipoPago.php';
 
 class TipoPagoController
 {
@@ -15,16 +15,12 @@ class TipoPagoController
     public function listar()
     {
         try {
-            $stmt = $this->tipoPago->leer();
-            $tiposPago = $stmt->fetchAll();
-
-            appLog('INFO', 'Tipos de pago listados', ['total' => count($tiposPago)]);
+            $tiposPago = $this->tipoPago->leer();
             return [
                 "success" => true,
                 "data" => $tiposPago
             ];
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al listar tipos de pago', ['error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al obtener los tipos de pago: " . $e->getMessage()
@@ -38,7 +34,6 @@ class TipoPagoController
             $tipoPago = $this->tipoPago->obtenerPorId($id);
 
             if ($tipoPago) {
-                appLog('INFO', 'Tipo de pago obtenido', ['id' => $id]);
                 return [
                     "success" => true,
                     "data" => $tipoPago
@@ -50,7 +45,6 @@ class TipoPagoController
                 ];
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al obtener tipo de pago', ['id' => $id, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al obtener el tipo de pago: " . $e->getMessage()
@@ -69,13 +63,21 @@ class TipoPagoController
                 ];
             }
 
+            // Verificar si ya existe un tipo de pago con el mismo nombre
+            $existe = $this->tipoPago->verificarNombreExistente($data['nombre']);
+            if ($existe) {
+                return [
+                    "success" => false,
+                    "message" => "Ya existe un tipo de pago con ese nombre"
+                ];
+            }
+
             $this->tipoPago->nombre = $data['nombre'];
             $this->tipoPago->descripcion = $data['descripcion'] ?? '';
 
             $tipoPago_id = $this->tipoPago->crear();
 
             if ($tipoPago_id) {
-                appLog('INFO', 'Tipo de pago creado exitosamente', ['id' => $tipoPago_id, 'nombre' => $data['nombre']]);
                 return [
                     "success" => true,
                     "message" => "Tipo de pago creado exitosamente",
@@ -85,7 +87,6 @@ class TipoPagoController
                 throw new Exception("No se pudo crear el tipo de pago");
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al crear tipo de pago', ['data' => $data, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al crear el tipo de pago: " . $e->getMessage()
@@ -104,12 +105,29 @@ class TipoPagoController
                 ];
             }
 
+            // Verificar si el tipo de pago existe
+            $tipoPagoExistente = $this->tipoPago->obtenerPorId($id);
+            if (!$tipoPagoExistente) {
+                return [
+                    "success" => false,
+                    "message" => "Tipo de pago no encontrado"
+                ];
+            }
+
+            // Verificar si ya existe otro tipo de pago con el mismo nombre (excluyendo el actual)
+            $existe = $this->tipoPago->verificarNombreExistente($data['nombre'], $id);
+            if ($existe) {
+                return [
+                    "success" => false,
+                    "message" => "Ya existe otro tipo de pago con ese nombre"
+                ];
+            }
+
             $this->tipoPago->nombre = $data['nombre'];
             $this->tipoPago->descripcion = $data['descripcion'] ?? '';
             $this->tipoPago->activo = $data['activo'] ?? true;
 
             if ($this->tipoPago->actualizar($id)) {
-                appLog('INFO', 'Tipo de pago actualizado', ['id' => $id, 'nombre' => $data['nombre']]);
                 return [
                     "success" => true,
                     "message" => "Tipo de pago actualizado exitosamente"
@@ -118,7 +136,6 @@ class TipoPagoController
                 throw new Exception("No se pudo actualizar el tipo de pago");
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al actualizar tipo de pago', ['id' => $id, 'data' => $data, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al actualizar el tipo de pago: " . $e->getMessage()
@@ -129,6 +146,15 @@ class TipoPagoController
     public function eliminar($id)
     {
         try {
+            // Verificar si el tipo de pago existe
+            $tipoPagoExistente = $this->tipoPago->obtenerPorId($id);
+            if (!$tipoPagoExistente) {
+                return [
+                    "success" => false,
+                    "message" => "Tipo de pago no encontrado"
+                ];
+            }
+
             // Verificar si el tipo de pago tiene ventas asociadas
             $query = "SELECT COUNT(*) as total FROM ventas WHERE tipo_pago_id = :tipo_pago_id";
             $stmt = $this->db->prepare($query);
@@ -144,7 +170,6 @@ class TipoPagoController
             }
 
             if ($this->tipoPago->eliminar($id)) {
-                appLog('INFO', 'Tipo de pago eliminado', ['id' => $id]);
                 return [
                     "success" => true,
                     "message" => "Tipo de pago eliminado exitosamente"
@@ -153,7 +178,6 @@ class TipoPagoController
                 throw new Exception("No se pudo eliminar el tipo de pago");
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al eliminar tipo de pago', ['id' => $id, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al eliminar el tipo de pago: " . $e->getMessage()
@@ -165,10 +189,8 @@ class TipoPagoController
     {
         try {
             $tiposPago = $this->tipoPago->obtenerTodos();
-            appLog('DEBUG', 'Todos los tipos de pago obtenidos');
             return $tiposPago;
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al obtener todos los tipos de pago', ['error' => $e->getMessage()]);
             return [];
         }
     }
@@ -176,12 +198,20 @@ class TipoPagoController
     public function desactivar($id)
     {
         try {
+            // Verificar si el tipo de pago existe
+            $tipoPagoExistente = $this->tipoPago->obtenerPorId($id);
+            if (!$tipoPagoExistente) {
+                return [
+                    "success" => false,
+                    "message" => "Tipo de pago no encontrado"
+                ];
+            }
+
             $query = "UPDATE tipos_pago SET activo = false WHERE id = :id";
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(":id", $id);
 
             if ($stmt->execute()) {
-                appLog('INFO', 'Tipo de pago desactivado', ['id' => $id]);
                 return [
                     "success" => true,
                     "message" => "Tipo de pago desactivado exitosamente"
@@ -190,7 +220,6 @@ class TipoPagoController
                 throw new Exception("No se pudo desactivar el tipo de pago");
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al desactivar tipo de pago', ['id' => $id, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al desactivar el tipo de pago: " . $e->getMessage()
@@ -201,12 +230,20 @@ class TipoPagoController
     public function activar($id)
     {
         try {
+            // Verificar si el tipo de pago existe
+            $tipoPagoExistente = $this->tipoPago->obtenerPorId($id);
+            if (!$tipoPagoExistente) {
+                return [
+                    "success" => false,
+                    "message" => "Tipo de pago no encontrado"
+                ];
+            }
+
             $query = "UPDATE tipos_pago SET activo = true WHERE id = :id";
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(":id", $id);
 
             if ($stmt->execute()) {
-                appLog('INFO', 'Tipo de pago activado', ['id' => $id]);
                 return [
                     "success" => true,
                     "message" => "Tipo de pago activado exitosamente"
@@ -215,7 +252,6 @@ class TipoPagoController
                 throw new Exception("No se pudo activar el tipo de pago");
             }
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al activar tipo de pago', ['id' => $id, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al activar el tipo de pago: " . $e->getMessage()
@@ -229,7 +265,7 @@ class TipoPagoController
             $query = "SELECT tp.nombre, 
                              COUNT(v.id) as total_ventas,
                              COALESCE(SUM(v.total), 0) as monto_total,
-                             ROUND((COUNT(v.id) * 100.0 / (SELECT COUNT(*) FROM ventas)), 2) as porcentaje
+                             ROUND((COUNT(v.id) * 100.0 / (SELECT COUNT(*) FROM ventas WHERE estado = 'completada')), 2) as porcentaje
                       FROM tipos_pago tp
                       LEFT JOIN ventas v ON tp.id = v.tipo_pago_id AND v.estado = 'completada'
                       WHERE tp.activo = true
@@ -240,16 +276,30 @@ class TipoPagoController
             $stmt->execute();
             $estadisticas = $stmt->fetchAll();
 
-            appLog('INFO', 'Estadísticas de uso de tipos de pago obtenidas');
             return [
                 "success" => true,
                 "data" => $estadisticas
             ];
         } catch (Exception $e) {
-            appLog('ERROR', 'Error al obtener estadísticas de tipos de pago', ['error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al obtener estadísticas: " . $e->getMessage()
+            ];
+        }
+    }
+
+    public function buscar($termino)
+    {
+        try {
+            $tiposPago = $this->tipoPago->buscar($termino);
+            return [
+                "success" => true,
+                "data" => $tiposPago
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al buscar tipos de pago: " . $e->getMessage()
             ];
         }
     }
