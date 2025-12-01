@@ -1,0 +1,64 @@
+/* css/precios-fijos.css */
+.precio-fijo-badge {
+    background-color: #ffc107;
+    color: #000;
+    font-size: 0.75em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 5px;
+}
+
+.precio-calculado-badge {
+    background-color: #17a2b8;
+    color: #fff;
+    font-size: 0.75em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 5px;
+}
+
+.card-stat {
+    transition: transform 0.3s ease;
+}
+
+.card-stat:hover {
+    transform: translateY(-5px);
+}
+
+.char-counter-info {
+    color: #6c757d;
+    font-size: 0.875em;
+}
+
+.char-counter-warning {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 0.875em;
+}
+
+.form-check-switch-lg .form-check-input {
+    width: 3em;
+    height: 1.5em;
+}
+
+.margen-bajo {
+    background-color: #dc3545 !important;
+}
+
+.margen-medio {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+}
+
+.margen-alto {
+    background-color: #198754 !important;
+}
+
+/* Estilos para la tabla de precios fijos */
+#tablaPreciosFijos td {
+    vertical-align: middle;
+}
+
+#tablaPreciosFijos .badge {
+    font-size: 0.75em;
+}

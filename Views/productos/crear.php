@@ -1,4 +1,5 @@
 <?php
+// Views/productos/crear.php
 require_once '../../Controllers/ProductoController.php';
 require_once '../../Controllers/CategoriaController.php';
 require_once '../../Controllers/TasaCambioController.php';
@@ -12,10 +13,9 @@ $categoriaController = new CategoriaController($db);
 $tasaController = new TasaCambioController($db);
 
 $categorias = $categoriaController->obtenerTodas();
-$tasaActual = TasaCambioHelper::obtenerTasaActual($db);
-$tasaInfo = $tasaController->obtenerTasaActual();
+$tasaActual = $tasaController->obtenerTasaActual();
 
-// 2. PROCESAR FORMULARIO
+// PROCESAR FORMULARIO
 $mensaje = '';
 $tipoMensaje = '';
 
@@ -26,10 +26,13 @@ if ($_POST) {
             'nombre' => trim($_POST['nombre'] ?? ''),
             'descripcion' => trim($_POST['descripcion'] ?? ''),
             'precio' => floatval($_POST['precio'] ?? 0),
+            'precio_bs' => floatval($_POST['precio_bs'] ?? 0),
             'precio_costo' => floatval($_POST['precio_costo'] ?? 0),
+            'usar_precio_fijo_bs' => isset($_POST['usar_precio_fijo_bs']) ? true : false,
             'stock_actual' => intval($_POST['stock_actual'] ?? 0),
-            'stock_minimo' => intval($_POST['stock_minimo'] ?? 0),
-            'categoria_id' => $_POST['categoria_id'] ?? null
+            'stock_minimo' => intval($_POST['stock_minimo'] ?? 5),
+            'categoria_id' => $_POST['categoria_id'] ?? null,
+            'activo' => true
         ];
 
         $resultado = $productoController->crear($data);
@@ -49,14 +52,11 @@ if ($_POST) {
     }
 }
 
-// 3. DEFINIR TÍTULO Y INCLUIR HEADER
 $page_title = "Crear Nuevo Producto";
 require_once '../layouts/header.php';
 ?>
 
-<!-- 4. CONTENIDO PRINCIPAL DE LA VISTA -->
 <div class="content-wrapper crear-producto-content">
-
     <!-- Header de la página -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">
@@ -70,14 +70,14 @@ require_once '../layouts/header.php';
     </div>
 
     <!-- Información de Tasa de Cambio -->
-    <?php if ($tasaInfo['success']): ?>
+    <?php if ($tasaActual['success']): ?>
         <div class="alert alert-info mb-4">
             <div class="d-flex align-items-center">
                 <i class="fas fa-exchange-alt me-3 fa-lg"></i>
                 <div>
-                    <strong>Tasa de Cambio Actual:</strong> 1 USD = <?php echo number_format($tasaInfo['data']['tasa_cambio'], 2); ?> Bs
+                    <strong>Tasa de Cambio Actual:</strong> 1 USD = <?php echo number_format($tasaActual['data']['tasa_cambio'], 2); ?> Bs
                     <br>
-                    <small class="text-muted">Los precios en Bolívares se calcularán automáticamente</small>
+                    <small class="text-muted">Los precios en Bolívares se calcularán automáticamente a menos que uses precio fijo</small>
                 </div>
             </div>
         </div>
@@ -184,7 +184,8 @@ require_once '../layouts/header.php';
                                     required
                                     min="0.01"
                                     step="0.01"
-                                    placeholder="0.00">
+                                    placeholder="0.00"
+                                    onchange="calcularPreciosYMargenes()">
                                 <?php if (isset($_POST['precio']) && (empty($_POST['precio']) || $_POST['precio'] <= 0)): ?>
                                     <div class="invalid-feedback">
                                         El precio debe ser mayor a 0.
@@ -208,7 +209,8 @@ require_once '../layouts/header.php';
                                     value="<?php echo htmlspecialchars($_POST['precio_costo'] ?? ''); ?>"
                                     min="0"
                                     step="0.01"
-                                    placeholder="0.00">
+                                    placeholder="0.00"
+                                    onchange="calcularPreciosYMargenes()">
                             </div>
                             <div class="form-text">Precio de compra al proveedor en USD</div>
                         </div>
@@ -223,15 +225,60 @@ require_once '../layouts/header.php';
                                     <div class="row">
                                         <div class="col-6">
                                             <small class="text-muted">Venta:</small><br>
-                                            <strong id="precioBs" class="text-success">Bs 0.00</strong>
+                                            <strong id="precioBsCalculado" class="text-success">Bs 0.00</strong>
                                         </div>
                                         <div class="col-6">
                                             <small class="text-muted">Costo:</small><br>
-                                            <strong id="precioCostoBs" class="text-muted">Bs 0.00</strong>
+                                            <strong id="precioCostoBsCalculado" class="text-muted">Bs 0.00</strong>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuración de Precio Fijo -->
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="usar_precio_fijo_bs" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Configuración de Precio en Bolívares
+                            </label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input"
+                                    type="checkbox"
+                                    id="usar_precio_fijo_bs"
+                                    name="usar_precio_fijo_bs"
+                                    value="1"
+                                    <?php echo (isset($_POST['usar_precio_fijo_bs']) && $_POST['usar_precio_fijo_bs']) ? 'checked' : ''; ?>
+                                    onchange="togglePrecioFijo()">
+                                <label class="form-check-label" for="usar_precio_fijo_bs">
+                                    Usar precio fijo en Bolívares
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                Cuando está activado, el precio en Bs no cambiará con la tasa de cambio.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3" id="precio-fijo-container" style="display: none;">
+                            <label for="precio_bs" class="form-label">
+                                <i class="fas fa-money-bill-wave me-1"></i>Precio Fijo en Bolívares *
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">Bs</span>
+                                <input type="number"
+                                    class="form-control"
+                                    id="precio_bs"
+                                    name="precio_bs"
+                                    value="<?php echo htmlspecialchars($_POST['precio_bs'] ?? ''); ?>"
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="Precio fijo en Bs">
+                            </div>
+                            <div class="form-text">Este precio no se actualizará automáticamente con la tasa de cambio</div>
                         </div>
                     </div>
                 </div>
@@ -337,45 +384,14 @@ require_once '../layouts/header.php';
 </div>
 
 <script>
-    // Calcular precios en Bolívares y márgenes
-    function calcularPreciosYMargenes() {
-        const tasaActual = <?php echo $tasaActual; ?>;
-        const precioUSD = parseFloat(document.getElementById('precio').value) || 0;
-        const precioCostoUSD = parseFloat(document.getElementById('precio_costo').value) || 0;
+    // Variables globales
+    let tasaActual = <?php echo $tasaActual['success'] ? $tasaActual['data']['tasa_cambio'] : 36.5; ?>;
 
-        // Calcular precios en Bs
-        const precioBs = precioUSD * tasaActual;
-        const precioCostoBs = precioCostoUSD * tasaActual;
-
-        // Calcular márgenes
-        const gananciaUSD = precioUSD - precioCostoUSD;
-        const gananciaBS = gananciaUSD * tasaActual;
-        const margen = precioCostoUSD > 0 ? ((gananciaUSD / precioCostoUSD) * 100) : 0;
-
-        // Actualizar display de precios en Bs
-        document.getElementById('precioBs').textContent = 'Bs ' + precioBs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-        document.getElementById('precioCostoBs').textContent = 'Bs ' + precioCostoBs.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-
-        // Actualizar información de márgenes
-        document.getElementById('margenGanancia').textContent = margen.toFixed(1) + '%';
-        document.getElementById('gananciaNetaUSD').textContent = '$' + gananciaUSD.toFixed(2);
-        document.getElementById('gananciaNetaBS').textContent = 'Bs ' + gananciaBS.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-
-        // Cambiar color del margen según el valor
-        if (margen < 10) {
-            document.getElementById('margenGanancia').className = 'badge margen-ganancia-bajo';
-        } else if (margen < 25) {
-            document.getElementById('margenGanancia').className = 'badge margen-ganancia-medio';
-        } else {
-            document.getElementById('margenGanancia').className = 'badge margen-ganancia-alto';
-        }
-    }
-
-    // Contador de caracteres para descripción
     document.addEventListener('DOMContentLoaded', function() {
         const descripcion = document.getElementById('descripcion');
         const charCount = document.getElementById('charCount');
 
+        // Contador de caracteres
         descripcion.addEventListener('input', function() {
             const length = this.value.length;
             charCount.textContent = length;
@@ -397,12 +413,14 @@ require_once '../layouts/header.php';
             charCount.className = 'text-warning';
         }
 
-        // Escuchar cambios en los campos de precio
-        document.getElementById('precio').addEventListener('input', calcularPreciosYMargenes);
-        document.getElementById('precio_costo').addEventListener('input', calcularPreciosYMargenes);
-
-        // Calcular inicialmente
+        // Calcular precios inicialmente
         calcularPreciosYMargenes();
+
+        // Verificar si hay precio fijo configurado previamente
+        const usarPrecioFijoCheckbox = document.getElementById('usar_precio_fijo_bs');
+        if (usarPrecioFijoCheckbox && usarPrecioFijoCheckbox.checked) {
+            togglePrecioFijo();
+        }
 
         // Validación del formulario
         const form = document.getElementById('formProducto');
@@ -414,6 +432,8 @@ require_once '../layouts/header.php';
             const sku = skuInput.value.trim();
             const nombre = nombreInput.value.trim();
             const precioVal = parseFloat(precioInput.value);
+            const usarPrecioFijo = document.getElementById('usar_precio_fijo_bs')?.checked || false;
+            const precioBsInput = document.getElementById('precio_bs');
 
             // Validación básica
             let isValid = true;
@@ -434,6 +454,17 @@ require_once '../layouts/header.php';
                 e.preventDefault();
                 precioInput.classList.add('is-invalid');
                 isValid = false;
+            }
+
+            // Validar precio fijo en BS
+            if (usarPrecioFijo) {
+                const precioBsVal = parseFloat(precioBsInput.value);
+                if (!precioBsVal || precioBsVal <= 0) {
+                    e.preventDefault();
+                    precioBsInput.classList.add('is-invalid');
+                    isValid = false;
+                    showToast('error', 'Debe ingresar un precio válido en bolívares para precio fijo.');
+                }
             }
 
             if (!isValid) {
@@ -476,21 +507,93 @@ require_once '../layouts/header.php';
             } else {
                 this.classList.remove('is-valid');
             }
+            calcularPreciosYMargenes();
         });
     });
+
+    // Calcular precios en Bolívares y márgenes
+    function calcularPreciosYMargenes() {
+        const precioUSD = parseFloat(document.getElementById('precio').value) || 0;
+        const precioCostoUSD = parseFloat(document.getElementById('precio_costo').value) || 0;
+        const usarPrecioFijo = document.getElementById('usar_precio_fijo_bs')?.checked || false;
+        const precioBsInput = document.getElementById('precio_bs');
+
+        // Calcular precio en Bs
+        let precioBsCalculado = precioUSD * tasaActual;
+        let precioCostoBsCalculado = precioCostoUSD * tasaActual;
+
+        // Actualizar campos de visualización
+        document.getElementById('precioBsCalculado').textContent = 'Bs ' + precioBsCalculado.toFixed(2);
+        document.getElementById('precioCostoBsCalculado').textContent = 'Bs ' + precioCostoBsCalculado.toFixed(2);
+
+        // Si es precio fijo, mostrar en el campo de entrada
+        if (usarPrecioFijo && precioBsInput) {
+            if (!precioBsInput.value || precioBsInput.value == '0') {
+                precioBsInput.value = precioBsCalculado.toFixed(2);
+            }
+        }
+
+        // Calcular márgenes
+        const gananciaUSD = precioUSD - precioCostoUSD;
+        const gananciaBS = usarPrecioFijo && precioBsInput ? parseFloat(precioBsInput.value) - precioCostoBsCalculado : precioBsCalculado - precioCostoBsCalculado;
+        const margen = precioCostoUSD > 0 ? ((gananciaUSD / precioCostoUSD) * 100) : 0;
+
+        // Actualizar información de márgenes
+        document.getElementById('margenGanancia').textContent = margen.toFixed(1) + '%';
+        document.getElementById('gananciaNetaUSD').textContent = '$' + gananciaUSD.toFixed(2);
+        document.getElementById('gananciaNetaBS').textContent = 'Bs ' + gananciaBS.toFixed(2);
+
+        // Cambiar color del margen según el valor
+        const margenElement = document.getElementById('margenGanancia');
+        if (margen < 10) {
+            margenElement.className = 'badge bg-danger';
+        } else if (margen < 25) {
+            margenElement.className = 'badge bg-warning';
+        } else {
+            margenElement.className = 'badge bg-success';
+        }
+    }
+
+    function togglePrecioFijo() {
+        const usarPrecioFijo = document.getElementById('usar_precio_fijo_bs').checked;
+        const precioBsContainer = document.getElementById('precio-fijo-container');
+        const precioBsInput = document.getElementById('precio_bs');
+
+        if (usarPrecioFijo) {
+            precioBsContainer.style.display = 'block';
+            precioBsInput.required = true;
+
+            // Si no hay valor, calcular basado en la tasa actual
+            if (!precioBsInput.value || precioBsInput.value == '0') {
+                const precioUSD = parseFloat(document.getElementById('precio').value) || 0;
+                precioBsInput.value = (precioUSD * tasaActual).toFixed(2);
+            }
+        } else {
+            precioBsContainer.style.display = 'none';
+            precioBsInput.required = false;
+        }
+
+        // Recalcular márgenes
+        calcularPreciosYMargenes();
+    }
 
     function limpiarFormulario() {
         if (confirm('¿Estás seguro de que deseas limpiar el formulario? Se perderán todos los datos ingresados.')) {
             document.getElementById('formProducto').reset();
             document.getElementById('charCount').textContent = '0';
             document.getElementById('charCount').className = 'char-counter-info';
-            calcularPreciosYMargenes();
+
+            // Ocultar contenedor de precio fijo
+            document.getElementById('precio-fijo-container').style.display = 'none';
 
             // Remover clases de validación
             const inputs = document.querySelectorAll('.form-control');
             inputs.forEach(input => {
                 input.classList.remove('is-valid', 'is-invalid');
             });
+
+            // Recalcular
+            calcularPreciosYMargenes();
 
             showToast('info', 'Formulario limpiado correctamente.');
         }
@@ -534,5 +637,28 @@ require_once '../layouts/header.php';
         return container;
     }
 </script>
+
+<style>
+    .char-counter-info {
+        color: #6c757d;
+    }
+
+    .char-counter-warning {
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .margen-ganancia-bajo {
+        background-color: #dc3545 !important;
+    }
+
+    .margen-ganancia-medio {
+        background-color: #ffc107 !important;
+    }
+
+    .margen-ganancia-alto {
+        background-color: #198754 !important;
+    }
+</style>
 
 <!-- <?php require_once '../layouts/footer.php'; ?> -->

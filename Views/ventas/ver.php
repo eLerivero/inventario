@@ -2,6 +2,7 @@
 require_once '../../Config/Database.php';
 require_once '../../Controllers/VentaController.php';
 require_once '../../Utils/Ayuda.php';
+require_once '../../Helpers/TasaCambioHelper.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -25,9 +26,9 @@ if (!$result['success']) {
 }
 ?>
 
-<?php 
+<?php
 $page_title = "Detalles de Venta";
-include '../layouts/header.php'; 
+include '../layouts/header.php';
 ?>
 
 <!-- Header con Botón de Volver -->
@@ -50,9 +51,9 @@ include '../layouts/header.php';
             <i class="fas fa-arrow-left me-1"></i> Volver al Listado
         </a>
         <?php if ($venta && $venta['estado'] === 'pendiente'): ?>
-            <a href="index.php?action=completar&id=<?php echo $venta['id']; ?>&token=<?php echo $_SESSION['csrf_token'] ?? ''; ?>" 
-               class="btn btn-success ms-2"
-               onclick="return confirm('¿Estás seguro de que deseas completar esta venta?')">
+            <a href="index.php?action=completar&id=<?php echo $venta['id']; ?>&token=<?php echo $_SESSION['csrf_token'] ?? ''; ?>"
+                class="btn btn-success ms-2"
+                onclick="return confirm('¿Estás seguro de que deseas completar esta venta?')">
                 <i class="fas fa-check me-1"></i> Completar Venta
             </a>
         <?php endif; ?>
@@ -130,9 +131,9 @@ include '../layouts/header.php';
                                     <?php echo !empty($venta['fecha_hora']) ? Ayuda::formatDate($venta['fecha_hora'], 'd/m/Y H:i:s') : Ayuda::formatDate($venta['created_at'], 'd/m/Y H:i:s'); ?>
                                 </dd>
 
-                                <dt class="col-sm-4">Total:</dt>
+                                <dt class="col-sm-4">Tasa Cambio:</dt>
                                 <dd class="col-sm-8">
-                                    <strong class="text-success h5">S/ <?php echo number_format($venta['total'], 2); ?></strong>
+                                    <small class="text-muted"><?php echo $venta['tasa_formateada'] ?? number_format($venta['tasa_cambio_utilizada'], 2); ?> Bs/$</small>
                                 </dd>
                             </dl>
                         </div>
@@ -176,32 +177,36 @@ include '../layouts/header.php';
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php 
-                                    $subtotal = 0;
-                                    foreach ($venta['detalles'] as $detalle): 
-                                        $subtotal += $detalle['subtotal'];
+                                    <?php
+                                    $subtotal_usd = 0;
+                                    $subtotal_bs = 0;
+                                    foreach ($venta['detalles'] as $detalle):
+                                        $subtotal_usd += $detalle['subtotal'];
+                                        $subtotal_bs += $detalle['subtotal_bs'];
                                     ?>
                                         <tr>
                                             <td><?php echo htmlspecialchars($detalle['producto_nombre']); ?></td>
                                             <td><?php echo htmlspecialchars($detalle['codigo_sku']); ?></td>
                                             <td><?php echo $detalle['cantidad']; ?></td>
-                                            <td>S/ <?php echo number_format($detalle['precio_unitario'], 2); ?></td>
-                                            <td><strong>S/ <?php echo number_format($detalle['subtotal'], 2); ?></strong></td>
+                                            <td>
+                                                <div class="small"><?php echo $detalle['precio_unitario_formateado_usd'] ?? '$' . number_format($detalle['precio_unitario'], 2); ?></div>
+                                                <div class="text-muted small"><?php echo $detalle['precio_unitario_formateado_bs'] ?? TasaCambioHelper::formatearBS($detalle['precio_unitario_bs']); ?></div>
+                                            </td>
+                                            <td>
+                                                <div><strong><?php echo $detalle['subtotal_formateado_usd'] ?? '$' . number_format($detalle['subtotal'], 2); ?></strong></div>
+                                                <div class="text-success small"><?php echo $detalle['subtotal_formateado_bs'] ?? TasaCambioHelper::formatearBS($detalle['subtotal_bs']); ?></div>
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td colspan="4" class="text-end"><strong>Subtotal:</strong></td>
-                                        <td><strong>S/ <?php echo number_format($subtotal, 2); ?></strong></td>
+                                        <td colspan="4" class="text-end"><strong>Total USD:</strong></td>
+                                        <td><strong class="text-primary"><?php echo $venta['total_formateado_usd'] ?? '$' . number_format($venta['total'], 2); ?></strong></td>
                                     </tr>
                                     <tr>
-                                        <td colspan="4" class="text-end"><strong>IGV (18%):</strong></td>
-                                        <td><strong>S/ <?php echo number_format($subtotal * 0.18, 2); ?></strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="4" class="text-end"><strong>Total:</strong></td>
-                                        <td><strong class="text-success">S/ <?php echo number_format($venta['total'], 2); ?></strong></td>
+                                        <td colspan="4" class="text-end"><strong>Total Bs:</strong></td>
+                                        <td><strong class="text-success"><?php echo $venta['total_formateado_bs'] ?? TasaCambioHelper::formatearBS($venta['total_bs']); ?></strong></td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -239,19 +244,19 @@ include '../layouts/header.php';
                             <?php echo count($venta['detalles']); ?> items
                         </dd>
 
-                        <dt class="col-sm-5">Subtotal:</dt>
+                        <dt class="col-sm-5">Tasa Cambio:</dt>
                         <dd class="col-sm-7">
-                            S/ <?php echo number_format($subtotal ?? 0, 2); ?>
+                            <?php echo $venta['tasa_formateada'] ?? number_format($venta['tasa_cambio_utilizada'], 2); ?> Bs/$
                         </dd>
 
-                        <dt class="col-sm-5">IGV:</dt>
+                        <dt class="col-sm-5">Total USD:</dt>
                         <dd class="col-sm-7">
-                            S/ <?php echo number_format(($subtotal ?? 0) * 0.18, 2); ?>
+                            <strong class="text-primary"><?php echo $venta['total_formateado_usd'] ?? '$' . number_format($venta['total'], 2); ?></strong>
                         </dd>
 
-                        <dt class="col-sm-5">Total:</dt>
+                        <dt class="col-sm-5">Total Bs:</dt>
                         <dd class="col-sm-7">
-                            <strong class="text-success">S/ <?php echo number_format($venta['total'], 2); ?></strong>
+                            <strong class="text-success"><?php echo $venta['total_formateado_bs'] ?? TasaCambioHelper::formatearBS($venta['total_bs']); ?></strong>
                         </dd>
 
                         <dt class="col-sm-5">Registrada:</dt>
@@ -260,15 +265,6 @@ include '../layouts/header.php';
                                 <?php echo Ayuda::formatDate($venta['created_at'], 'd/m/Y H:i:s'); ?>
                             </small>
                         </dd>
-
-                        <?php if (!empty($venta['updated_at']) && $venta['updated_at'] !== $venta['created_at']): ?>
-                            <dt class="col-sm-5">Actualizada:</dt>
-                            <dd class="col-sm-7">
-                                <small class="text-muted">
-                                    <?php echo Ayuda::formatDate($venta['updated_at'], 'd/m/Y H:i:s'); ?>
-                                </small>
-                            </dd>
-                        <?php endif; ?>
                     </dl>
                 </div>
             </div>
@@ -287,9 +283,9 @@ include '../layouts/header.php';
                             <i class="fas fa-arrow-left me-1"></i> Volver al Listado
                         </a>
                         <?php if ($venta['estado'] === 'pendiente'): ?>
-                            <a href="index.php?action=completar&id=<?php echo $venta['id']; ?>&token=<?php echo $_SESSION['csrf_token'] ?? ''; ?>" 
-                               class="btn btn-success"
-                               onclick="return confirm('¿Estás seguro de que deseas completar esta venta? El stock se actualizará automáticamente.')">
+                            <a href="index.php?action=completar&id=<?php echo $venta['id']; ?>&token=<?php echo $_SESSION['csrf_token'] ?? ''; ?>"
+                                class="btn btn-success"
+                                onclick="return confirm('¿Estás seguro de que deseas completar esta venta? El stock se actualizará automáticamente.')">
                                 <i class="fas fa-check me-1"></i> Completar Venta
                             </a>
                         <?php endif; ?>
@@ -300,4 +296,4 @@ include '../layouts/header.php';
     </div>
 <?php endif; ?>
 
-<?php include '../layouts/footer.php'; ?>
+<!-- <?php include '../layouts/footer.php'; ?> -->

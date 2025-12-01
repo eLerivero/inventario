@@ -1,12 +1,10 @@
 <?php
+// Helpers/TasaCambioHelper.php
 class TasaCambioHelper
 {
-    /**
-     * Obtiene la tasa de cambio actual
-     */
     public static function obtenerTasaActual($db = null)
     {
-        if ($db === null) {
+        if (!$db) {
             require_once __DIR__ . '/../Config/Database.php';
             $database = new Database();
             $db = $database->getConnection();
@@ -15,108 +13,74 @@ class TasaCambioHelper
         $query = "SELECT tasa_cambio FROM tasas_cambio WHERE activa = TRUE ORDER BY fecha_actualizacion DESC LIMIT 1";
         $stmt = $db->prepare($query);
         $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($stmt->rowCount() > 0) {
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            return $result['tasa_cambio'];
-        }
-
-        return 1; // Tasa por defecto
+        return $result ? $result['tasa_cambio'] : 1;
     }
 
-    /**
-     * Convierte USD a Bolívares
-     */
-    public static function convertirUSDaBS($montoUSD, $db = null)
+    public static function formatearUSD($monto)
+    {
+        return '$' . number_format($monto, 2);
+    }
+
+    public static function formatearBS($monto, $incluirSimbolo = true)
+    {
+        return ($incluirSimbolo ? 'Bs ' : '') . number_format($monto, 2);
+    }
+
+    public static function convertirUSDaBS($monto_usd, $db = null)
     {
         $tasa = self::obtenerTasaActual($db);
-        return $montoUSD * $tasa;
+        return $monto_usd * $tasa;
     }
 
-    /**
-     * Convierte Bolívares a USD
-     */
-    public static function convertirBSaUSD($montoBS, $db = null)
+    public static function convertirBSaUSD($monto_bs, $db = null)
     {
         $tasa = self::obtenerTasaActual($db);
-        return $tasa > 0 ? $montoBS / $tasa : 0;
+        return $tasa > 0 ? $monto_bs / $tasa : 0;
     }
 
-    /**
-     * Formatea un precio en Bolívares
-     */
-    public static function formatearBS($precio, $simbolo = true)
+    public static function calcularMargenGanancia($precio_venta, $precio_costo)
     {
-        $formatted = number_format($precio, 2, ',', '.');
-        return $simbolo ? "Bs $formatted" : $formatted;
-    }
-
-    /**
-     * Formatea un precio en USD
-     */
-    public static function formatearUSD($precio, $simbolo = true)
-    {
-        $formatted = number_format($precio, 2, ',', '.');
-        return $simbolo ? "\$$formatted" : $formatted;
-    }
-
-    /**
-     * Formatea el precio de un producto mostrando ambas monedas
-     */
-    public static function formatearPrecioProducto($producto, $db = null)
-    {
-        if (!isset($producto['precio_bs']) || $producto['precio_bs'] == 0) {
-            $tasa = self::obtenerTasaActual($db);
-            $precioBS = isset($producto['precio']) ? $producto['precio'] * $tasa : 0;
-        } else {
-            $precioBS = $producto['precio_bs'];
+        if ($precio_costo <= 0) {
+            return 0;
         }
-
-        return self::formatearBS($precioBS);
+        return (($precio_venta - $precio_costo) / $precio_costo) * 100;
     }
 
-    /**
-     * Calcula el margen de ganancia
-     */
-    public static function calcularMargenGanancia($precioVenta, $precioCosto)
-    {
-        if ($precioCosto == 0) return 0;
-        return (($precioVenta - $precioCosto) / $precioCosto) * 100;
-    }
-
-    /**
-     * Determina la clase CSS para el margen
-     */
     public static function obtenerClaseMargen($margen)
     {
-        if ($margen < 0) return 'bg-danger';
-        if ($margen < 10) return 'bg-warning text-dark';
-        if ($margen < 25) return 'bg-info';
-        return 'bg-success';
-    }
-
-    /**
-     * Obtiene la última tasa activa con información completa
-     */
-    public static function obtenerInformacionTasaActual($db)
-    {
-        $query = "SELECT * FROM tasas_cambio WHERE activa = TRUE ORDER BY fecha_actualizacion DESC LIMIT 1";
-        $stmt = $db->prepare($query);
-        $stmt->execute();
-
-        if ($stmt->rowCount() > 0) {
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($margen < 10) {
+            return 'bg-danger';
+        } elseif ($margen < 25) {
+            return 'bg-warning';
+        } else {
+            return 'bg-success';
         }
-        return null;
     }
 
-    /**
-     * Verifica si una tasa está vigente (creada hoy)
-     */
-    public static function esTasaVigente($fechaActualizacion)
+    public static function formatearPrecioProducto($producto, $db = null)
     {
-        $hoy = date('Y-m-d');
-        $fechaTasa = date('Y-m-d', strtotime($fechaActualizacion));
-        return $fechaTasa == $hoy;
+        if (isset($producto['usar_precio_fijo_bs']) && $producto['usar_precio_fijo_bs']) {
+            $badge = '<span class="badge bg-warning">Fijo</span> ';
+            return $badge . 'Bs ' . number_format($producto['precio_bs'], 2);
+        } else {
+            if (isset($producto['precio_bs'])) {
+                return 'Bs ' . number_format($producto['precio_bs'], 2);
+            } else {
+                $precio_bs = self::convertirUSDaBS($producto['precio'], $db);
+                return 'Bs ' . number_format($precio_bs, 2);
+            }
+        }
+    }
+
+    public static function obtenerPrecioBsProducto($producto, $db = null)
+    {
+        if (isset($producto['usar_precio_fijo_bs']) && $producto['usar_precio_fijo_bs']) {
+            return $producto['precio_bs'];
+        } else {
+            $tasa = self::obtenerTasaActual($db);
+            return $producto['precio'] * $tasa;
+        }
     }
 }

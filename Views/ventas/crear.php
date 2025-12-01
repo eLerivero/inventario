@@ -4,6 +4,8 @@ require_once '../../Controllers/VentaController.php';
 require_once '../../Controllers/ClienteController.php';
 require_once '../../Controllers/ProductoController.php';
 require_once '../../Controllers/TipoPagoController.php';
+require_once '../../Controllers/TasaCambioController.php';
+require_once '../../Helpers/TasaCambioHelper.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -12,6 +14,7 @@ $ventaController = new VentaController($db);
 $clienteController = new ClienteController($db);
 $productoController = new ProductoController($db);
 $tipoPagoController = new TipoPagoController($db);
+$tasaController = new TasaCambioController($db);
 
 $error_message = '';
 $success_message = '';
@@ -20,16 +23,13 @@ $success_message = '';
 $clientes = $clienteController->obtenerClientesActivos();
 $productos = $productoController->listar();
 $tiposPago = $tipoPagoController->listar();
+$tasaActual = $tasaController->obtenerTasaActual();
 
 // Verificar y asignar datos correctamente
 $clientes_data = $clientes['success'] ? $clientes['data'] : [];
 $productos_data = $productos['success'] ? $productos['data'] : [];
 $tiposPago_data = $tiposPago['success'] ? $tiposPago['data'] : [];
-
-// Debug: Verificar datos de productos
-if (empty($productos_data)) {
-    error_log("No se encontraron productos. Respuesta del controlador: " . print_r($productos, true));
-}
+$tasa_info = $tasaActual['success'] ? $tasaActual['data'] : null;
 
 // Procesar formulario de venta
 if ($_POST && isset($_POST['cliente_id'])) {
@@ -46,25 +46,21 @@ if ($_POST && isset($_POST['cliente_id'])) {
         // Procesar detalles de la venta
         if (isset($_POST['productos']) && is_array($_POST['productos'])) {
             $total_venta = 0;
-            
+
             foreach ($_POST['productos'] as $index => $producto_id) {
                 if (!empty($producto_id) && !empty($_POST['cantidades'][$index]) && !empty($_POST['precios'][$index])) {
                     $cantidad = floatval($_POST['cantidades'][$index]);
                     $precio = floatval($_POST['precios'][$index]);
                     $subtotal = $cantidad * $precio;
-                    
+
                     $datosVenta['detalles'][] = [
                         'producto_id' => $producto_id,
                         'cantidad' => $cantidad,
                         'precio_unitario' => $precio,
                         'subtotal' => $subtotal
                     ];
-                    
-                    $total_venta += $subtotal;
                 }
             }
-            
-            $datosVenta['total'] = $total_venta;
         }
 
         if (empty($datosVenta['detalles'])) {
@@ -72,7 +68,7 @@ if ($_POST && isset($_POST['cliente_id'])) {
         }
 
         $result = $ventaController->crear($datosVenta);
-        
+
         if ($result['success']) {
             $success_message = $result['message'];
             // Redirigir después de 2 segundos
@@ -88,7 +84,7 @@ if ($_POST && isset($_POST['cliente_id'])) {
 // Procesar creación de nuevo cliente desde AJAX
 if ($_POST && isset($_POST['action']) && $_POST['action'] === 'crear_cliente') {
     header('Content-Type: application/json');
-    
+
     try {
         $datosCliente = [
             'nombre' => $_POST['nombre'],
@@ -99,7 +95,7 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'crear_cliente') {
         ];
 
         $result = $clienteController->crear($datosCliente);
-        
+
         echo json_encode($result);
     } catch (Exception $e) {
         echo json_encode([
@@ -111,9 +107,9 @@ if ($_POST && isset($_POST['action']) && $_POST['action'] === 'crear_cliente') {
 }
 ?>
 
-<?php 
+<?php
 $page_title = "Crear Nueva Venta";
-include '../layouts/header.php'; 
+include '../layouts/header.php';
 ?>
 
 <!-- Header con Botón de Volver -->
@@ -131,6 +127,34 @@ include '../layouts/header.php';
         </a>
     </div>
 </div>
+
+<!-- Tasa de Cambio Actual -->
+<?php if ($tasa_info): ?>
+    <div class="alert alert-info mb-4">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h6 class="mb-1"><i class="fas fa-exchange-alt me-2"></i>Tasa de Cambio Actual</h6>
+                <p class="mb-0">
+                    <strong>1 USD = <?php echo number_format($tasa_info['tasa_cambio'], 2); ?> Bs</strong>
+                    <small class="text-muted ms-3">
+                        (Actualizada: <?php echo date('d/m/Y H:i', strtotime($tasa_info['fecha_actualizacion'])); ?>)
+                    </small>
+                </p>
+            </div>
+            <div>
+                <a href="../tasas-cambio/actualizar.php" class="btn btn-outline-info btn-sm">
+                    <i class="fas fa-sync-alt me-1"></i> Actualizar Tasa
+                </a>
+            </div>
+        </div>
+    </div>
+<?php else: ?>
+    <div class="alert alert-danger mb-4">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Error:</strong> No hay tasa de cambio configurada.
+        <a href="../tasas-cambio/actualizar.php" class="alert-link">Configure la tasa de cambio primero</a>
+    </div>
+<?php endif; ?>
 
 <!-- Alertas -->
 <?php if ($success_message): ?>
@@ -172,7 +196,7 @@ include '../layouts/header.php';
                             <select class="form-control" id="cliente_id" name="cliente_id" required>
                                 <option value="">Seleccionar cliente...</option>
                                 <?php foreach ($clientes_data as $cliente): ?>
-                                    <option value="<?php echo $cliente['id']; ?>" 
+                                    <option value="<?php echo $cliente['id']; ?>"
                                         <?php echo ($_POST['cliente_id'] ?? '') == $cliente['id'] ? 'selected' : ''; ?>>
                                         <?php echo htmlspecialchars($cliente['nombre']); ?>
                                         <?php if (!empty($cliente['documento_identidad'])): ?>
@@ -214,7 +238,7 @@ include '../layouts/header.php';
                         <i class="fas fa-boxes me-2"></i>
                         Productos de la Venta
                     </h5>
-                    
+
                     <div id="productos-container">
                         <!-- Fila de producto inicial -->
                         <div class="producto-row row mb-3">
@@ -223,14 +247,14 @@ include '../layouts/header.php';
                                     <option value="">Seleccionar producto...</option>
                                     <?php if (!empty($productos_data)): ?>
                                         <?php foreach ($productos_data as $producto): ?>
-                                            <option value="<?php echo $producto['id']; ?>" 
-                                                    data-precio="<?php echo $producto['precio']; ?>"
-                                                    data-stock="<?php echo $producto['stock_actual']; ?>">
-                                                <?php echo htmlspecialchars($producto['nombre']); ?> 
+                                            <option value="<?php echo $producto['id']; ?>"
+                                                data-precio="<?php echo $producto['precio']; ?>"
+                                                data-stock="<?php echo $producto['stock_actual']; ?>">
+                                                <?php echo htmlspecialchars($producto['nombre']); ?>
                                                 <?php if (!empty($producto['codigo_sku'])): ?>
                                                     (SKU: <?php echo htmlspecialchars($producto['codigo_sku']); ?>)
                                                 <?php endif; ?>
-                                                - S/ <?php echo number_format($producto['precio'], 2); ?>
+                                                - $<?php echo number_format($producto['precio'], 2); ?>
                                                 - Stock: <?php echo $producto['stock_actual']; ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -240,12 +264,12 @@ include '../layouts/header.php';
                                 </select>
                             </div>
                             <div class="col-md-2">
-                                <input type="number" class="form-control cantidad-input" name="cantidades[]" 
-                                       min="1" step="1" value="1" placeholder="Cantidad" onchange="calcularSubtotal(this)">
+                                <input type="number" class="form-control cantidad-input" name="cantidades[]"
+                                    min="1" step="1" value="1" placeholder="Cantidad" onchange="calcularSubtotal(this)">
                             </div>
                             <div class="col-md-2">
-                                <input type="number" class="form-control precio-input" name="precios[]" 
-                                       step="0.01" min="0" placeholder="Precio" readonly>
+                                <input type="number" class="form-control precio-input" name="precios[]"
+                                    step="0.01" min="0" placeholder="Precio" readonly>
                             </div>
                             <div class="col-md-2">
                                 <input type="text" class="form-control subtotal-input" readonly placeholder="Subtotal">
@@ -278,11 +302,11 @@ include '../layouts/header.php';
                         <label for="observaciones" class="form-label">
                             <i class="fas fa-sticky-note me-1"></i>Observaciones
                         </label>
-                        <textarea class="form-control" 
-                                  id="observaciones" 
-                                  name="observaciones" 
-                                  rows="3"
-                                  placeholder="Observaciones adicionales sobre la venta..."><?php echo htmlspecialchars($_POST['observaciones'] ?? ''); ?></textarea>
+                        <textarea class="form-control"
+                            id="observaciones"
+                            name="observaciones"
+                            rows="3"
+                            placeholder="Observaciones adicionales sobre la venta..."><?php echo htmlspecialchars($_POST['observaciones'] ?? ''); ?></textarea>
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -290,17 +314,16 @@ include '../layouts/header.php';
                         <div class="card-body">
                             <h6 class="card-title">Resumen de Venta</h6>
                             <div class="d-flex justify-content-between">
-                                <span>Subtotal:</span>
-                                <span id="subtotal-total">S/ 0.00</span>
+                                <span>Total USD:</span>
+                                <span id="total-usd">$0.00</span>
                             </div>
                             <div class="d-flex justify-content-between">
-                                <span>IGV (18%):</span>
-                                <span id="igv-total">S/ 0.00</span>
+                                <span>Tasa de Cambio:</span>
+                                <span id="tasa-cambio"><?php echo $tasa_info ? number_format($tasa_info['tasa_cambio'], 2) : '0.00'; ?> Bs/$</span>
                             </div>
-                            <hr>
                             <div class="d-flex justify-content-between">
-                                <strong>Total:</strong>
-                                <strong id="total-venta">S/ 0.00</strong>
+                                <strong>Total Bs:</strong>
+                                <strong id="total-bs" class="text-success">Bs 0.00</strong>
                             </div>
                         </div>
                     </div>
@@ -309,7 +332,7 @@ include '../layouts/header.php';
 
             <div class="row mt-4">
                 <div class="col-12">
-                    <button type="submit" class="btn btn-success" <?php echo empty($productos_data) ? 'disabled' : ''; ?>>
+                    <button type="submit" class="btn btn-success" <?php echo (empty($productos_data) || !$tasa_info) ? 'disabled' : ''; ?>>
                         <i class="fas fa-save me-1"></i> Guardar Venta
                     </button>
                     <a href="index.php" class="btn btn-secondary">
@@ -399,10 +422,10 @@ include '../layouts/header.php';
             <div class="col-md-6">
                 <h6 class="text-primary">Proceso de Venta:</h6>
                 <ul class="list-unstyled">
-                    <li><i class="fas fa-check text-success me-2"></i> Selecciona cliente existente o crea uno nuevo</li>
-                    <li><i class="fas fa-check text-success me-2"></i> Agrega productos con sus cantidades</li>
-                    <li><i class="fas fa-check text-success me-2"></i> Verifica precios y stock disponible</li>
-                    <li><i class="fas fa-check text-success me-2"></i> Completa la venta desde el listado</li>
+                    <li><i class="fas fa-check text-success me-2"></i> Los precios se manejan en USD</li>
+                    <li><i class="fas fa-check text-success me-2"></i> La conversión a Bs es automática</li>
+                    <li><i class="fas fa-check text-success me-2"></i> Sin IGV (impuesto eliminado)</li>
+                    <li><i class="fas fa-check text-success me-2"></i> Tasa actual: <?php echo $tasa_info ? number_format($tasa_info['tasa_cambio'], 2) : 'N/A'; ?> Bs/$</li>
                 </ul>
             </div>
             <div class="col-md-6">
@@ -418,23 +441,28 @@ include '../layouts/header.php';
 </div>
 
 <script>
-let productosData = <?php echo json_encode($productos_data); ?>;
+    let tasaCambio = <?php echo $tasa_info ? $tasa_info['tasa_cambio'] : 0; ?>;
 
-document.addEventListener('DOMContentLoaded', function() {
-    calcularTotal();
-    
-    // Si no hay productos, mostrar alerta
-    <?php if (empty($productos_data)): ?>
-        showToast('warning', 'No hay productos disponibles. Debes crear productos primero.');
-    <?php endif; ?>
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        calcularTotal();
 
-// Funciones para gestión de productos
-function agregarProducto() {
-    const container = document.getElementById('productos-container');
-    const newRow = document.createElement('div');
-    newRow.className = 'producto-row row mb-3';
-    newRow.innerHTML = `
+        // Si no hay productos, mostrar alerta
+        <?php if (empty($productos_data)): ?>
+            showToast('warning', 'No hay productos disponibles. Debes crear productos primero.');
+        <?php endif; ?>
+
+        // Si no hay tasa, deshabilitar el formulario
+        <?php if (!$tasa_info): ?>
+            showToast('error', 'No hay tasa de cambio configurada. Configure la tasa primero.');
+        <?php endif; ?>
+    });
+
+    // Funciones para gestión de productos
+    function agregarProducto() {
+        const container = document.getElementById('productos-container');
+        const newRow = document.createElement('div');
+        newRow.className = 'producto-row row mb-3';
+        newRow.innerHTML = `
         <div class="col-md-5">
             <select class="form-control producto-select" name="productos[]" onchange="actualizarPrecio(this)">
                 <option value="">Seleccionar producto...</option>
@@ -447,7 +475,7 @@ function agregarProducto() {
                             <?php if (!empty($producto['codigo_sku'])): ?>
                                 (SKU: <?php echo htmlspecialchars($producto['codigo_sku']); ?>)
                             <?php endif; ?>
-                            - S/ <?php echo number_format($producto['precio'], 2); ?>
+                            - $<?php echo number_format($producto['precio'], 2); ?>
                             - Stock: <?php echo $producto['stock_actual']; ?>
                         </option>
                     <?php endforeach; ?>
@@ -473,147 +501,145 @@ function agregarProducto() {
             </button>
         </div>
     `;
-    container.appendChild(newRow);
-}
-
-function eliminarFila(button) {
-    const row = button.closest('.producto-row');
-    // No permitir eliminar la primera fila si es la única
-    const totalRows = document.querySelectorAll('.producto-row').length;
-    if (totalRows > 1) {
-        row.remove();
-        calcularTotal();
-    } else {
-        showToast('warning', 'Debe haber al menos un producto en la venta');
+        container.appendChild(newRow);
     }
-}
 
-function actualizarPrecio(select) {
-    const row = select.closest('.producto-row');
-    const precioInput = row.querySelector('.precio-input');
-    const cantidadInput = row.querySelector('.cantidad-input');
-    
-    if (select.value) {
-        const precio = select.selectedOptions[0].getAttribute('data-precio');
-        const stock = parseInt(select.selectedOptions[0].getAttribute('data-stock'));
-        
-        precioInput.value = parseFloat(precio).toFixed(2);
-        cantidadInput.max = stock;
-        
-        if (parseInt(cantidadInput.value) > stock) {
-            cantidadInput.value = stock;
-            showToast('warning', 'La cantidad supera el stock disponible. Se ajustó al máximo.');
+    function eliminarFila(button) {
+        const row = button.closest('.producto-row');
+        const totalRows = document.querySelectorAll('.producto-row').length;
+        if (totalRows > 1) {
+            row.remove();
+            calcularTotal();
+        } else {
+            showToast('warning', 'Debe haber al menos un producto en la venta');
         }
-        
-        calcularSubtotal(cantidadInput);
-    } else {
-        precioInput.value = '';
-        row.querySelector('.subtotal-input').value = '';
     }
-}
 
-function calcularSubtotal(input) {
-    const row = input.closest('.producto-row');
-    const precioInput = row.querySelector('.precio-input');
-    const subtotalInput = row.querySelector('.subtotal-input');
-    
-    const cantidad = parseFloat(input.value) || 0;
-    const precio = parseFloat(precioInput.value) || 0;
-    const subtotal = cantidad * precio;
-    
-    subtotalInput.value = 'S/ ' + subtotal.toFixed(2);
-    calcularTotal();
-}
+    function actualizarPrecio(select) {
+        const row = select.closest('.producto-row');
+        const precioInput = row.querySelector('.precio-input');
+        const cantidadInput = row.querySelector('.cantidad-input');
 
-function calcularTotal() {
-    let subtotal = 0;
-    
-    document.querySelectorAll('.producto-row').forEach(row => {
+        if (select.value) {
+            const precio = select.selectedOptions[0].getAttribute('data-precio');
+            const stock = parseInt(select.selectedOptions[0].getAttribute('data-stock'));
+
+            precioInput.value = parseFloat(precio).toFixed(2);
+            cantidadInput.max = stock;
+
+            if (parseInt(cantidadInput.value) > stock) {
+                cantidadInput.value = stock;
+                showToast('warning', 'La cantidad supera el stock disponible. Se ajustó al máximo.');
+            }
+
+            calcularSubtotal(cantidadInput);
+        } else {
+            precioInput.value = '';
+            row.querySelector('.subtotal-input').value = '';
+        }
+    }
+
+    function calcularSubtotal(input) {
+        const row = input.closest('.producto-row');
+        const precioInput = row.querySelector('.precio-input');
         const subtotalInput = row.querySelector('.subtotal-input');
-        const valorTexto = subtotalInput.value.replace('S/ ', '').trim();
-        const valor = parseFloat(valorTexto) || 0;
-        subtotal += valor;
-    });
-    
-    const igv = subtotal * 0.18;
-    const total = subtotal + igv;
-    
-    document.getElementById('subtotal-total').textContent = 'S/ ' + subtotal.toFixed(2);
-    document.getElementById('igv-total').textContent = 'S/ ' + igv.toFixed(2);
-    document.getElementById('total-venta').textContent = 'S/ ' + total.toFixed(2);
-}
 
-// Funciones para gestión de clientes (se mantienen igual)
-function crearCliente() {
-    const form = document.getElementById('formNuevoCliente');
-    const formData = new FormData(form);
-    formData.append('action', 'crear_cliente');
+        const cantidad = parseFloat(input.value) || 0;
+        const precio = parseFloat(precioInput.value) || 0;
+        const subtotal = cantidad * precio;
 
-    // Mostrar loading
-    const submitBtn = document.querySelector('#modalNuevoCliente .btn-primary');
-    const originalText = submitBtn.innerHTML;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Guardando...';
-    submitBtn.disabled = true;
+        subtotalInput.value = '$' + subtotal.toFixed(2);
+        calcularTotal();
+    }
 
-    fetch('crear.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('cliente-message').innerHTML = `
+    function calcularTotal() {
+        let subtotalUSD = 0;
+
+        document.querySelectorAll('.producto-row').forEach(row => {
+            const subtotalInput = row.querySelector('.subtotal-input');
+            const valorTexto = subtotalInput.value.replace('$', '').trim();
+            const valor = parseFloat(valorTexto) || 0;
+            subtotalUSD += valor;
+        });
+
+        const totalBS = subtotalUSD * tasaCambio;
+
+        document.getElementById('total-usd').textContent = '$' + subtotalUSD.toFixed(2);
+        document.getElementById('total-bs').textContent = 'Bs ' + totalBS.toFixed(2);
+        document.getElementById('tasa-cambio').textContent = tasaCambio.toFixed(2) + ' Bs/$';
+    }
+
+    // Funciones para gestión de clientes
+    function crearCliente() {
+        const form = document.getElementById('formNuevoCliente');
+        const formData = new FormData(form);
+        formData.append('action', 'crear_cliente');
+
+        // Mostrar loading
+        const submitBtn = document.querySelector('#modalNuevoCliente .btn-primary');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Guardando...';
+        submitBtn.disabled = true;
+
+        fetch('crear.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('cliente-message').innerHTML = `
                 <div class="alert alert-success">
                     <i class="fas fa-check-circle me-2"></i>
                     ${data.message}
                 </div>
             `;
 
-            actualizarSelectClientes(data.id, formData.get('nombre'), formData.get('documento_identidad'));
-            
-            setTimeout(() => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevoCliente'));
-                modal.hide();
-                form.reset();
-                document.getElementById('cliente-message').innerHTML = '';
-            }, 2000);
-        } else {
-            document.getElementById('cliente-message').innerHTML = `
+                    actualizarSelectClientes(data.id, formData.get('nombre'), formData.get('documento_identidad'));
+
+                    setTimeout(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevoCliente'));
+                        modal.hide();
+                        form.reset();
+                        document.getElementById('cliente-message').innerHTML = '';
+                    }, 2000);
+                } else {
+                    document.getElementById('cliente-message').innerHTML = `
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-triangle me-2"></i>
                     ${data.message}
                 </div>
             `;
-        }
-    })
-    .catch(error => {
-        document.getElementById('cliente-message').innerHTML = `
+                }
+            })
+            .catch(error => {
+                document.getElementById('cliente-message').innerHTML = `
             <div class="alert alert-danger">
                 <i class="fas fa-exclamation-triangle me-2"></i>
                 Error de conexión: ${error}
             </div>
         `;
-    })
-    .finally(() => {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    });
-}
+            })
+            .finally(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+    }
 
-function actualizarSelectClientes(clienteId, clienteNombre, documento) {
-    const select = document.getElementById('cliente_id');
-    const option = document.createElement('option');
-    option.value = clienteId;
-    option.text = clienteNombre + (documento ? ` (${documento})` : '');
-    option.selected = true;
-    
-    select.appendChild(option);
-}
+    function actualizarSelectClientes(clienteId, clienteNombre, documento) {
+        const select = document.getElementById('cliente_id');
+        const option = document.createElement('option');
+        option.value = clienteId;
+        option.text = clienteNombre + (documento ? ` (${documento})` : '');
+        option.selected = true;
 
-function limpiarFormulario() {
-    if (confirm('¿Estás seguro de que deseas limpiar el formulario? Se perderán todos los datos ingresados.')) {
-        document.getElementById('formVenta').reset();
-        document.getElementById('productos-container').innerHTML = `
+        select.appendChild(option);
+    }
+
+    function limpiarFormulario() {
+        if (confirm('¿Estás seguro de que deseas limpiar el formulario? Se perderán todos los datos ingresados.')) {
+            document.getElementById('formVenta').reset();
+            document.getElementById('productos-container').innerHTML = `
             <div class="producto-row row mb-3">
                 <div class="col-md-5">
                     <select class="form-control producto-select" name="productos[]" onchange="actualizarPrecio(this)">
@@ -627,7 +653,7 @@ function limpiarFormulario() {
                                     <?php if (!empty($producto['codigo_sku'])): ?>
                                         (SKU: <?php echo htmlspecialchars($producto['codigo_sku']); ?>)
                                     <?php endif; ?>
-                                    - S/ <?php echo number_format($producto['precio'], 2); ?>
+                                    - $<?php echo number_format($producto['precio'], 2); ?>
                                     - Stock: <?php echo $producto['stock_actual']; ?>
                                 </option>
                             <?php endforeach; ?>
@@ -654,18 +680,18 @@ function limpiarFormulario() {
                 </div>
             </div>
         `;
-        calcularTotal();
-        showToast('info', 'Formulario limpiado correctamente.');
+            calcularTotal();
+            showToast('info', 'Formulario limpiado correctamente.');
+        }
     }
-}
 
-function showToast(type, message) {
-    const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-    const toast = document.createElement('div');
-    
-    toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : type} border-0`;
-    toast.setAttribute('role', 'alert');
-    toast.innerHTML = `
+    function showToast(type, message) {
+        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+        const toast = document.createElement('div');
+
+        toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
         <div class="d-flex">
             <div class="toast-body">
                 <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
@@ -674,31 +700,31 @@ function showToast(type, message) {
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     `;
-    
-    toastContainer.appendChild(toast);
-    
-    const bsToast = new bootstrap.Toast(toast);
-    bsToast.show();
-    
-    toast.addEventListener('hidden.bs.toast', function() {
-        toast.remove();
+
+        toastContainer.appendChild(toast);
+
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+
+        toast.addEventListener('hidden.bs.toast', function() {
+            toast.remove();
+        });
+    }
+
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    // Limpiar mensajes del modal cuando se cierre
+    document.getElementById('modalNuevoCliente').addEventListener('hidden.bs.modal', function() {
+        document.getElementById('formNuevoCliente').reset();
+        document.getElementById('cliente-message').innerHTML = '';
     });
-}
-
-function createToastContainer() {
-    const container = document.createElement('div');
-    container.id = 'toastContainer';
-    container.className = 'toast-container position-fixed top-0 end-0 p-3';
-    container.style.zIndex = '9999';
-    document.body.appendChild(container);
-    return container;
-}
-
-// Limpiar mensajes del modal cuando se cierre
-document.getElementById('modalNuevoCliente').addEventListener('hidden.bs.modal', function () {
-    document.getElementById('formNuevoCliente').reset();
-    document.getElementById('cliente-message').innerHTML = '';
-});
 </script>
 
 <!-- <?php include '../layouts/footer.php'; ?> -->

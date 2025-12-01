@@ -1,6 +1,5 @@
 <?php
-require_once __DIR__ . '/../Utils/Ayuda.php';
-
+// Models/Producto.php
 class Producto
 {
     private $conn;
@@ -11,7 +10,11 @@ class Producto
     public $nombre;
     public $descripcion;
     public $precio;
+    public $precio_bs;
     public $precio_costo;
+    public $precio_costo_bs;
+    public $moneda_base;
+    public $usar_precio_fijo_bs;
     public $stock_actual;
     public $stock_minimo;
     public $categoria_id;
@@ -27,38 +30,118 @@ class Producto
     public function leer()
     {
         $query = "SELECT p.*, c.nombre as categoria_nombre 
-                  FROM " . $this->table . " p 
-                  LEFT JOIN categorias c ON p.categoria_id = c.id 
-                  WHERE p.activo = true 
-                  ORDER BY p.created_at DESC";
-
+                  FROM " . $this->table . " p
+                  LEFT JOIN categorias c ON p.categoria_id = c.id
+                  ORDER BY p.nombre ASC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
     }
 
-    public function buscar($search)
+    public function crear($data)
     {
-        $query = "SELECT p.*, c.nombre as categoria_nombre 
-                  FROM " . $this->table . " p 
-                  LEFT JOIN categorias c ON p.categoria_id = c.id 
-                  WHERE p.activo = true 
-                  AND (p.nombre ILIKE :search OR p.codigo_sku ILIKE :search OR p.descripcion ILIKE :search)
-                  ORDER BY p.nombre";
+        $query = "INSERT INTO " . $this->table . " 
+                  (codigo_sku, nombre, descripcion, precio, precio_bs, precio_costo, precio_costo_bs, 
+                   usar_precio_fijo_bs, stock_actual, stock_minimo, categoria_id, activo) 
+                  VALUES 
+                  (:codigo_sku, :nombre, :descripcion, :precio, :precio_bs, :precio_costo, :precio_costo_bs,
+                   :usar_precio_fijo_bs, :stock_actual, :stock_minimo, :categoria_id, :activo)";
 
         $stmt = $this->conn->prepare($query);
-        $search = "%" . $search . "%";
-        $stmt->bindParam(":search", $search);
-        $stmt->execute();
-        return $stmt;
+
+        // Obtener tasa de cambio actual para calcular precios en BS si no son fijos
+        $tasa_cambio = $this->obtenerTasaCambio();
+
+        // Calcular precios en BS si no se proporcionan y no es precio fijo
+        if (empty($data['precio_bs']) && (!isset($data['usar_precio_fijo_bs']) || !$data['usar_precio_fijo_bs'])) {
+            $data['precio_bs'] = round($data['precio'] * $tasa_cambio, 2);
+            $data['precio_costo_bs'] = round(($data['precio_costo'] ?? 0) * $tasa_cambio, 2);
+        }
+
+        $stmt->bindParam(":codigo_sku", $data['codigo_sku']);
+        $stmt->bindParam(":nombre", $data['nombre']);
+        $stmt->bindParam(":descripcion", $data['descripcion']);
+        $stmt->bindParam(":precio", $data['precio']);
+        $stmt->bindParam(":precio_bs", $data['precio_bs']);
+        $stmt->bindParam(":precio_costo", $data['precio_costo'] ?? 0);
+        $stmt->bindParam(":precio_costo_bs", $data['precio_costo_bs'] ?? 0);
+        $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
+        $stmt->bindParam(":usar_precio_fijo_bs", $usarPrecioFijo, PDO::PARAM_BOOL);
+        $stmt->bindParam(":stock_actual", $data['stock_actual'] ?? 0);
+        $stmt->bindParam(":stock_minimo", $data['stock_minimo'] ?? 5);
+        $stmt->bindParam(":categoria_id", $data['categoria_id'] ?? null);
+        $activo = isset($data['activo']) ? (bool)$data['activo'] : true;
+        $stmt->bindParam(":activo", $activo, PDO::PARAM_BOOL);
+
+        if ($stmt->execute()) {
+            return [
+                "success" => true,
+                "message" => "Producto creado exitosamente",
+                "id" => $this->conn->lastInsertId()
+            ];
+        }
+        return [
+            "success" => false,
+            "message" => "Error al crear producto"
+        ];
+    }
+
+    public function actualizar($id, $data)
+    {
+        $query = "UPDATE " . $this->table . " SET
+                  nombre = :nombre,
+                  descripcion = :descripcion,
+                  precio = :precio,
+                  precio_bs = :precio_bs,
+                  precio_costo = :precio_costo,
+                  precio_costo_bs = :precio_costo_bs,
+                  usar_precio_fijo_bs = :usar_precio_fijo_bs,
+                  stock_minimo = :stock_minimo,
+                  categoria_id = :categoria_id,
+                  activo = :activo
+                  WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+
+        // Si no es precio fijo y no se proporciona precio_bs, calcularlo
+        if ((!isset($data['usar_precio_fijo_bs']) || !$data['usar_precio_fijo_bs']) && empty($data['precio_bs'])) {
+            $tasa_cambio = $this->obtenerTasaCambio();
+            $data['precio_bs'] = round($data['precio'] * $tasa_cambio, 2);
+            $data['precio_costo_bs'] = round(($data['precio_costo'] ?? 0) * $tasa_cambio, 2);
+        }
+
+        $stmt->bindParam(":nombre", $data['nombre']);
+        $stmt->bindParam(":descripcion", $data['descripcion']);
+        $stmt->bindParam(":precio", $data['precio']);
+        $stmt->bindParam(":precio_bs", $data['precio_bs']);
+        $stmt->bindParam(":precio_costo", $data['precio_costo'] ?? 0);
+        $stmt->bindParam(":precio_costo_bs", $data['precio_costo_bs'] ?? 0);
+        $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
+        $stmt->bindParam(":usar_precio_fijo_bs", $usarPrecioFijo, PDO::PARAM_BOOL);
+        $stmt->bindParam(":stock_minimo", $data['stock_minimo'] ?? 5);
+        $stmt->bindParam(":categoria_id", $data['categoria_id'] ?? null);
+        $activo = isset($data['activo']) ? (bool)$data['activo'] : true;
+        $stmt->bindParam(":activo", $activo, PDO::PARAM_BOOL);
+        $stmt->bindParam(":id", $id);
+
+        if ($stmt->execute()) {
+            return [
+                "success" => true,
+                "message" => "Producto actualizado exitosamente"
+            ];
+        }
+        return [
+            "success" => false,
+            "message" => "Error al actualizar producto"
+        ];
     }
 
     public function obtenerPorId($id)
     {
         $query = "SELECT p.*, c.nombre as categoria_nombre 
-                  FROM " . $this->table . " p 
-                  LEFT JOIN categorias c ON p.categoria_id = c.id 
-                  WHERE p.id = :id AND p.activo = true";
+                  FROM " . $this->table . " p
+                  LEFT JOIN categorias c ON p.categoria_id = c.id
+                  WHERE p.id = :id";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $id);
@@ -70,237 +153,149 @@ class Producto
         return false;
     }
 
-    public function crear()
+    public function obtenerPorSku($sku)
     {
-        try {
-            // Validar que tenemos un SKU (siempre requerido manualmente)
-            if (empty($this->codigo_sku)) {
-                throw new Exception("El código SKU es requerido");
-            }
-
-            // Verificar si el SKU ya existe
-            if ($this->existeSKU($this->codigo_sku)) {
-                throw new Exception("El código SKU '{$this->codigo_sku}' ya existe en el sistema");
-            }
-
-            $query = "INSERT INTO " . $this->table . " 
-                      (codigo_sku, nombre, descripcion, precio, precio_costo, stock_actual, stock_minimo, categoria_id) 
-                      VALUES 
-                      (:codigo_sku, :nombre, :descripcion, :precio, :precio_costo, :stock_actual, :stock_minimo, :categoria_id)
-                      RETURNING id";
-
-            $stmt = $this->conn->prepare($query);
-
-            // Limpiar datos
-            $this->codigo_sku = Ayuda::sanitizeInput($this->codigo_sku);
-            $this->nombre = Ayuda::sanitizeInput($this->nombre);
-            $this->descripcion = Ayuda::sanitizeInput($this->descripcion);
-
-            // Validar datos requeridos
-            if (empty($this->nombre)) {
-                throw new Exception("El nombre del producto es requerido");
-            }
-
-            if (empty($this->precio) || $this->precio < 0) {
-                throw new Exception("El precio debe ser un valor positivo");
-            }
-
-            // Vincular parámetros
-            $stmt->bindParam(":codigo_sku", $this->codigo_sku);
-            $stmt->bindParam(":nombre", $this->nombre);
-            $stmt->bindParam(":descripcion", $this->descripcion);
-            $stmt->bindParam(":precio", $this->precio);
-            $stmt->bindParam(":precio_costo", $this->precio_costo);
-            $stmt->bindParam(":stock_actual", $this->stock_actual);
-            $stmt->bindParam(":stock_minimo", $this->stock_minimo);
-            $stmt->bindParam(":categoria_id", $this->categoria_id);
-
-            if ($stmt->execute()) {
-                $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                $producto_id = $row['id'];
-
-                // Registrar en historial de stock
-                $this->registrarMovimientoStock(
-                    $producto_id,
-                    0,
-                    $this->stock_actual,
-                    $this->stock_actual,
-                    'entrada',
-                    'Stock inicial'
-                );
-
-                return $producto_id;
-            } else {
-                throw new Exception("Error al ejecutar la consulta de inserción");
-            }
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-
-    private function existeSKU($sku)
-    {
-        $query = "SELECT id FROM productos WHERE codigo_sku = :sku AND activo = true";
+        $query = "SELECT * FROM " . $this->table . " WHERE codigo_sku = :sku";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":sku", $sku);
         $stmt->execute();
-        
-        return $stmt->rowCount() > 0;
-    }
-
-    public function actualizar($id)
-    {
-        $query = "UPDATE " . $this->table . " 
-                  SET nombre = :nombre, descripcion = :descripcion, precio = :precio, 
-                      precio_costo = :precio_costo, stock_minimo = :stock_minimo, 
-                      categoria_id = :categoria_id, updated_at = CURRENT_TIMESTAMP
-                  WHERE id = :id";
-
-        $stmt = $this->conn->prepare($query);
-
-        $this->nombre = Ayuda::sanitizeInput($this->nombre);
-        $this->descripcion = Ayuda::sanitizeInput($this->descripcion);
-
-        // Validaciones
-        if (empty($this->nombre)) {
-            throw new Exception("El nombre del producto es requerido");
-        }
-
-        $stmt->bindParam(":nombre", $this->nombre);
-        $stmt->bindParam(":descripcion", $this->descripcion);
-        $stmt->bindParam(":precio", $this->precio);
-        $stmt->bindParam(":precio_costo", $this->precio_costo);
-        $stmt->bindParam(":stock_minimo", $this->stock_minimo);
-        $stmt->bindParam(":categoria_id", $this->categoria_id);
-        $stmt->bindParam(":id", $id);
-
-        return $stmt->execute();
-    }
-
-    public function actualizarStock($producto_id, $nueva_cantidad, $tipo_movimiento = 'ajuste', $observaciones = '')
-    {
-        // Obtener stock actual
-        $query = "SELECT stock_actual FROM productos WHERE id = :id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $producto_id);
-        $stmt->execute();
 
         if ($stmt->rowCount() > 0) {
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            $cantidad_anterior = $row['stock_actual'];
-            $diferencia = $nueva_cantidad - $cantidad_anterior;
-
-            // Actualizar stock
-            $query_update = "UPDATE productos SET stock_actual = :stock_actual WHERE id = :id";
-            $stmt_update = $this->conn->prepare($query_update);
-            $stmt_update->bindParam(":stock_actual", $nueva_cantidad);
-            $stmt_update->bindParam(":id", $producto_id);
-
-            if ($stmt_update->execute()) {
-                // Registrar en historial
-                $this->registrarMovimientoStock(
-                    $producto_id,
-                    $cantidad_anterior,
-                    $nueva_cantidad,
-                    $diferencia,
-                    $tipo_movimiento,
-                    $observaciones
-                );
-
-                return true;
-            }
+            return $stmt->fetch(PDO::FETCH_ASSOC);
         }
         return false;
     }
 
-    private function registrarMovimientoStock($producto_id, $cantidad_anterior, $cantidad_nueva, $diferencia, $tipo_movimiento, $observaciones)
+    public function actualizarStock($producto_id, $nuevo_stock, $tipo_movimiento = 'ajuste', $observaciones = '')
     {
-        $query = "INSERT INTO historial_stock 
-                  (producto_id, cantidad_anterior, cantidad_nueva, diferencia, tipo_movimiento, observaciones, fecha_hora, usuario) 
-                  VALUES 
-                  (:producto_id, :cantidad_anterior, :cantidad_nueva, :diferencia, :tipo_movimiento, :observaciones, NOW(), :usuario)";
+        $producto = $this->obtenerPorId($producto_id);
+        if (!$producto) {
+            return [
+                "success" => false,
+                "message" => "Producto no encontrado"
+            ];
+        }
+
+        $diferencia = $nuevo_stock - $producto['stock_actual'];
+
+        $query = "UPDATE " . $this->table . " SET stock_actual = :stock_actual WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":stock_actual", $nuevo_stock);
+        $stmt->bindParam(":id", $producto_id);
+
+        if ($stmt->execute()) {
+            // Registrar en historial
+            $historial_query = "INSERT INTO historial_stock 
+                               (producto_id, cantidad_anterior, cantidad_nueva, diferencia, 
+                                tipo_movimiento, observaciones, usuario) 
+                               VALUES 
+                               (:producto_id, :cantidad_anterior, :cantidad_nueva, :diferencia,
+                                :tipo_movimiento, :observaciones, :usuario)";
+
+            $historial_stmt = $this->conn->prepare($historial_query);
+            $historial_stmt->bindParam(":producto_id", $producto_id);
+            $historial_stmt->bindParam(":cantidad_anterior", $producto['stock_actual']);
+            $historial_stmt->bindParam(":cantidad_nueva", $nuevo_stock);
+            $historial_stmt->bindParam(":diferencia", $diferencia);
+            $historial_stmt->bindParam(":tipo_movimiento", $tipo_movimiento);
+            $historial_stmt->bindParam(":observaciones", $observaciones);
+            $historial_stmt->bindParam(":usuario", $_SESSION['usuario_nombre'] ?? 'Sistema');
+
+            $historial_stmt->execute();
+
+            return [
+                "success" => true,
+                "message" => "Stock actualizado exitosamente"
+            ];
+        }
+
+        return [
+            "success" => false,
+            "message" => "Error al actualizar stock"
+        ];
+    }
+
+    public function eliminar($id)
+    {
+        $query = "DELETE FROM " . $this->table . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $id);
+
+        if ($stmt->execute()) {
+            return [
+                "success" => true,
+                "message" => "Producto eliminado exitosamente"
+            ];
+        }
+        return [
+            "success" => false,
+            "message" => "Error al eliminar producto"
+        ];
+    }
+
+    public function obtenerProductosConPrecioFijo()
+    {
+        $query = "SELECT p.*, c.nombre as categoria_nombre 
+                  FROM " . $this->table . " p
+                  LEFT JOIN categorias c ON p.categoria_id = c.id
+                  WHERE p.usar_precio_fijo_bs = TRUE AND p.activo = TRUE
+                  ORDER BY p.nombre";
 
         $stmt = $this->conn->prepare($query);
+        $stmt->execute();
 
-        // Obtener usuario actual (esto debería venir de la sesión)
-        $usuario = 'sistema'; // Por defecto
+        $productos = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $productos[] = $row;
+        }
 
-        $stmt->bindParam(":producto_id", $producto_id);
-        $stmt->bindParam(":cantidad_anterior", $cantidad_anterior);
-        $stmt->bindParam(":cantidad_nueva", $cantidad_nueva);
-        $stmt->bindParam(":diferencia", $diferencia);
-        $stmt->bindParam(":tipo_movimiento", $tipo_movimiento);
-        $stmt->bindParam(":observaciones", $observaciones);
-        $stmt->bindParam(":usuario", $usuario);
+        return $productos;
+    }
 
-        return $stmt->execute();
+    public function obtenerProductosActivos()
+    {
+        $query = "SELECT p.*, c.nombre as categoria_nombre 
+                  FROM " . $this->table . " p
+                  LEFT JOIN categorias c ON p.categoria_id = c.id
+                  WHERE p.activo = TRUE
+                  ORDER BY p.nombre";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        $productos = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $productos[] = $row;
+        }
+
+        return $productos;
     }
 
     public function obtenerProductosBajoStock()
     {
         $query = "SELECT p.*, c.nombre as categoria_nombre 
-                  FROM productos p 
-                  LEFT JOIN categorias c ON p.categoria_id = c.id 
-                  WHERE p.stock_actual <= p.stock_minimo AND p.activo = true
-                  ORDER BY (p.stock_actual / p.stock_minimo) ASC";
+                  FROM " . $this->table . " p
+                  LEFT JOIN categorias c ON p.categoria_id = c.id
+                  WHERE p.stock_actual <= p.stock_minimo AND p.activo = TRUE
+                  ORDER BY p.stock_actual ASC";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        return $stmt;
-    }
 
-    public function obtenerEstadisticas()
-    {
-        $query = "SELECT 
-                    COUNT(*) as total_productos,
-                    SUM(stock_actual) as total_stock,
-                    COUNT(CASE WHEN stock_actual <= stock_minimo THEN 1 END) as productos_bajo_stock,
-                    AVG(precio) as precio_promedio,
-                    SUM(precio * stock_actual) as valor_inventario,
-                    COUNT(CASE WHEN stock_actual = 0 THEN 1 END) as productos_sin_stock
-                  FROM productos 
-                  WHERE activo = true";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    public function eliminar($id)
-    {
-        $query = "UPDATE productos SET activo = false WHERE id = :id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $id);
-
-        return $stmt->execute();
-    }
-
-    public function obtenerPorSKU($sku)
-    {
-        $query = "SELECT * FROM " . $this->table . " WHERE codigo_sku = :sku AND activo = true";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":sku", $sku);
-        $stmt->execute();
-
-        if ($stmt->rowCount() > 0) {
-            return $stmt->fetch(PDO::FETCH_ASSOC);
+        $productos = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $productos[] = $row;
         }
-        return false;
+
+        return $productos;
     }
 
-    public function obtenerTodos()
+    private function obtenerTasaCambio()
     {
-        $query = "SELECT * FROM " . $this->table . " WHERE activo = true ORDER BY nombre";
+        $query = "SELECT tasa_cambio FROM tasas_cambio WHERE activa = TRUE ORDER BY fecha_actualizacion DESC LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        return $stmt->fetchAll();
-    }
-
-    public function obtenerProductosActivos()
-    {
-        $query = "SELECT * FROM " . $this->table . " WHERE activo = true ORDER BY nombre";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        return $stmt->fetchAll();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ? $result['tasa_cambio'] : 1;
     }
 }

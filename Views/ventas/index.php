@@ -2,6 +2,7 @@
 require_once '../../Config/Database.php';
 require_once '../../Controllers/VentaController.php';
 require_once '../../Utils/Ayuda.php';
+require_once '../../Helpers/TasaCambioHelper.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -49,9 +50,9 @@ if (!isset($_SESSION['csrf_token'])) {
 }
 ?>
 
-<?php 
+<?php
 $page_title = "Gestión de Ventas";
-include '../layouts/header.php'; 
+include '../layouts/header.php';
 ?>
 
 <!-- Header con Botón de Nueva Venta -->
@@ -115,10 +116,10 @@ include '../layouts/header.php';
                 <div class="d-flex justify-content-between">
                     <div>
                         <h5 class="card-title">Ingresos Totales</h5>
-                        <h3>S/ <?php echo number_format($stats['ingresos_totales'] ?? 0, 2); ?></h3>
+                        <h3><?php echo $stats['ingresos_totales_formateado'] ?? '$0.00'; ?></h3>
                     </div>
                     <div class="align-self-center">
-                        <i class="fas fa-money-bill-wave fa-2x"></i>
+                        <i class="fas fa-dollar-sign fa-2x"></i>
                     </div>
                 </div>
             </div>
@@ -130,7 +131,7 @@ include '../layouts/header.php';
                 <div class="d-flex justify-content-between">
                     <div>
                         <h5 class="card-title">Ticket Promedio</h5>
-                        <h3>S/ <?php echo number_format($stats['ticket_promedio'] ?? 0, 2); ?></h3>
+                        <h3><?php echo $stats['ticket_promedio_formateado'] ?? '$0.00'; ?></h3>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-chart-line fa-2x"></i>
@@ -181,7 +182,9 @@ include '../layouts/header.php';
                         <tr>
                             <th># Venta</th>
                             <th>Cliente</th>
-                            <th>Total</th>
+                            <th>Total USD</th>
+                            <th>Total Bs</th>
+                            <th>Tasa</th>
                             <th>Tipo Pago</th>
                             <th>Estado</th>
                             <th>Fecha</th>
@@ -189,7 +192,7 @@ include '../layouts/header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($ventas as $venta): 
+                        <?php foreach ($ventas as $venta):
                             $estado_badge = [
                                 'pendiente' => 'bg-warning',
                                 'completada' => 'bg-success',
@@ -209,7 +212,13 @@ include '../layouts/header.php';
                                     <?php echo htmlspecialchars($venta['cliente_nombre'] ?? 'Cliente no especificado'); ?>
                                 </td>
                                 <td>
-                                    <strong class="text-success">S/ <?php echo number_format($venta['total'], 2); ?></strong>
+                                    <strong class="text-primary"><?php echo $venta['total_formateado_usd'] ?? '$' . number_format($venta['total'], 2); ?></strong>
+                                </td>
+                                <td>
+                                    <strong class="text-success"><?php echo $venta['total_formateado_bs'] ?? TasaCambioHelper::formatearBS($venta['total_bs']); ?></strong>
+                                </td>
+                                <td>
+                                    <small class="text-muted"><?php echo $venta['tasa_formateada'] ?? number_format($venta['tasa_cambio_utilizada'], 2); ?> Bs/$</small>
                                 </td>
                                 <td>
                                     <?php echo htmlspecialchars($venta['tipo_pago_nombre'] ?? 'No especificado'); ?>
@@ -224,20 +233,20 @@ include '../layouts/header.php';
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a href="ver.php?id=<?php echo $venta['id']; ?>" 
-                                           class="btn btn-outline-info" 
-                                           title="Ver detalles"
-                                           data-bs-toggle="tooltip">
+                                        <a href="ver.php?id=<?php echo $venta['id']; ?>"
+                                            class="btn btn-outline-info"
+                                            title="Ver detalles"
+                                            data-bs-toggle="tooltip">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <?php if ($venta['estado'] === 'pendiente'): ?>
-                                            <button type="button" 
-                                                    class="btn btn-outline-success" 
-                                                    title="Completar venta"
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#modalCompletar"
-                                                    data-id="<?php echo $venta['id']; ?>"
-                                                    data-numero="<?php echo $venta['numero_venta']; ?>">
+                                            <button type="button"
+                                                class="btn btn-outline-success"
+                                                title="Completar venta"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalCompletar"
+                                                data-id="<?php echo $venta['id']; ?>"
+                                                data-numero="<?php echo $venta['numero_venta']; ?>">
                                                 <i class="fas fa-check"></i>
                                             </button>
                                         <?php endif; ?>
@@ -264,12 +273,13 @@ include '../layouts/header.php';
         <div class="row">
             <div class="col-md-6">
                 <h6 class="text-primary">
-                    <i class="fas fa-lightbulb me-2"></i>Estados de Venta:
+                    <i class="fas fa-lightbulb me-2"></i>Monedas de Venta:
                 </h6>
                 <ul class="list-unstyled">
-                    <li><span class="badge bg-warning me-2">Pendiente</span> Venta registrada pero no completada</li>
-                    <li><span class="badge bg-success me-2">Completada</span> Venta finalizada y stock actualizado</li>
-                    <li><span class="badge bg-danger me-2">Cancelada</span> Venta anulada</li>
+                    <li><span class="badge bg-primary me-2">USD</span> Los precios se manejan en Dólares Americanos</li>
+                    <li><span class="badge bg-success me-2">Bs</span> La conversión a Bolívares es automática</li>
+                    <li><span class="badge bg-info me-2">Tasa</span> Se usa la tasa de cambio activa del sistema</li>
+                    <li><span class="badge bg-warning me-2">Sin IGV</span> El impuesto del 18% ha sido eliminado</li>
                 </ul>
             </div>
             <div class="col-md-6">
@@ -280,6 +290,7 @@ include '../layouts/header.php';
                     <li><i class="fas fa-ban text-danger me-2"></i> Las ventas completadas no se pueden modificar</li>
                     <li><i class="fas fa-ban text-danger me-2"></i> El stock se actualiza al completar la venta</li>
                     <li><i class="fas fa-ban text-danger me-2"></i> Verificar stock antes de completar</li>
+                    <li><i class="fas fa-ban text-danger me-2"></i> La tasa de cambio se bloquea al momento de la venta</li>
                 </ul>
             </div>
         </div>
@@ -317,64 +328,67 @@ include '../layouts/header.php';
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Configurar DataTables
+        $('#tablaVentas').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+            },
+            pageLength: 10,
+            order: [
+                [0, 'desc']
+            ],
+            columnDefs: [{
+                orderable: false,
+                targets: [8]
+            }],
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            initComplete: function() {
+                $('.dataTables_filter input').addClass('form-control form-control-sm');
+                $('.dataTables_length select').addClass('form-control form-control-sm');
+            }
+        });
+
+        // Configurar modal de completar venta
+        const modalCompletar = document.getElementById('modalCompletar');
+        modalCompletar.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const numero = button.getAttribute('data-numero');
+
+            document.getElementById('numeroVenta').textContent = '#' + numero;
+            document.getElementById('btnCompletarConfirmar').href = `index.php?action=completar&id=${id}&token=<?php echo $_SESSION['csrf_token'] ?? ''; ?>`;
+        });
+
+        <?php if ($action === 'completar' && !empty($success_message)): ?>
+            setTimeout(() => {
+                showToast('success', '<?php echo addslashes($success_message); ?>');
+            }, 100);
+        <?php endif; ?>
+
+        // Auto-ocultar alertas después de 5 segundos
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 5000);
+        });
     });
 
-    // Configurar DataTables
-    $('#tablaVentas').DataTable({
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
-        },
-        pageLength: 10,
-        order: [[0, 'desc']],
-        columnDefs: [
-            { orderable: false, targets: [6] }
-        ],
-        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-        initComplete: function() {
-            $('.dataTables_filter input').addClass('form-control form-control-sm');
-            $('.dataTables_length select').addClass('form-control form-control-sm');
-        }
-    });
+    function showToast(type, message) {
+        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+        const toast = document.createElement('div');
 
-    // Configurar modal de completar venta
-    const modalCompletar = document.getElementById('modalCompletar');
-    modalCompletar.addEventListener('show.bs.modal', function(event) {
-        const button = event.relatedTarget;
-        const id = button.getAttribute('data-id');
-        const numero = button.getAttribute('data-numero');
-        
-        document.getElementById('numeroVenta').textContent = '#' + numero;
-        document.getElementById('btnCompletarConfirmar').href = `index.php?action=completar&id=${id}&token=<?php echo $_SESSION['csrf_token'] ?? ''; ?>`;
-    });
-
-    <?php if ($action === 'completar' && !empty($success_message)): ?>
-        setTimeout(() => {
-            showToast('success', '<?php echo addslashes($success_message); ?>');
-        }, 100);
-    <?php endif; ?>
-
-    // Auto-ocultar alertas después de 5 segundos
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            const bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
-        }, 5000);
-    });
-});
-
-function showToast(type, message) {
-    const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-    const toast = document.createElement('div');
-    
-    toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type} border-0`;
-    toast.setAttribute('role', 'alert');
-    toast.innerHTML = `
+        toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
         <div class="d-flex">
             <div class="toast-body">
                 <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
@@ -383,25 +397,25 @@ function showToast(type, message) {
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     `;
-    
-    toastContainer.appendChild(toast);
-    
-    const bsToast = new bootstrap.Toast(toast);
-    bsToast.show();
-    
-    toast.addEventListener('hidden.bs.toast', function() {
-        toast.remove();
-    });
-}
 
-function createToastContainer() {
-    const container = document.createElement('div');
-    container.id = 'toastContainer';
-    container.className = 'toast-container position-fixed top-0 end-0 p-3';
-    container.style.zIndex = '9999';
-    document.body.appendChild(container);
-    return container;
-}
+        toastContainer.appendChild(toast);
+
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+
+        toast.addEventListener('hidden.bs.toast', function() {
+            toast.remove();
+        });
+    }
+
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+        return container;
+    }
 </script>
 
 <!-- <?php include '../layouts/footer.php'; ?> -->

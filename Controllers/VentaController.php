@@ -1,15 +1,16 @@
 <?php
-
 require_once __DIR__ . '/../Models/Venta.php';
 require_once __DIR__ . '/../Models/DetalleVenta.php';
 require_once __DIR__ . '/../Models/Producto.php';
-
+require_once __DIR__ . '/../Models/TasaCambio.php';
+require_once __DIR__ . '/../Helpers/TasaCambioHelper.php';
 
 class VentaController
 {
     private $venta;
     private $detalleVenta;
     private $producto;
+    private $tasaCambio;
     private $db;
 
     public function __construct($db)
@@ -18,6 +19,7 @@ class VentaController
         $this->venta = new Venta($db);
         $this->detalleVenta = new DetalleVenta($db);
         $this->producto = new Producto($db);
+        $this->tasaCambio = new TasaCambio($db);
     }
 
     public function listar()
@@ -25,6 +27,13 @@ class VentaController
         try {
             $stmt = $this->venta->leer();
             $ventas = $stmt->fetchAll();
+
+            // Formatear cada venta para mostrar precios
+            foreach ($ventas as &$venta) {
+                $venta['total_formateado_usd'] = TasaCambioHelper::formatearUSD($venta['total']);
+                $venta['total_formateado_bs'] = TasaCambioHelper::formatearBS($venta['total_bs']);
+                $venta['tasa_formateada'] = TasaCambioHelper::formatearBS($venta['tasa_cambio_utilizada'], false);
+            }
 
             return [
                 "success" => true,
@@ -45,6 +54,19 @@ class VentaController
 
             if ($venta) {
                 $venta['detalles'] = $this->obtenerDetalles($id);
+
+                // Formatear precios para mostrar
+                $venta['total_formateado_usd'] = TasaCambioHelper::formatearUSD($venta['total']);
+                $venta['total_formateado_bs'] = TasaCambioHelper::formatearBS($venta['total_bs']);
+                $venta['tasa_formateada'] = TasaCambioHelper::formatearBS($venta['tasa_cambio_utilizada'], false);
+
+                foreach ($venta['detalles'] as &$detalle) {
+                    $detalle['precio_unitario_formateado_usd'] = TasaCambioHelper::formatearUSD($detalle['precio_unitario']);
+                    $detalle['precio_unitario_formateado_bs'] = TasaCambioHelper::formatearBS($detalle['precio_unitario_bs']);
+                    $detalle['subtotal_formateado_usd'] = TasaCambioHelper::formatearUSD($detalle['subtotal']);
+                    $detalle['subtotal_formateado_bs'] = TasaCambioHelper::formatearBS($detalle['subtotal_bs']);
+                }
+
                 return [
                     "success" => true,
                     "data" => $venta
@@ -62,7 +84,6 @@ class VentaController
             ];
         }
     }
-
 
     public function obtenerDetalles($venta_id)
     {
@@ -84,6 +105,24 @@ class VentaController
                 throw new Exception("Datos incompletos para crear la venta");
             }
 
+            // Obtener tasa de cambio actual
+            $tasa_actual = $this->tasaCambio->obtenerTasaActual();
+            if (!$tasa_actual) {
+                throw new Exception("No hay tasa de cambio configurada. Configure la tasa primero.");
+            }
+            $tasa_cambio = $tasa_actual['tasa_cambio'];
+
+            // Calcular totales
+            $total_usd = 0;
+            $total_bs = 0;
+
+            foreach ($data['detalles'] as $detalle) {
+                $subtotal_usd = $detalle['cantidad'] * $detalle['precio_unitario'];
+                $total_usd += $subtotal_usd;
+            }
+
+            $total_bs = $total_usd * $tasa_cambio;
+
             // Validar stock disponible
             foreach ($data['detalles'] as $detalle) {
                 $producto = $this->producto->obtenerPorId($detalle['producto_id']);
@@ -97,14 +136,18 @@ class VentaController
             }
 
             // Crear la venta
-            $this->venta->cliente_id = $data['cliente_id'];
-            $this->venta->total = $data['total'];
-            $this->venta->tipo_pago_id = $data['tipo_pago_id'];
-            $this->venta->estado = $data['estado'] ?? 'pendiente';
-            $this->venta->fecha_hora = $data['fecha_hora'] ?? date('Y-m-d H:i:s');
-            $this->venta->observaciones = $data['observaciones'] ?? '';
+            $ventaData = [
+                'cliente_id' => $data['cliente_id'],
+                'total' => $total_usd,
+                'total_bs' => $total_bs,
+                'tasa_cambio_utilizada' => $tasa_cambio,
+                'tipo_pago_id' => $data['tipo_pago_id'],
+                'estado' => $data['estado'] ?? 'pendiente',
+                'fecha_hora' => $data['fecha_hora'] ?? date('Y-m-d H:i:s'),
+                'observaciones' => $data['observaciones'] ?? ''
+            ];
 
-            $resultado_venta = $this->venta->crear();
+            $resultado_venta = $this->venta->crear($ventaData);
 
             if (!$resultado_venta) {
                 throw new Exception("Error al crear la venta");
@@ -114,9 +157,24 @@ class VentaController
             $numero_venta = $resultado_venta['numero_venta'];
 
             // Crear detalles de venta
-            $this->detalleVenta->venta_id = $venta_id;
+            $detallesData = [];
+            foreach ($data['detalles'] as $detalle) {
+                $subtotal_usd = $detalle['cantidad'] * $detalle['precio_unitario'];
+                $subtotal_bs = $subtotal_usd * $tasa_cambio;
+                $precio_unitario_bs = $detalle['precio_unitario'] * $tasa_cambio;
 
-            if (!$this->detalleVenta->crearMultiple($data['detalles'])) {
+                $detallesData[] = [
+                    'venta_id' => $venta_id,
+                    'producto_id' => $detalle['producto_id'],
+                    'cantidad' => $detalle['cantidad'],
+                    'precio_unitario' => $detalle['precio_unitario'],
+                    'precio_unitario_bs' => $precio_unitario_bs,
+                    'subtotal' => $subtotal_usd,
+                    'subtotal_bs' => $subtotal_bs
+                ];
+            }
+
+            if (!$this->venta->crearDetalles($detallesData)) {
                 throw new Exception("Error al crear los detalles de venta");
             }
 
@@ -141,7 +199,10 @@ class VentaController
                 "success" => true,
                 "message" => "Venta creada exitosamente",
                 "venta_id" => $venta_id,
-                "numero_venta" => $numero_venta
+                "numero_venta" => $numero_venta,
+                "tasa_cambio" => $tasa_cambio,
+                "total_usd" => $total_usd,
+                "total_bs" => $total_bs
             ];
         } catch (Exception $e) {
             $this->db->rollBack();
@@ -151,7 +212,6 @@ class VentaController
             ];
         }
     }
-
 
     public function actualizarEstado($id, $estado)
     {
@@ -208,13 +268,18 @@ class VentaController
     {
         try {
             $estadisticas = $this->venta->obtenerEstadisticas();
-          //  appLog('DEBUG', 'Estadísticas de ventas obtenidas');
+
+            // Formatear las estadísticas
+            if ($estadisticas) {
+                $estadisticas['ingresos_totales_formateado'] = TasaCambioHelper::formatearUSD($estadisticas['ingresos_totales'] ?? 0);
+                $estadisticas['ticket_promedio_formateado'] = TasaCambioHelper::formatearUSD($estadisticas['ticket_promedio'] ?? 0);
+            }
+
             return [
                 "success" => true,
                 "data" => $estadisticas
             ];
         } catch (Exception $e) {
-        //    appLog('ERROR', 'Error al obtener estadísticas de ventas', ['error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al obtener estadísticas: " . $e->getMessage()
@@ -226,13 +291,11 @@ class VentaController
     {
         try {
             $ventas_mes = $this->venta->obtenerVentasPorMes();
-         //   appLog('DEBUG', 'Ventas por mes obtenidas');
             return [
                 "success" => true,
                 "data" => $ventas_mes
             ];
         } catch (Exception $e) {
-         //   appLog('ERROR', 'Error al obtener ventas por mes', ['error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al obtener ventas por mes: " . $e->getMessage()
@@ -258,13 +321,11 @@ class VentaController
             $stmt->execute();
             $ventas = $stmt->fetchAll();
 
-         //   appLog('INFO', 'Búsqueda de ventas', ['termino' => $search, 'resultados' => count($ventas)]);
             return [
                 "success" => true,
                 "data" => $ventas
             ];
         } catch (Exception $e) {
-        //    appLog('ERROR', 'Error al buscar ventas', ['termino' => $search, 'error' => $e->getMessage()]);
             return [
                 "success" => false,
                 "message" => "Error al buscar ventas: " . $e->getMessage()

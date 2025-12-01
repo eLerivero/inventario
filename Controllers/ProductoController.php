@@ -1,4 +1,5 @@
 <?php
+// Controllers/ProductoController.php
 require_once __DIR__ . '/../Models/Producto.php';
 
 class ProductoController
@@ -25,25 +26,7 @@ class ProductoController
         } catch (Exception $e) {
             return [
                 "success" => false,
-                "message" => "Error al obtener los productos: " . $e->getMessage()
-            ];
-        }
-    }
-
-    public function buscar($searchTerm)
-    {
-        try {
-            $stmt = $this->producto->buscar($searchTerm);
-            $productos = $stmt->fetchAll();
-
-            return [
-                "success" => true,
-                "data" => $productos
-            ];
-        } catch (Exception $e) {
-            return [
-                "success" => false,
-                "message" => "Error al buscar productos: " . $e->getMessage()
+                "message" => "Error al obtener productos: " . $e->getMessage()
             ];
         }
     }
@@ -67,7 +50,7 @@ class ProductoController
         } catch (Exception $e) {
             return [
                 "success" => false,
-                "message" => "Error al obtener el producto: " . $e->getMessage()
+                "message" => "Error al obtener producto: " . $e->getMessage()
             ];
         }
     }
@@ -76,40 +59,34 @@ class ProductoController
     {
         try {
             // Validar datos requeridos
-            if (empty($data['codigo_sku']) || empty($data['nombre']) || empty($data['precio'])) {
-                return [
-                    "success" => false,
-                    "message" => "SKU, nombre y precio son campos requeridos"
-                ];
+            if (empty($data['codigo_sku'])) {
+                throw new Exception("El código SKU es obligatorio");
             }
 
-            $this->producto->codigo_sku = $data['codigo_sku'];
-            $this->producto->nombre = $data['nombre'];
-            $this->producto->descripcion = $data['descripcion'] ?? '';
-            $this->producto->precio = $data['precio'];
-            $this->producto->precio_costo = $data['precio_costo'] ?? 0;
-            $this->producto->stock_actual = $data['stock_actual'] ?? 0;
-            $this->producto->stock_minimo = $data['stock_minimo'] ?? 0;
-            $this->producto->categoria_id = $data['categoria_id'] ?? null;
-
-            $producto_id = $this->producto->crear();
-
-            if ($producto_id) {
-                return [
-                    "success" => true,
-                    "message" => "Producto creado exitosamente",
-                    "id" => $producto_id
-                ];
-            } else {
-                return [
-                    "success" => false,
-                    "message" => "Error al crear producto"
-                ];
+            if (empty($data['nombre'])) {
+                throw new Exception("El nombre del producto es obligatorio");
             }
+
+            if (empty($data['precio']) || $data['precio'] <= 0) {
+                throw new Exception("El precio debe ser mayor a 0");
+            }
+
+            // Validar que el SKU sea único
+            $producto_existente = $this->producto->obtenerPorSku($data['codigo_sku']);
+            if ($producto_existente) {
+                throw new Exception("El código SKU ya existe");
+            }
+
+            // Si se marca como precio fijo en BS, validar que se proporcione precio_bs
+            if (isset($data['usar_precio_fijo_bs']) && $data['usar_precio_fijo_bs'] && empty($data['precio_bs'])) {
+                throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
+            }
+
+            return $this->producto->crear($data);
         } catch (Exception $e) {
             return [
                 "success" => false,
-                "message" => $e->getMessage()
+                "message" => "Error al crear producto: " . $e->getMessage()
             ];
         }
     }
@@ -117,28 +94,25 @@ class ProductoController
     public function actualizar($id, $data)
     {
         try {
-            $this->producto->nombre = $data['nombre'];
-            $this->producto->descripcion = $data['descripcion'] ?? '';
-            $this->producto->precio = $data['precio'];
-            $this->producto->precio_costo = $data['precio_costo'] ?? 0;
-            $this->producto->stock_minimo = $data['stock_minimo'] ?? 0;
-            $this->producto->categoria_id = $data['categoria_id'] ?? null;
-
-            if ($this->producto->actualizar($id)) {
-                return [
-                    "success" => true,
-                    "message" => "Producto actualizado exitosamente"
-                ];
-            } else {
-                return [
-                    "success" => false,
-                    "message" => "Error al actualizar producto"
-                ];
+            // Validar datos requeridos
+            if (empty($data['nombre'])) {
+                throw new Exception("El nombre del producto es obligatorio");
             }
+
+            if (empty($data['precio']) || $data['precio'] <= 0) {
+                throw new Exception("El precio debe ser mayor a 0");
+            }
+
+            // Si se marca como precio fijo en BS, validar que se proporcione precio_bs
+            if (isset($data['usar_precio_fijo_bs']) && $data['usar_precio_fijo_bs'] && empty($data['precio_bs'])) {
+                throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
+            }
+
+            return $this->producto->actualizar($id, $data);
         } catch (Exception $e) {
             return [
                 "success" => false,
-                "message" => $e->getMessage()
+                "message" => "Error al actualizar producto: " . $e->getMessage()
             ];
         }
     }
@@ -146,79 +120,44 @@ class ProductoController
     public function eliminar($id)
     {
         try {
-            if ($this->producto->eliminar($id)) {
-                return [
-                    "success" => true,
-                    "message" => "Producto eliminado exitosamente"
-                ];
-            } else {
-                return [
-                    "success" => false,
-                    "message" => "Error al eliminar producto"
-                ];
+            // Verificar si el producto existe
+            $producto = $this->producto->obtenerPorId($id);
+            if (!$producto) {
+                throw new Exception("Producto no encontrado");
             }
-        } catch (Exception $e) {
-            return [
-                "success" => false,
-                "message" => $e->getMessage()
-            ];
-        }
-    }
 
-    public function obtenerProductosBajoStock()
-    {
-        try {
-            $stmt = $this->producto->obtenerProductosBajoStock();
-            $productos = $stmt->fetchAll();
+            // Verificar si el producto tiene ventas asociadas
+            $query = "SELECT COUNT(*) as total FROM detalle_ventas WHERE producto_id = :producto_id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":producto_id", $id);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            return [
-                "success" => true,
-                "data" => $productos
-            ];
-        } catch (Exception $e) {
-            return [
-                "success" => false,
-                "message" => "Error al obtener productos bajo stock: " . $e->getMessage()
-            ];
-        }
-    }
-
-    public function obtenerEstadisticas()
-    {
-        try {
-            $estadisticas = $this->producto->obtenerEstadisticas();
-            return [
-                "success" => true,
-                "data" => $estadisticas
-            ];
-        } catch (Exception $e) {
-            return [
-                "success" => false,
-                "message" => "Error al obtener estadísticas: " . $e->getMessage()
-            ];
-        }
-    }
-
-    public function actualizarStock($producto_id, $nueva_cantidad, $tipo_movimiento = 'ajuste', $observaciones = '')
-    {
-        try {
-            $result = $this->producto->actualizarStock($producto_id, $nueva_cantidad, $tipo_movimiento, $observaciones);
-            
-            if ($result) {
-                return [
-                    "success" => true,
-                    "message" => "Stock actualizado exitosamente"
-                ];
-            } else {
-                return [
-                    "success" => false,
-                    "message" => "Error al actualizar stock"
-                ];
+            if ($result['total'] > 0) {
+                throw new Exception("No se puede eliminar el producto porque tiene ventas asociadas");
             }
+
+            return $this->producto->eliminar($id);
         } catch (Exception $e) {
             return [
                 "success" => false,
-                "message" => $e->getMessage()
+                "message" => "Error al eliminar producto: " . $e->getMessage()
+            ];
+        }
+    }
+
+    public function actualizarStock($producto_id, $nuevo_stock, $tipo_movimiento = 'ajuste', $observaciones = '')
+    {
+        try {
+            if ($nuevo_stock < 0) {
+                throw new Exception("El stock no puede ser negativo");
+            }
+
+            return $this->producto->actualizarStock($producto_id, $nuevo_stock, $tipo_movimiento, $observaciones);
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al actualizar stock: " . $e->getMessage()
             ];
         }
     }
@@ -226,11 +165,7 @@ class ProductoController
     public function obtenerProductosActivos()
     {
         try {
-            $query = "SELECT * FROM productos WHERE activo = true ORDER BY nombre";
-            $stmt = $this->db->prepare($query);
-            $stmt->execute();
-            $productos = $stmt->fetchAll();
-
+            $productos = $this->producto->obtenerProductosActivos();
             return [
                 "success" => true,
                 "data" => $productos
@@ -243,25 +178,94 @@ class ProductoController
         }
     }
 
-
-    public function obtenerTodos()
-{
-    try {
-        $query = "SELECT * FROM productos WHERE activo = true ORDER BY nombre";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute();
-        $productos = $stmt->fetchAll();
-
-        return [
-            "success" => true,
-            "data" => $productos
-        ];
-    } catch (Exception $e) {
-        return [
-            "success" => false,
-            "message" => "Error al obtener productos: " . $e->getMessage(),
-            "data" => []
-        ];
+    public function obtenerProductosBajoStock()
+    {
+        try {
+            $productos = $this->producto->obtenerProductosBajoStock();
+            return [
+                "success" => true,
+                "data" => $productos
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener productos bajo stock: " . $e->getMessage()
+            ];
+        }
     }
-}
+
+    public function obtenerProductosConPrecioFijo()
+    {
+        try {
+            $productos = $this->producto->obtenerProductosConPrecioFijo();
+            return [
+                "success" => true,
+                "data" => $productos
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener productos con precio fijo: " . $e->getMessage()
+            ];
+        }
+    }
+
+    public function buscar($search)
+    {
+        try {
+            $query = "SELECT p.*, c.nombre as categoria_nombre 
+                      FROM productos p
+                      LEFT JOIN categorias c ON p.categoria_id = c.id
+                      WHERE p.codigo_sku ILIKE :search 
+                         OR p.nombre ILIKE :search 
+                         OR p.descripcion ILIKE :search
+                      ORDER BY p.nombre";
+
+            $stmt = $this->db->prepare($query);
+            $searchTerm = "%" . $search . "%";
+            $stmt->bindParam(":search", $searchTerm);
+            $stmt->execute();
+            $productos = $stmt->fetchAll();
+
+            return [
+                "success" => true,
+                "data" => $productos
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al buscar productos: " . $e->getMessage()
+            ];
+        }
+    }
+
+    public function obtenerEstadisticas()
+    {
+        try {
+            $query = "SELECT 
+                        COUNT(*) as total_productos,
+                        SUM(CASE WHEN activo = TRUE THEN 1 ELSE 0 END) as productos_activos,
+                        SUM(CASE WHEN stock_actual = 0 THEN 1 ELSE 0 END) as productos_sin_stock,
+                        SUM(CASE WHEN stock_actual <= stock_minimo AND stock_actual > 0 THEN 1 ELSE 0 END) as productos_bajo_stock,
+                        SUM(CASE WHEN usar_precio_fijo_bs = TRUE THEN 1 ELSE 0 END) as productos_precio_fijo,
+                        AVG(precio) as precio_promedio,
+                        SUM(stock_actual * precio_costo) as valor_inventario_costo,
+                        SUM(stock_actual * precio) as valor_inventario_venta
+                      FROM productos";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $estadisticas = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return [
+                "success" => true,
+                "data" => $estadisticas
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener estadísticas: " . $e->getMessage()
+            ];
+        }
+    }
 }
