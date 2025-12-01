@@ -12,6 +12,17 @@ $user = Auth::getUser();
 // Determinar la ruta base CORREGIDA - desde Views/layouts
 $base_path = __DIR__ . '/../'; // Retrocede a Views/
 $relative_path = '../'; // Desde cualquier página en Views/ va a la raíz
+
+// Obtener tasa actual para mostrar
+try {
+    require_once '../../Controllers/TasaCambioController.php';
+    $database = new Database();
+    $db = $database->getConnection();
+    $tasaController = new TasaCambioController($db);
+    $tasaActual = $tasaController->obtenerTasaActual();
+} catch (Exception $e) {
+    $tasaActual = ['success' => false];
+}
 ?>
 <!-- Sidebar -->
 <nav class="sidebar">
@@ -22,6 +33,20 @@ $relative_path = '../'; // Desde cualquier página en Views/ va a la raíz
                 <span class="sidebar-text"><?php echo SITE_NAME; ?></span>
             </h4>
             <small class="text-white-50 sidebar-text">v<?php echo SITE_VERSION; ?></small>
+
+            <!-- Mostrar tasa actual en el sidebar -->
+            <?php if ($tasaActual['success']): ?>
+                <div class="mt-2 p-2 bg-primary bg-opacity-25 rounded">
+                    <small class="text-white">
+                        <i class="fas fa-exchange-alt me-1"></i>
+                        1 USD = <?php echo number_format($tasaActual['data']['tasa_cambio'], 2); ?> Bs
+                    </small>
+                    <br>
+                    <small class="text-white-50">
+                        <?php echo date('d/m', strtotime($tasaActual['data']['fecha_actualizacion'])); ?>
+                    </small>
+                </div>
+            <?php endif; ?>
         </div>
 
         <ul class="nav flex-column">
@@ -55,6 +80,14 @@ $relative_path = '../'; // Desde cualquier página en Views/ va a la raíz
                     <span class="sidebar-text">Ventas</span>
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'tasas-cambio') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>tasas-cambio/index.php">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span class="sidebar-text">Tasas de Cambio</span>
+                </a>
+            </li>
+
             <li class="nav-item">
                 <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'tipos-pago') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>tipos-pago/index.php">
                     <i class="fas fa-credit-card"></i>

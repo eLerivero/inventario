@@ -701,4 +701,4 @@ document.getElementById('modalNuevoCliente').addEventListener('hidden.bs.modal',
 });
 </script>
 
-<?php include '../layouts/footer.php'; ?>
+<!-- <?php include '../layouts/footer.php'; ?> -->

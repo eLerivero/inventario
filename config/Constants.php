@@ -21,3 +21,16 @@ define('ROL_ADMIN', 'admin');
 define('ROL_USUARIO', 'usuario');
 define('ROL_VENDEDOR', 'vendedor');
 
+
+
+// Configuración de monedas
+define('MONEDA_BASE', 'USD');
+define('MONEDA_LOCAL', 'VES');
+define('SIMBOLO_USD', '$');
+define('SIMBOLO_BS', 'Bs');
+define('TASA_DEFAULT', 247.30); // Tasa por defecto si no hay configurada
+
+// Permisos para tasa de cambio
+define('PERMISO_ACTUALIZAR_TASA', 'actualizar_tasa');
+define('PERMISO_VER_HISTORIAL_TASA', 'ver_historial_tasa');
+

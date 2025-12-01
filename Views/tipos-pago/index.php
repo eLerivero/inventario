@@ -40,7 +40,7 @@ if (($action === 'activar' || $action === 'desactivar') && $id) {
         } else {
             $result = $controller->desactivar($id);
         }
-        
+
         if ($result['success']) {
             $success_message = $result['message'];
             header("Refresh: 2; URL=index.php");
@@ -69,9 +69,9 @@ if (!isset($_SESSION['csrf_token'])) {
 }
 ?>
 
-<?php 
+<?php
 $page_title = "Gestión de Tipos de Pago";
-include '../layouts/header.php'; 
+include '../layouts/header.php';
 ?>
 
 <!-- Header con Botón de Nuevo Tipo de Pago -->
@@ -136,7 +136,7 @@ include '../layouts/header.php';
                     <div>
                         <h5 class="card-title">Más Usado</h5>
                         <h3>
-                            <?php 
+                            <?php
                             $mas_usado = !empty($stats_data) ? $stats_data[0]['nombre'] : 'N/A';
                             echo htmlspecialchars($mas_usado);
                             ?>
@@ -156,8 +156,8 @@ include '../layouts/header.php';
                     <div>
                         <h5 class="card-title">Total Ventas</h5>
                         <h3>
-                            <?php 
-                            $total_ventas = array_sum(array_map(function($stat) {
+                            <?php
+                            $total_ventas = array_sum(array_map(function ($stat) {
                                 return $stat['total_ventas'];
                             }, $stats_data));
                             echo $total_ventas;
@@ -178,8 +178,8 @@ include '../layouts/header.php';
                     <div>
                         <h5 class="card-title">Monto Total</h5>
                         <h3>
-                            <?php 
-                            $monto_total = array_sum(array_map(function($stat) {
+                            <?php
+                            $monto_total = array_sum(array_map(function ($stat) {
                                 return $stat['monto_total'];
                             }, $stats_data));
                             echo 'S/ ' . number_format($monto_total, 2);
@@ -230,9 +230,9 @@ include '../layouts/header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($tiposPago as $index => $tipo): 
+                        <?php foreach ($tiposPago as $index => $tipo):
                             // Buscar estadísticas para este tipo de pago
-                            $estadistica = array_filter($stats_data, function($stat) use ($tipo) {
+                            $estadistica = array_filter($stats_data, function ($stat) use ($tipo) {
                                 return $stat['nombre'] === $tipo['nombre'];
                             });
                             $estadistica = !empty($estadistica) ? array_values($estadistica)[0] : null;
@@ -243,7 +243,7 @@ include '../layouts/header.php';
                                     <strong><?php echo htmlspecialchars($tipo['nombre']); ?></strong>
                                 </td>
                                 <td>
-                                    <?php 
+                                    <?php
                                     if (empty($tipo['descripcion'])) {
                                         echo '<span class="text-muted">Sin descripción</span>';
                                     } else {
@@ -280,49 +280,49 @@ include '../layouts/header.php';
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a href="editar.php?id=<?php echo $tipo['id']; ?>" 
-                                           class="btn btn-outline-primary" 
-                                           title="Editar tipo de pago"
-                                           data-bs-toggle="tooltip">
+                                        <a href="editar.php?id=<?php echo $tipo['id']; ?>"
+                                            class="btn btn-outline-primary"
+                                            title="Editar tipo de pago"
+                                            data-bs-toggle="tooltip">
                                             <i class="fas fa-edit"></i>
                                         </a>
                                         <?php if ($tipo['activo']): ?>
-                                            <button type="button" 
-                                                    class="btn btn-outline-warning" 
-                                                    title="Desactivar tipo de pago"
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#modalDesactivar"
-                                                    data-id="<?php echo $tipo['id']; ?>"
-                                                    data-nombre="<?php echo htmlspecialchars($tipo['nombre']); ?>">
+                                            <button type="button"
+                                                class="btn btn-outline-warning"
+                                                title="Desactivar tipo de pago"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalDesactivar"
+                                                data-id="<?php echo $tipo['id']; ?>"
+                                                data-nombre="<?php echo htmlspecialchars($tipo['nombre']); ?>">
                                                 <i class="fas fa-pause"></i>
                                             </button>
                                         <?php else: ?>
-                                            <button type="button" 
-                                                    class="btn btn-outline-success" 
-                                                    title="Activar tipo de pago"
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#modalActivar"
-                                                    data-id="<?php echo $tipo['id']; ?>"
-                                                    data-nombre="<?php echo htmlspecialchars($tipo['nombre']); ?>">
+                                            <button type="button"
+                                                class="btn btn-outline-success"
+                                                title="Activar tipo de pago"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalActivar"
+                                                data-id="<?php echo $tipo['id']; ?>"
+                                                data-nombre="<?php echo htmlspecialchars($tipo['nombre']); ?>">
                                                 <i class="fas fa-play"></i>
                                             </button>
                                         <?php endif; ?>
                                         <?php if (($estadistica['total_ventas'] ?? 0) == 0): ?>
-                                            <button type="button" 
-                                                    class="btn btn-outline-danger" 
-                                                    title="Eliminar tipo de pago"
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#modalEliminar"
-                                                    data-id="<?php echo $tipo['id']; ?>"
-                                                    data-nombre="<?php echo htmlspecialchars($tipo['nombre']); ?>">
+                                            <button type="button"
+                                                class="btn btn-outline-danger"
+                                                title="Eliminar tipo de pago"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#modalEliminar"
+                                                data-id="<?php echo $tipo['id']; ?>"
+                                                data-nombre="<?php echo htmlspecialchars($tipo['nombre']); ?>">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         <?php else: ?>
-                                            <button type="button" 
-                                                    class="btn btn-outline-secondary" 
-                                                    title="No se puede eliminar (tiene ventas asociadas)"
-                                                    disabled
-                                                    data-bs-toggle="tooltip">
+                                            <button type="button"
+                                                class="btn btn-outline-secondary"
+                                                title="No se puede eliminar (tiene ventas asociadas)"
+                                                disabled
+                                                data-bs-toggle="tooltip">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         <?php endif; ?>
@@ -462,71 +462,78 @@ include '../layouts/header.php';
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-
-    // Configurar DataTables
-    $('#tablaTiposPago').DataTable({
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
-        },
-        pageLength: 10,
-        order: [[1, 'asc']],
-        columnDefs: [
-            { orderable: false, targets: [0, 8] },
-            { searchable: false, targets: [0, 3, 4, 5, 6, 7, 8] }
-        ],
-        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-        initComplete: function() {
-            $('.dataTables_filter input').addClass('form-control form-control-sm');
-            $('.dataTables_length select').addClass('form-control form-control-sm');
-        }
-    });
-
-    // Configurar modales
-    configurarModal('Eliminar', 'eliminar');
-    configurarModal('Desactivar', 'desactivar');
-    configurarModal('Activar', 'activar');
-
-    function configurarModal(accion, tipo) {
-        const modal = document.getElementById(`modal${accion}`);
-        modal.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            const id = button.getAttribute('data-id');
-            const nombre = button.getAttribute('data-nombre');
-            
-            document.getElementById(`nombreTipoPago${accion}`).textContent = nombre;
-            document.getElementById(`btn${accion}Confirmar`).href = `index.php?action=${tipo}&id=${id}&token=<?php echo $_SESSION['csrf_token'] ?? ''; ?>`;
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
-    }
 
-    <?php if (in_array($action, ['delete', 'activar', 'desactivar']) && !empty($success_message)): ?>
-        setTimeout(() => {
-            showToast('success', '<?php echo addslashes($success_message); ?>');
-        }, 100);
-    <?php endif; ?>
+        // Configurar DataTables
+        $('#tablaTiposPago').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+            },
+            pageLength: 10,
+            order: [
+                [1, 'asc']
+            ],
+            columnDefs: [{
+                    orderable: false,
+                    targets: [0, 8]
+                },
+                {
+                    searchable: false,
+                    targets: [0, 3, 4, 5, 6, 7, 8]
+                }
+            ],
+            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+            initComplete: function() {
+                $('.dataTables_filter input').addClass('form-control form-control-sm');
+                $('.dataTables_length select').addClass('form-control form-control-sm');
+            }
+        });
 
-    // Auto-ocultar alertas después de 5 segundos
-    const alerts = document.querySelectorAll('.alert');
-    alerts.forEach(alert => {
-        setTimeout(() => {
-            const bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
-        }, 5000);
+        // Configurar modales
+        configurarModal('Eliminar', 'eliminar');
+        configurarModal('Desactivar', 'desactivar');
+        configurarModal('Activar', 'activar');
+
+        function configurarModal(accion, tipo) {
+            const modal = document.getElementById(`modal${accion}`);
+            modal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                const nombre = button.getAttribute('data-nombre');
+
+                document.getElementById(`nombreTipoPago${accion}`).textContent = nombre;
+                document.getElementById(`btn${accion}Confirmar`).href = `index.php?action=${tipo}&id=${id}&token=<?php echo $_SESSION['csrf_token'] ?? ''; ?>`;
+            });
+        }
+
+        <?php if (in_array($action, ['delete', 'activar', 'desactivar']) && !empty($success_message)): ?>
+            setTimeout(() => {
+                showToast('success', '<?php echo addslashes($success_message); ?>');
+            }, 100);
+        <?php endif; ?>
+
+        // Auto-ocultar alertas después de 5 segundos
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 5000);
+        });
     });
-});
 
-function showToast(type, message) {
-    const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-    const toast = document.createElement('div');
-    
-    toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type} border-0`;
-    toast.setAttribute('role', 'alert');
-    toast.innerHTML = `
+    function showToast(type, message) {
+        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
+        const toast = document.createElement('div');
+
+        toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
         <div class="d-flex">
             <div class="toast-body">
                 <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
@@ -535,25 +542,25 @@ function showToast(type, message) {
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
         </div>
     `;
-    
-    toastContainer.appendChild(toast);
-    
-    const bsToast = new bootstrap.Toast(toast);
-    bsToast.show();
-    
-    toast.addEventListener('hidden.bs.toast', function() {
-        toast.remove();
-    });
-}
 
-function createToastContainer() {
-    const container = document.createElement('div');
-    container.id = 'toastContainer';
-    container.className = 'toast-container position-fixed top-0 end-0 p-3';
-    container.style.zIndex = '9999';
-    document.body.appendChild(container);
-    return container;
-}
+        toastContainer.appendChild(toast);
+
+        const bsToast = new bootstrap.Toast(toast);
+        bsToast.show();
+
+        toast.addEventListener('hidden.bs.toast', function() {
+            toast.remove();
+        });
+    }
+
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+        return container;
+    }
 </script>
 
-<?php include '../layouts/footer.php'; ?>
+<!-- <?php include '../layouts/footer.php'; ?> -->
