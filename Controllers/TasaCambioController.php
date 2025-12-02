@@ -115,7 +115,7 @@ class TasaCambioController
             $moneda_origen = $data['moneda_origen'] ?? 'USD';
             $moneda_destino = $data['moneda_destino'] ?? 'VES';
             $tasa_cambio = $data['tasa_cambio'];
-            $usuario_actualizacion = $data['usuario_actualizacion'] ?? 'Sistema';
+            $usuario_id = $data['usuario_id'] ?? 1;
             $activa = isset($data['activa']) && $data['activa'] ? 1 : 0;
 
             // Si se marca como activa, desactivar todas las anteriores
@@ -127,7 +127,7 @@ class TasaCambioController
 
             // Crear nueva tasa
             $query = "INSERT INTO tasas_cambio 
-                      (moneda_origen, moneda_destino, tasa_cambio, usuario_actualizacion, activa) 
+                      (moneda_origen, moneda_destino, tasa_cambio, usuario_id, activa) 
                       VALUES 
                       (:origen, :destino, :tasa, :usuario, :activa)
                       RETURNING *";
@@ -136,7 +136,7 @@ class TasaCambioController
             $stmt->bindParam(":origen", $moneda_origen);
             $stmt->bindParam(":destino", $moneda_destino);
             $stmt->bindParam(":tasa", $tasa_cambio);
-            $stmt->bindParam(":usuario", $usuario_actualizacion);
+            $stmt->bindParam(":usuario", $usuario_id);
             $stmt->bindParam(":activa", $activa, PDO::PARAM_INT);
 
             if ($stmt->execute()) {
@@ -183,7 +183,7 @@ class TasaCambioController
 
             // Extraer valores en variables separadas para bindParam
             $tasa_cambio = $data['tasa_cambio'];
-            $usuario_actualizacion = $data['usuario_actualizacion'] ?? 'Sistema';
+            $usuario_id = $data['usuario_id'] ?? 1;
             $activa = isset($data['activa']) && $data['activa'] ? 1 : 0;
 
             // Si se marca como activa, desactivar todas las anteriores
@@ -196,7 +196,7 @@ class TasaCambioController
             // Actualizar tasa
             $query = "UPDATE tasas_cambio SET 
                       tasa_cambio = :tasa,
-                      usuario_actualizacion = :usuario,
+                      usuario_id = :usuario,
                       activa = :activa,
                       fecha_actualizacion = CURRENT_TIMESTAMP,
                       updated_at = CURRENT_TIMESTAMP
@@ -205,7 +205,7 @@ class TasaCambioController
 
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(":tasa", $tasa_cambio);
-            $stmt->bindParam(":usuario", $usuario_actualizacion);
+            $stmt->bindParam(":usuario", $usuario_id);
             $stmt->bindParam(":activa", $activa, PDO::PARAM_INT);
             $stmt->bindParam(":id", $id);
 

@@ -35,8 +35,8 @@ class DashboardController
 
     public function obtenerProductosBajoStock()
     {
-        $stmt = $this->producto->obtenerProductosBajoStock();
-        return $stmt->fetchAll();
+        return $this->producto->obtenerProductosBajoStock();
+     //   return $stmt->fetchAll();
     }
 
     public function obtenerEstadisticasCompletas()

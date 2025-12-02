@@ -93,6 +93,7 @@ require_once '../layouts/header.php';
                 <i class="fas fa-filter me-2"></i>Filtros de Búsqueda
             </h5>
         </div>
+
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-4">
@@ -121,6 +122,7 @@ require_once '../layouts/header.php';
                 </div>
             </div>
         </div>
+        
     </div>
 
     <!-- Estadísticas Rápidas -->
@@ -245,8 +247,26 @@ require_once '../layouts/header.php';
                         </thead>
                         <tbody>
                             <?php foreach ($productos as $producto):
-                                $margen = TasaCambioHelper::calcularMargenGanancia($producto['precio'], $producto['precio_costo']);
-                                $claseMargen = TasaCambioHelper::obtenerClaseMargen($margen);
+                                // Obtener tasa de cambio actual para cálculos
+                                $tasa_cambio = $tasaActual['success'] ? $tasaActual['data']['tasa_cambio'] : 1.0;
+                                
+                                // Calcular margen (devuelve array con 'porcentaje', 'monto', 'mensaje')
+                                $margenData = TasaCambioHelper::calcularMargenGanancia(
+                                    $producto['precio'], 
+                                    $producto['precio_costo']
+                                );
+                                $porcentajeMargen = $margenData['porcentaje'];
+                                
+                                // Obtener clase CSS para el margen
+                                $claseMargen = TasaCambioHelper::obtenerClaseMargen($porcentajeMargen);
+                                
+                                // Obtener precio en Bs considerando precio fijo
+                                $precioBSData = TasaCambioHelper::obtenerPrecioBS($producto, $tasa_cambio);
+                                $precioBS = $precioBSData['precio'];
+                                
+                                // Obtener costo en Bs
+                                $costoUSD = $producto['precio_costo'] ?? 0;
+                                $costoBS = TasaCambioHelper::convertirUSDaBS($costoUSD, $tasa_cambio);
                             ?>
                                 <tr>
                                     <td>
@@ -282,20 +302,24 @@ require_once '../layouts/header.php';
                                                 Costo: $<?php echo number_format($producto['precio_costo'], 2); ?>
                                             </small>
                                             <br>
-                                            <span class="badge <?php echo $claseMargen; ?>">
-                                                <?php echo number_format($margen, 1); ?>%
+                                            <span class="badge <?php echo $claseMargen; ?>" title="<?php echo $margenData['mensaje']; ?>">
+                                                <?php echo number_format($porcentajeMargen, 1); ?>%
                                             </span>
                                         <?php endif; ?>
                                     </td>
                                     <td class="precio-bs">
                                         <strong>
-                                            <?php echo TasaCambioHelper::formatearPrecioProducto($producto, $db); ?>
+                                            <?php echo TasaCambioHelper::formatearBS($precioBS); ?>
                                         </strong>
                                         <?php if ($producto['precio_costo'] > 0): ?>
                                             <br>
                                             <small class="text-muted">
-                                                Costo: <?php echo TasaCambioHelper::formatearBS($producto['precio_costo_bs'] ?? TasaCambioHelper::convertirUSDaBS($producto['precio_costo'], $db)); ?>
+                                                Costo: <?php echo TasaCambioHelper::formatearBS($costoBS, false); ?>
                                             </small>
+                                            <?php if ($precioBSData['tipo'] === 'fijo'): ?>
+                                                <br>
+                                                <small class="badge bg-info">Precio fijo</small>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     </td>
                                     <td>

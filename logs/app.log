@@ -1,545 +1,217 @@
-[2025-11-02 18:49:23] [DEBUG] Todas las categorías obtenidas {"total":2}
-[2025-11-02 14:49:26] [ERROR] WARNING: require_once(Models/Venta.php): Failed to open stream: No such file or directory en D:\wamp64\www\inventario\Controllers\VentaController.php línea 2 
-[2025-11-02 14:49:26] [ERROR] Excepción no capturada: Failed opening required 'Models/Venta.php' (include_path='.;C:\php\pear') {"file":"D:\\wamp64\\www\\inventario\\Controllers\\VentaController.php","line":2,"trace":"#0 D:\\wamp64\\www\\inventario\\Views\\ventas\\index.php(5): require_once()\n#1 {main}"}
-[2025-11-02 19:12:24] [DEBUG] Todas las categorías obtenidas {"total":2}
-[2025-11-02 19:31:03] [DEBUG] Todas las categorías obtenidas {"total":2}
-[2025-11-02 15:31:03] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-02 15:31:03] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-02 15:31:03] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-02 15:31:03] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-02 15:31:03] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-02 15:31:03] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-02 19:40:29] [DEBUG] Todas las categorías obtenidas {"total":2}
-[2025-11-02 15:40:29] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-02 15:40:29] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-02 15:40:29] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-02 15:40:29] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-02 15:40:29] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-02 15:40:29] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-02 19:41:02] [DEBUG] Todas las categorías obtenidas {"total":2}
-[2025-11-02 15:41:02] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-02 15:41:02] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-02 15:41:02] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-02 15:41:02] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-02 15:41:02] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-02 15:41:02] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-02 19:41:03] [INFO] Categorías listadas {"total":2}
-[2025-11-02 16:06:37] [ERROR] WARNING: Undefined array key "csrf_token" en D:\wamp64\www\inventario\Views\tipos-pago\crear.php línea 100 
-[2025-11-02 16:30:52] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-11-02 16:30:52] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-11-02 16:30:52] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:30:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:30:52] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:30:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:30:52] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-11-02 16:30:52] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-11-02 16:30:52] [ERROR] WARNING: Undefined array key "nombre" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:30:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:30:52] [ERROR] WARNING: Undefined array key "codigo_sku" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:30:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:31:57] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-11-02 16:31:57] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-11-02 16:31:57] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:31:57] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:31:57] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:31:57] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:31:57] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-11-02 16:31:57] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-11-02 16:31:57] [ERROR] WARNING: Undefined array key "nombre" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:31:57] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:31:57] [ERROR] WARNING: Undefined array key "codigo_sku" en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 16:31:57] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en D:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-02 20:32:36] [INFO] Categorías listadas {"total":2}
-[2025-11-02 20:32:37] [DEBUG] Todas las categorías obtenidas {"total":2}
-[2025-11-02 16:32:37] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-02 16:32:37] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-02 16:32:37] [ERROR] WARNING: Trying to access array offset on true en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-02 16:32:37] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-02 16:32:37] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-02 16:32:37] [ERROR] WARNING: Undefined array key "id" en D:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 19:05:56] [DEBUG] Todas las categorías obtenidas {"total":5}
-[2025-11-18 15:05:56] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 15:05:56] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 15:05:56] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 15:05:56] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 15:05:56] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 15:05:56] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 19:06:02] [INFO] Categorías listadas {"total":5}
-[2025-11-18 19:14:49] [DEBUG] Todas las categorías obtenidas {"total":5}
-[2025-11-18 15:14:49] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 15:14:49] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 15:14:49] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 15:14:49] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 15:14:49] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 15:14:49] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 19:14:50] [INFO] Categorías listadas {"total":5}
-[2025-11-18 19:14:54] [DEBUG] Todas las categorías obtenidas {"total":5}
-[2025-11-18 15:14:54] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 15:14:54] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 15:14:54] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 15:14:54] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 15:14:54] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 15:14:54] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 19:14:58] [DEBUG] Todas las categorías obtenidas {"total":5}
-[2025-11-18 19:15:23] [DEBUG] Todas las categorías obtenidas {"total":5}
-[2025-11-18 19:15:25] [DEBUG] Todas las categorías obtenidas {"total":5}
-[2025-11-18 15:15:25] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 15:15:25] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 15:15:25] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 15:15:25] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 15:15:25] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 15:15:25] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 19:15:44] [INFO] Categorías listadas {"total":5}
-[2025-11-18 20:06:52] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 16:06:52] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 16:06:52] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 16:06:52] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 16:06:52] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 16:06:52] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 16:06:52] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 20:06:58] [INFO] Categorías listadas {"total":4}
-[2025-11-18 20:07:07] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 16:07:07] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 16:07:07] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 16:07:07] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 16:07:07] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 16:07:07] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 16:07:07] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 20:07:11] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 20:07:23] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 20:07:30] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 20:07:42] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 20:07:45] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 16:07:45] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 16:07:45] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 16:07:45] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 16:07:45] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 16:07:45] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 16:07:45] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 20:08:05] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 16:08:05] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 16:08:05] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 16:08:05] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 16:08:05] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 16:08:05] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 16:08:05] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 20:08:26] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 16:08:26] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 16:08:26] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 16:08:26] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 16:08:26] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 16:08:26] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 16:08:26] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 20:09:50] [INFO] Categorías listadas {"total":4}
-[2025-11-18 20:10:04] [INFO] Categorías listadas {"total":4}
-[2025-11-18 20:10:17] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 16:10:17] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 16:10:17] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 16:10:17] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 16:10:17] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 16:10:17] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 16:10:17] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 20:10:19] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 20:10:30] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 20:10:47] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 20:10:52] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 20:11:00] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 20:11:02] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-18 16:11:02] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 16:11:02] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 16:11:02] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-18 16:11:02] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-18 16:11:02] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-18 16:11:02] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-19 12:26:33] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 08:26:33] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-19 08:26:33] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-19 08:26:33] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-19 08:26:33] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-19 08:26:33] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-19 08:26:33] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-19 12:26:34] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 08:26:34] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-19 08:26:34] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-19 08:26:34] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-19 08:26:34] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-19 08:26:34] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-19 08:26:34] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-19 12:26:45] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 08:26:45] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-19 08:26:45] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-19 08:26:45] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-19 08:26:45] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-19 08:26:45] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-19 08:26:45] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-19 12:30:40] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 08:30:40] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-19 08:30:40] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-19 08:30:40] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-19 08:30:40] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 277 
-[2025-11-19 08:30:40] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 288 
-[2025-11-19 08:30:40] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\productos\index.php línea 292 
-[2025-11-19 12:31:10] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 08:31:10] [WARNING] Clase no encontrada: TasaCambioHelper 
-[2025-11-19 08:31:10] [ERROR] Excepción no capturada: Class "TasaCambioHelper" not found {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":279,"trace":"#0 {main}"}
-[2025-11-19 12:48:33] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 12:49:41] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 12:50:29] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 12:50:56] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 12:51:08] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 12:54:37] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 12:57:27] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 12:57:29] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 12:58:09] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 12:58:17] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 12:59:14] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 12:59:16] [INFO] Categorías listadas {"total":4}
-[2025-11-19 12:59:22] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 08:59:37] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-11-19 08:59:37] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-11-19 08:59:37] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 08:59:37] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 08:59:37] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 08:59:37] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 08:59:37] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-11-19 08:59:37] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-11-19 08:59:37] [ERROR] WARNING: Undefined array key "nombre" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 08:59:37] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 08:59:37] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 08:59:37] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:00:09] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-11-19 09:00:09] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-11-19 09:00:09] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:00:09] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:00:09] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:00:09] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:00:09] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-11-19 09:00:09] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-11-19 09:00:09] [ERROR] WARNING: Undefined array key "nombre" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:00:09] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:00:09] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:00:09] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 13:00:20] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:00:55] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:01:03] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:08:08] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:09:24] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:09:38] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:09:40] [INFO] Categorías listadas {"total":4}
-[2025-11-19 13:09:45] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:10:12] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:10:14] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:11:46] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\productos\editar.php línea 135 
-[2025-11-19 09:11:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 135 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 140 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "stock_minimo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 140 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 141 
-[2025-11-19 09:11:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 141 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\productos\editar.php línea 147 
-[2025-11-19 09:11:46] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 147 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\productos\editar.php línea 151 
-[2025-11-19 09:11:46] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 151 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "nombre" en C:\wamp64\www\inventario\Views\productos\editar.php línea 177 
-[2025-11-19 09:11:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 177 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\productos\editar.php línea 195 
-[2025-11-19 09:11:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 195 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "descripcion" en C:\wamp64\www\inventario\Views\productos\editar.php línea 212 
-[2025-11-19 09:11:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 212 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "descripcion" en C:\wamp64\www\inventario\Views\productos\editar.php línea 215 
-[2025-11-19 09:11:46] [ERROR] DEPRECATED: strlen(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 215 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "precio" en C:\wamp64\www\inventario\Views\productos\editar.php línea 231 
-[2025-11-19 09:11:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 231 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "precio_costo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 256 
-[2025-11-19 09:11:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 256 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "stock_minimo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 294 
-[2025-11-19 09:11:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 294 
-[2025-11-19 09:11:46] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 308 
-[2025-11-19 09:11:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 308 
-[2025-11-19 13:12:18] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\productos\editar.php línea 135 
-[2025-11-19 09:12:18] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 135 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 140 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "stock_minimo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 140 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 141 
-[2025-11-19 09:12:18] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 141 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\productos\editar.php línea 147 
-[2025-11-19 09:12:18] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 147 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\productos\editar.php línea 151 
-[2025-11-19 09:12:18] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 151 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "nombre" en C:\wamp64\www\inventario\Views\productos\editar.php línea 177 
-[2025-11-19 09:12:18] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 177 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\productos\editar.php línea 195 
-[2025-11-19 09:12:18] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 195 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "descripcion" en C:\wamp64\www\inventario\Views\productos\editar.php línea 212 
-[2025-11-19 09:12:18] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 212 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "descripcion" en C:\wamp64\www\inventario\Views\productos\editar.php línea 215 
-[2025-11-19 09:12:18] [ERROR] DEPRECATED: strlen(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 215 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "precio" en C:\wamp64\www\inventario\Views\productos\editar.php línea 231 
-[2025-11-19 09:12:18] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 231 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "precio_costo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 256 
-[2025-11-19 09:12:18] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 256 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "stock_minimo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 294 
-[2025-11-19 09:12:18] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 294 
-[2025-11-19 09:12:18] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 308 
-[2025-11-19 09:12:18] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 308 
-[2025-11-19 13:12:33] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\productos\editar.php línea 135 
-[2025-11-19 09:12:33] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 135 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 140 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "stock_minimo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 140 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 141 
-[2025-11-19 09:12:33] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 141 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\productos\editar.php línea 147 
-[2025-11-19 09:12:33] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 147 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\productos\editar.php línea 151 
-[2025-11-19 09:12:33] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 151 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "nombre" en C:\wamp64\www\inventario\Views\productos\editar.php línea 177 
-[2025-11-19 09:12:33] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 177 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\productos\editar.php línea 195 
-[2025-11-19 09:12:33] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 195 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "descripcion" en C:\wamp64\www\inventario\Views\productos\editar.php línea 212 
-[2025-11-19 09:12:33] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 212 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "descripcion" en C:\wamp64\www\inventario\Views\productos\editar.php línea 215 
-[2025-11-19 09:12:33] [ERROR] DEPRECATED: strlen(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 215 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "precio" en C:\wamp64\www\inventario\Views\productos\editar.php línea 231 
-[2025-11-19 09:12:33] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 231 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "precio_costo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 256 
-[2025-11-19 09:12:33] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 256 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "stock_minimo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 294 
-[2025-11-19 09:12:33] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 294 
-[2025-11-19 09:12:33] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 308 
-[2025-11-19 09:12:33] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 308 
-[2025-11-19 13:12:46] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\productos\editar.php línea 135 
-[2025-11-19 09:12:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 135 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 140 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "stock_minimo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 140 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 141 
-[2025-11-19 09:12:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 141 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\productos\editar.php línea 147 
-[2025-11-19 09:12:46] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 147 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\productos\editar.php línea 151 
-[2025-11-19 09:12:46] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 151 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "nombre" en C:\wamp64\www\inventario\Views\productos\editar.php línea 177 
-[2025-11-19 09:12:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 177 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\productos\editar.php línea 195 
-[2025-11-19 09:12:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 195 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "descripcion" en C:\wamp64\www\inventario\Views\productos\editar.php línea 212 
-[2025-11-19 09:12:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 212 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "descripcion" en C:\wamp64\www\inventario\Views\productos\editar.php línea 215 
-[2025-11-19 09:12:46] [ERROR] DEPRECATED: strlen(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 215 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "precio" en C:\wamp64\www\inventario\Views\productos\editar.php línea 231 
-[2025-11-19 09:12:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 231 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "precio_costo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 256 
-[2025-11-19 09:12:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 256 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "stock_minimo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 294 
-[2025-11-19 09:12:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 294 
-[2025-11-19 09:12:46] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 308 
-[2025-11-19 09:12:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 308 
-[2025-11-19 13:13:46] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:13:59] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:14:15] [INFO] Categorías listadas {"total":4}
-[2025-11-19 13:15:14] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:15:21] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:15:52] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:16:54] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:17:03] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:17:11] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 13:17:18] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-19 09:17:27] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-11-19 09:17:27] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-11-19 09:17:27] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:17:27] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:17:27] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:17:27] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:17:27] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-11-19 09:17:27] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-11-19 09:17:27] [ERROR] WARNING: Undefined array key "nombre" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:17:27] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:17:27] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 09:17:27] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-19 13:18:44] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-20 12:56:37] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-20 12:56:44] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-20 12:57:52] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-20 12:58:01] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\productos\editar.php línea 135 
-[2025-11-20 08:58:01] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 135 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 140 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "stock_minimo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 140 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 141 
-[2025-11-20 08:58:01] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 141 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\productos\editar.php línea 147 
-[2025-11-20 08:58:01] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 147 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\productos\editar.php línea 151 
-[2025-11-20 08:58:01] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 151 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "nombre" en C:\wamp64\www\inventario\Views\productos\editar.php línea 177 
-[2025-11-20 08:58:01] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 177 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\productos\editar.php línea 195 
-[2025-11-20 08:58:01] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 195 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "descripcion" en C:\wamp64\www\inventario\Views\productos\editar.php línea 212 
-[2025-11-20 08:58:01] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 212 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "descripcion" en C:\wamp64\www\inventario\Views\productos\editar.php línea 215 
-[2025-11-20 08:58:01] [ERROR] DEPRECATED: strlen(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 215 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "precio" en C:\wamp64\www\inventario\Views\productos\editar.php línea 231 
-[2025-11-20 08:58:01] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 231 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "precio_costo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 256 
-[2025-11-20 08:58:01] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 256 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "stock_minimo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 294 
-[2025-11-20 08:58:01] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 294 
-[2025-11-20 08:58:01] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 308 
-[2025-11-20 08:58:01] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 308 
-[2025-11-20 13:01:35] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\productos\editar.php línea 135 
-[2025-11-20 09:01:35] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 135 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 140 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "stock_minimo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 140 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 141 
-[2025-11-20 09:01:35] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 141 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\productos\editar.php línea 147 
-[2025-11-20 09:01:35] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 147 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\productos\editar.php línea 151 
-[2025-11-20 09:01:35] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 151 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "nombre" en C:\wamp64\www\inventario\Views\productos\editar.php línea 177 
-[2025-11-20 09:01:35] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 177 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\productos\editar.php línea 195 
-[2025-11-20 09:01:35] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 195 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "descripcion" en C:\wamp64\www\inventario\Views\productos\editar.php línea 212 
-[2025-11-20 09:01:35] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 212 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "descripcion" en C:\wamp64\www\inventario\Views\productos\editar.php línea 215 
-[2025-11-20 09:01:35] [ERROR] DEPRECATED: strlen(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 215 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "precio" en C:\wamp64\www\inventario\Views\productos\editar.php línea 231 
-[2025-11-20 09:01:35] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 231 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "precio_costo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 256 
-[2025-11-20 09:01:35] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 256 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "categoria_id" en C:\wamp64\www\inventario\Views\productos\editar.php línea 274 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "stock_minimo" en C:\wamp64\www\inventario\Views\productos\editar.php línea 294 
-[2025-11-20 09:01:35] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 294 
-[2025-11-20 09:01:35] [ERROR] WARNING: Undefined array key "stock_actual" en C:\wamp64\www\inventario\Views\productos\editar.php línea 308 
-[2025-11-20 09:01:35] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\productos\editar.php línea 308 
-[2025-11-20 15:18:52] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-20 15:19:08] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-20 15:19:14] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-11-20 11:19:32] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-11-20 11:19:32] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-11-20 11:19:32] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-20 11:19:32] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-20 11:19:32] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-20 11:19:32] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-20 11:19:32] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-11-20 11:19:32] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-11-20 11:19:32] [ERROR] WARNING: Undefined array key "nombre" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-20 11:19:32] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-20 11:19:32] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-11-20 11:19:32] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 13:28:53] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 13:28:56] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 13:45:14] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 13:45:15] [INFO] Categorías listadas {"total":4}
-[2025-12-01 09:45:23] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-12-01 09:45:23] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-12-01 09:45:23] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 09:45:23] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 09:45:23] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 09:45:23] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 09:45:23] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-12-01 09:45:23] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-12-01 09:45:23] [ERROR] WARNING: Undefined array key "nombre" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 09:45:23] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 09:45:23] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 09:45:23] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 09:56:00] [WARNING] Clase no encontrada: Database 
-[2025-12-01 09:56:00] [ERROR] Excepción no capturada: Class "Database" not found {"file":"C:\\wamp64\\www\\inventario\\Views\\layouts\\sidebar.php","line":19,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\layouts\\header.php(71): include()\n#1 C:\\wamp64\\www\\inventario\\Views\\tasas-cambio\\index.php(3): require_once('C:\\\\wamp64\\\\www\\\\i...')\n#2 {main}"}
-[2025-12-01 09:56:16] [WARNING] Clase no encontrada: Database 
-[2025-12-01 09:56:16] [ERROR] Excepción no capturada: Class "Database" not found {"file":"C:\\wamp64\\www\\inventario\\Views\\layouts\\sidebar.php","line":19,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\layouts\\header.php(71): include()\n#1 C:\\wamp64\\www\\inventario\\Views\\tasas-cambio\\index.php(3): require_once('C:\\\\wamp64\\\\www\\\\i...')\n#2 {main}"}
-[2025-12-01 09:56:17] [WARNING] Clase no encontrada: Database 
-[2025-12-01 09:56:17] [ERROR] Excepción no capturada: Class "Database" not found {"file":"C:\\wamp64\\www\\inventario\\Views\\layouts\\sidebar.php","line":19,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\layouts\\header.php(71): include()\n#1 C:\\wamp64\\www\\inventario\\Views\\tasas-cambio\\index.php(3): require_once('C:\\\\wamp64\\\\www\\\\i...')\n#2 {main}"}
-[2025-12-01 10:02:25] [WARNING] Clase no encontrada: Database 
-[2025-12-01 10:02:25] [ERROR] Excepción no capturada: Class "Database" not found {"file":"C:\\wamp64\\www\\inventario\\Views\\layouts\\sidebar.php","line":19,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\layouts\\header.php(71): include()\n#1 C:\\wamp64\\www\\inventario\\Views\\tasas-cambio\\index.php(3): require_once('C:\\\\wamp64\\\\www\\\\i...')\n#2 {main}"}
-[2025-12-01 10:02:26] [WARNING] Clase no encontrada: Database 
-[2025-12-01 10:02:26] [ERROR] Excepción no capturada: Class "Database" not found {"file":"C:\\wamp64\\www\\inventario\\Views\\layouts\\sidebar.php","line":19,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\layouts\\header.php(71): include()\n#1 C:\\wamp64\\www\\inventario\\Views\\tasas-cambio\\index.php(3): require_once('C:\\\\wamp64\\\\www\\\\i...')\n#2 {main}"}
-[2025-12-01 10:02:27] [WARNING] Clase no encontrada: Database 
-[2025-12-01 10:02:27] [ERROR] Excepción no capturada: Class "Database" not found {"file":"C:\\wamp64\\www\\inventario\\Views\\layouts\\sidebar.php","line":19,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\layouts\\header.php(71): include()\n#1 C:\\wamp64\\www\\inventario\\Views\\tasas-cambio\\index.php(3): require_once('C:\\\\wamp64\\\\www\\\\i...')\n#2 {main}"}
-[2025-12-01 10:02:27] [WARNING] Clase no encontrada: Database 
-[2025-12-01 10:02:27] [ERROR] Excepción no capturada: Class "Database" not found {"file":"C:\\wamp64\\www\\inventario\\Views\\layouts\\sidebar.php","line":19,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\layouts\\header.php(71): include()\n#1 C:\\wamp64\\www\\inventario\\Views\\tasas-cambio\\index.php(3): require_once('C:\\\\wamp64\\\\www\\\\i...')\n#2 {main}"}
-[2025-12-01 10:02:34] [WARNING] Clase no encontrada: Database 
-[2025-12-01 10:02:34] [ERROR] Excepción no capturada: Class "Database" not found {"file":"C:\\wamp64\\www\\inventario\\Views\\layouts\\sidebar.php","line":19,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\layouts\\header.php(71): include()\n#1 C:\\wamp64\\www\\inventario\\Views\\tasas-cambio\\index.php(3): require_once('C:\\\\wamp64\\\\www\\\\i...')\n#2 {main}"}
-[2025-12-01 14:25:42] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 17:37:03] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 17:37:03] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 17:37:11] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 13:37:11] [ERROR] WARNING: Array to string conversion en C:\wamp64\www\inventario\Views\productos\crear.php línea 342 
-[2025-12-01 17:38:25] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 17:38:26] [INFO] Categorías listadas {"total":4}
-[2025-12-01 14:07:14] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-12-01 14:07:14] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-12-01 14:07:14] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:07:14] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:07:14] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:07:14] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:07:14] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-12-01 14:07:14] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-12-01 14:07:14] [ERROR] WARNING: Undefined array key "nombre" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:07:14] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:07:14] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:07:14] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:22:08] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-12-01 14:22:08] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-12-01 14:22:08] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:22:08] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:22:08] [ERROR] WARNING: Trying to access array offset on true en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:22:08] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:22:08] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 106 
-[2025-12-01 14:22:08] [ERROR] WARNING: Undefined array key "id" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 107 
-[2025-12-01 14:22:08] [ERROR] WARNING: Undefined array key "nombre" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:22:08] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:22:08] [ERROR] WARNING: Undefined array key "codigo_sku" en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 14:22:08] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\historial-stock\index.php línea 108 
-[2025-12-01 18:35:07] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 18:35:08] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 18:35:23] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 18:36:07] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 18:36:10] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 14:36:10] [ERROR] WARNING: Undefined array key "usar_precio_fijo_bs" en C:\wamp64\www\inventario\Views\productos\editar.php línea 295 
-[2025-12-01 14:36:10] [ERROR] WARNING: Undefined array key "usar_precio_fijo_bs" en C:\wamp64\www\inventario\Views\productos\editar.php línea 307 
-[2025-12-01 18:38:11] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 18:38:20] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 18:38:22] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 18:38:33] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 18:38:43] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 14:38:43] [ERROR] WARNING: Undefined array key "usar_precio_fijo_bs" en C:\wamp64\www\inventario\Views\productos\editar.php línea 295 
-[2025-12-01 14:38:43] [ERROR] WARNING: Undefined array key "usar_precio_fijo_bs" en C:\wamp64\www\inventario\Views\productos\editar.php línea 307 
-[2025-12-01 18:38:47] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 14:38:47] [ERROR] WARNING: Undefined array key "usar_precio_fijo_bs" en C:\wamp64\www\inventario\Views\productos\editar.php línea 295 
-[2025-12-01 14:38:47] [ERROR] WARNING: Undefined array key "usar_precio_fijo_bs" en C:\wamp64\www\inventario\Views\productos\editar.php línea 307 
-[2025-12-01 18:39:56] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 18:39:59] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 14:39:59] [ERROR] WARNING: Undefined array key "usar_precio_fijo_bs" en C:\wamp64\www\inventario\Views\productos\editar.php línea 295 
-[2025-12-01 14:39:59] [ERROR] WARNING: Undefined array key "usar_precio_fijo_bs" en C:\wamp64\www\inventario\Views\productos\editar.php línea 307 
-[2025-12-01 18:39:59] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 18:40:02] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-01 18:40:41] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2025-12-02 13:20:14] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2025-12-02 13:20:22] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2025-12-02 13:28:08] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 13:28:27] [INFO] Categorías listadas {"total":10}
+[2025-12-02 13:28:52] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 13:29:04] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 13:29:34] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 13:29:36] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 13:43:58] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 13:44:02] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 13:44:07] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 13:44:17] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 13:44:46] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 13:44:48] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 09:45:11] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 09:45:11] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 09:45:11] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 170 
+[2025-12-02 09:45:11] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 170 
+[2025-12-02 09:45:11] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 09:45:11] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 09:45:11] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 281 
+[2025-12-02 09:45:11] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 281 
+[2025-12-02 09:45:14] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:45:14] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:45:14] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:45:14] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:45:14] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 187 
+[2025-12-02 09:45:14] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 187 
+[2025-12-02 09:45:20] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:45:20] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:45:20] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:45:20] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:45:30] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:45:30] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:45:30] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:45:30] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:48:18] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:48:18] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:48:18] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:48:18] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:51:33] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:51:33] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:51:33] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:51:33] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:51:37] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:51:37] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:51:37] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:51:37] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:51:40] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:51:40] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:51:40] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:51:40] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:53:14] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:53:14] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:53:14] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:53:14] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:55:53] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:55:53] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:55:53] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:55:53] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:55:53] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 187 
+[2025-12-02 09:55:57] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:55:57] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:55:57] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:55:57] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:55:57] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 187 
+[2025-12-02 09:56:19] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:56:19] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:56:19] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:56:19] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:56:26] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:56:26] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:56:26] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:56:26] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:57:22] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:57:22] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:57:22] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:57:22] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:57:26] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:57:26] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:57:26] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:57:26] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:57:28] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:57:28] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:57:28] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:57:28] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:58:20] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:58:20] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 09:58:20] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 09:58:20] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 14:02:34] [DEBUG] Todas las categorías obtenidas {"total":0}
+[2025-12-02 14:02:36] [DEBUG] Todas las categorías obtenidas {"total":0}
+[2025-12-02 17:31:12] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 17:31:40] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 17:31:46] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 17:32:10] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 17:32:12] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 13:32:13] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 13:32:13] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 13:32:13] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 170 
+[2025-12-02 13:32:13] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 170 
+[2025-12-02 13:32:13] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 13:32:13] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 13:32:13] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 281 
+[2025-12-02 13:32:13] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 281 
+[2025-12-02 13:32:16] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 13:32:16] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 13:32:16] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 13:32:16] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 13:32:16] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 187 
+[2025-12-02 13:32:22] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 13:32:22] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
+[2025-12-02 13:32:22] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 13:32:22] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
+[2025-12-02 13:33:39] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 13:33:39] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 13:33:39] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 13:33:39] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 13:33:41] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
+[2025-12-02 13:33:52] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 13:33:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 13:33:52] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 13:33:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 13:33:52] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 13:33:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 13:34:01] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 187 
+[2025-12-02 13:34:12] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 13:34:12] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 13:34:12] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 13:34:12] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 13:34:12] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 13:34:12] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 17:34:15] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 17:34:17] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 17:34:40] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 17:34:43] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:20:11] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 14:20:11] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 14:20:11] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:20:11] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:20:11] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:20:11] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 18:20:13] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:20:13] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::calcularMargenGanancia() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":248,"trace":"#0 {main}"}
+[2025-12-02 18:20:15] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:20:15] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::calcularMargenGanancia() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":248,"trace":"#0 {main}"}
+[2025-12-02 18:20:41] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:20:41] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::calcularMargenGanancia() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":248,"trace":"#0 {main}"}
+[2025-12-02 18:22:11] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:22:11] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":249,"trace":"#0 {main}"}
+[2025-12-02 18:22:14] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:22:14] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":249,"trace":"#0 {main}"}
+[2025-12-02 18:22:17] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:22:17] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":249,"trace":"#0 {main}"}
+[2025-12-02 18:23:37] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 18:23:56] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:23:57] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":249,"trace":"#0 {main}"}
+[2025-12-02 18:25:10] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:25:10] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":249,"trace":"#0 {main}"}
+[2025-12-02 18:27:43] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:27:43] [ERROR] Excepción no capturada: Call to undefined function obtenerClaseMargenLocal() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":119,"trace":"#0 {main}"}
+[2025-12-02 18:28:32] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:28:32] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":251,"trace":"#0 {main}"}
+[2025-12-02 18:29:30] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:29:31] [ERROR] Excepción no capturada: number_format(): Argument #1 ($num) must be of type float, array given {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":288,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\productos\\index.php(288): number_format(Array, 1)\n#1 {main}"}
+[2025-12-02 18:30:17] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:30:17] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":251,"trace":"#0 {main}"}
+[2025-12-02 18:31:13] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:31:13] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":254,"trace":"#0 {main}"}
+[2025-12-02 18:31:19] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:31:19] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":254,"trace":"#0 {main}"}
+[2025-12-02 18:33:06] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:33:06] [ERROR] Excepción no capturada: number_format(): Argument #1 ($num) must be of type float, array given {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":288,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\productos\\index.php(288): number_format(Array, 1)\n#1 {main}"}
+[2025-12-02 18:36:30] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 18:36:45] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 18:36:53] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 18:37:47] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 18:37:49] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 18:38:07] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 18:38:14] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 18:38:16] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-02 14:38:45] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 14:38:45] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 14:38:45] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:38:45] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:38:45] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:38:45] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:41:58] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 14:41:58] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 14:41:58] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:41:58] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:04] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
+[2025-12-02 14:42:13] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 14:42:13] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 14:42:13] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:13] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:13] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:13] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:30] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 14:42:30] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 14:42:30] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:30] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:30] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:30] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:30] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:30] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:42] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 14:42:42] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-02 14:42:42] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:42] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:42] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:42] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:42] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:42] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:42] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 14:42:42] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-02 18:42:50] [DEBUG] Todas las categorías obtenidas {"total":10}

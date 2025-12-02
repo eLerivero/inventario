@@ -10,7 +10,7 @@ class TasaCambio
     public $tasa_cambio;
     public $fecha_actualizacion;
     public $activa;
-    public $usuario_actualizacion;
+    public $usuario_id;
     public $created_at;
     public $updated_at;
 
@@ -35,7 +35,7 @@ class TasaCambio
         return false;
     }
 
-    public function crear($tasa, $usuario = 'Sistema')
+    public function crear($tasa, $usuario = 1)
     {
         // Primero desactivar todas las tasas anteriores
         $query_desactivar = "UPDATE " . $this->table . " SET activa = FALSE WHERE activa = TRUE";
@@ -44,7 +44,7 @@ class TasaCambio
 
         // Crear nueva tasa activa
         $query = "INSERT INTO " . $this->table . " 
-                  (moneda_origen, moneda_destino, tasa_cambio, usuario_actualizacion) 
+                  (moneda_origen, moneda_destino, tasa_cambio, usuario_id) 
                   VALUES 
                   ('USD', 'VES', :tasa, :usuario)
                   RETURNING *";

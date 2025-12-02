@@ -55,7 +55,15 @@ class Producto
         // Calcular precios en BS si no se proporcionan y no es precio fijo
         if (empty($data['precio_bs']) && (!isset($data['usar_precio_fijo_bs']) || !$data['usar_precio_fijo_bs'])) {
             $data['precio_bs'] = round($data['precio'] * $tasa_cambio, 2);
-            $data['precio_costo_bs'] = round(($data['precio_costo'] ?? 0) * $tasa_cambio, 2);
+        }
+
+        // Asignar valores por defecto a variables
+        $precio_costo = $data['precio_costo'] ?? 0;
+        $precio_costo_bs = $data['precio_costo_bs'] ?? 0;
+        
+        // Si no se proporciona precio_costo_bs, calcularlo
+        if (empty($precio_costo_bs) && (!isset($data['usar_precio_fijo_bs']) || !$data['usar_precio_fijo_bs'])) {
+            $precio_costo_bs = round($precio_costo * $tasa_cambio, 2);
         }
 
         $stmt->bindParam(":codigo_sku", $data['codigo_sku']);
@@ -63,13 +71,21 @@ class Producto
         $stmt->bindParam(":descripcion", $data['descripcion']);
         $stmt->bindParam(":precio", $data['precio']);
         $stmt->bindParam(":precio_bs", $data['precio_bs']);
-        $stmt->bindParam(":precio_costo", $data['precio_costo'] ?? 0);
-        $stmt->bindParam(":precio_costo_bs", $data['precio_costo_bs'] ?? 0);
+        $stmt->bindParam(":precio_costo", $precio_costo);
+        $stmt->bindParam(":precio_costo_bs", $precio_costo_bs);
+        
         $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
         $stmt->bindParam(":usar_precio_fijo_bs", $usarPrecioFijo, PDO::PARAM_BOOL);
-        $stmt->bindParam(":stock_actual", $data['stock_actual'] ?? 0);
-        $stmt->bindParam(":stock_minimo", $data['stock_minimo'] ?? 5);
-        $stmt->bindParam(":categoria_id", $data['categoria_id'] ?? null);
+        
+        $stock_actual = $data['stock_actual'] ?? 0;
+        $stmt->bindParam(":stock_actual", $stock_actual);
+        
+        $stock_minimo = $data['stock_minimo'] ?? 5;
+        $stmt->bindParam(":stock_minimo", $stock_minimo);
+        
+        $categoria_id = $data['categoria_id'] ?? null;
+        $stmt->bindParam(":categoria_id", $categoria_id);
+        
         $activo = isset($data['activo']) ? (bool)$data['activo'] : true;
         $stmt->bindParam(":activo", $activo, PDO::PARAM_BOOL);
 
@@ -82,7 +98,7 @@ class Producto
         }
         return [
             "success" => false,
-            "message" => "Error al crear producto"
+            "message" => "Error al crear producto: " . $stmt->errorInfo()[2]
         ];
     }
 
@@ -107,21 +123,36 @@ class Producto
         if ((!isset($data['usar_precio_fijo_bs']) || !$data['usar_precio_fijo_bs']) && empty($data['precio_bs'])) {
             $tasa_cambio = $this->obtenerTasaCambio();
             $data['precio_bs'] = round($data['precio'] * $tasa_cambio, 2);
-            $data['precio_costo_bs'] = round(($data['precio_costo'] ?? 0) * $tasa_cambio, 2);
+        }
+
+        // Asignar valores por defecto a variables
+        $precio_costo = $data['precio_costo'] ?? 0;
+        $precio_costo_bs = $data['precio_costo_bs'] ?? 0;
+        
+        // Si no se proporciona precio_costo_bs, calcularlo
+        if (empty($precio_costo_bs) && (!isset($data['usar_precio_fijo_bs']) || !$data['usar_precio_fijo_bs'])) {
+            $precio_costo_bs = round($precio_costo * $tasa_cambio, 2);
         }
 
         $stmt->bindParam(":nombre", $data['nombre']);
         $stmt->bindParam(":descripcion", $data['descripcion']);
         $stmt->bindParam(":precio", $data['precio']);
         $stmt->bindParam(":precio_bs", $data['precio_bs']);
-        $stmt->bindParam(":precio_costo", $data['precio_costo'] ?? 0);
-        $stmt->bindParam(":precio_costo_bs", $data['precio_costo_bs'] ?? 0);
+        $stmt->bindParam(":precio_costo", $precio_costo);
+        $stmt->bindParam(":precio_costo_bs", $precio_costo_bs);
+        
         $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
         $stmt->bindParam(":usar_precio_fijo_bs", $usarPrecioFijo, PDO::PARAM_BOOL);
-        $stmt->bindParam(":stock_minimo", $data['stock_minimo'] ?? 5);
-        $stmt->bindParam(":categoria_id", $data['categoria_id'] ?? null);
+        
+        $stock_minimo = $data['stock_minimo'] ?? 5;
+        $stmt->bindParam(":stock_minimo", $stock_minimo);
+        
+        $categoria_id = $data['categoria_id'] ?? null;
+        $stmt->bindParam(":categoria_id", $categoria_id);
+        
         $activo = isset($data['activo']) ? (bool)$data['activo'] : true;
         $stmt->bindParam(":activo", $activo, PDO::PARAM_BOOL);
+        
         $stmt->bindParam(":id", $id);
 
         if ($stmt->execute()) {
@@ -132,7 +163,7 @@ class Producto
         }
         return [
             "success" => false,
-            "message" => "Error al actualizar producto"
+            "message" => "Error al actualizar producto: " . $stmt->errorInfo()[2]
         ];
     }
 
@@ -184,7 +215,7 @@ class Producto
         $stmt->bindParam(":id", $producto_id);
 
         if ($stmt->execute()) {
-            // Registrar en historial
+            // Registrar en historial - VERSIÓN CORREGIDA
             $historial_query = "INSERT INTO historial_stock 
                                (producto_id, cantidad_anterior, cantidad_nueva, diferencia, 
                                 tipo_movimiento, observaciones, usuario) 
@@ -193,13 +224,20 @@ class Producto
                                 :tipo_movimiento, :observaciones, :usuario)";
 
             $historial_stmt = $this->conn->prepare($historial_query);
+            
+            // Asignar a variables primero para evitar problemas de referencia
+            $cantidad_anterior = $producto['stock_actual'];
+            $cantidad_nueva = $nuevo_stock;
+            $observaciones_final = $observaciones ?: 'Actualización de stock';
+            $usuario = isset($_SESSION['usuario_nombre']) ? $_SESSION['usuario_nombre'] : 'Sistema';
+            
             $historial_stmt->bindParam(":producto_id", $producto_id);
-            $historial_stmt->bindParam(":cantidad_anterior", $producto['stock_actual']);
-            $historial_stmt->bindParam(":cantidad_nueva", $nuevo_stock);
+            $historial_stmt->bindParam(":cantidad_anterior", $cantidad_anterior);
+            $historial_stmt->bindParam(":cantidad_nueva", $cantidad_nueva);
             $historial_stmt->bindParam(":diferencia", $diferencia);
             $historial_stmt->bindParam(":tipo_movimiento", $tipo_movimiento);
-            $historial_stmt->bindParam(":observaciones", $observaciones);
-            $historial_stmt->bindParam(":usuario", $_SESSION['usuario_nombre'] ?? 'Sistema');
+            $historial_stmt->bindParam(":observaciones", $observaciones_final);
+            $historial_stmt->bindParam(":usuario", $usuario);
 
             $historial_stmt->execute();
 
@@ -211,7 +249,7 @@ class Producto
 
         return [
             "success" => false,
-            "message" => "Error al actualizar stock"
+            "message" => "Error al actualizar stock: " . $stmt->errorInfo()[2]
         ];
     }
 
@@ -274,10 +312,10 @@ class Producto
     public function obtenerProductosBajoStock()
     {
         $query = "SELECT p.*, c.nombre as categoria_nombre 
-                  FROM " . $this->table . " p
-                  LEFT JOIN categorias c ON p.categoria_id = c.id
-                  WHERE p.stock_actual <= p.stock_minimo AND p.activo = TRUE
-                  ORDER BY p.stock_actual ASC";
+                FROM " . $this->table . " p
+                LEFT JOIN categorias c ON p.categoria_id = c.id
+                WHERE p.stock_actual <= p.stock_minimo AND p.activo = TRUE
+                ORDER BY p.stock_actual ASC";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
@@ -297,5 +335,24 @@ class Producto
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ? $result['tasa_cambio'] : 1;
+    }
+
+    public function obtenerProductosConInfoCompleta()
+    {
+        $query = "SELECT p.*, c.nombre as categoria_nombre 
+                FROM " . $this->table . " p
+                LEFT JOIN categorias c ON p.categoria_id = c.id
+                WHERE p.activo = TRUE
+                ORDER BY p.nombre";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        $productos = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $productos[] = $row;
+        }
+
+        return $productos;
     }
 }

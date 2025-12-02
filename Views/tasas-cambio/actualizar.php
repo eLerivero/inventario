@@ -73,7 +73,7 @@ require_once '../layouts/header.php';
                         </p>
                         <p class="mb-0">
                             <i class="fas fa-user me-1"></i>
-                            <strong>Por:</strong> <?php echo htmlspecialchars($tasaActual['data']['usuario_actualizacion']); ?>
+                            <strong>Por:</strong> <?php echo htmlspecialchars($tasaActual['data']['usuario_id']); ?>
                         </p>
                     </div>
                     <div class="col-md-4 text-md-end">
@@ -142,7 +142,7 @@ require_once '../layouts/header.php';
                                 class="form-control"
                                 id="usuario"
                                 name="usuario"
-                                value="Sistema"
+                                value="1"
                                 readonly>
                             <div class="form-text">
                                 Usuario que realiza la actualización

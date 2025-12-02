@@ -30,7 +30,7 @@ if ($_POST && $tasa) {
     try {
         $data = [
             'tasa_cambio' => floatval($_POST['tasa_cambio'] ?? 0),
-            'usuario_actualizacion' => $_POST['usuario_actualizacion'] ?? 'Sistema',
+            'usuario_id' => $_POST['usuario_id'] ?? 1,
             'activa' => isset($_POST['activa']) ? 1 : 0
         ];
 
@@ -177,14 +177,14 @@ require_once '../layouts/header.php';
                             </div>
 
                             <div class="mb-3">
-                                <label for="usuario_actualizacion" class="form-label">
+                                <label for="usuario_id" class="form-label">
                                     <i class="fas fa-user me-1"></i>Usuario
                                 </label>
                                 <input type="text"
                                     class="form-control"
-                                    id="usuario_actualizacion"
-                                    name="usuario_actualizacion"
-                                    value="<?php echo htmlspecialchars($_POST['usuario_actualizacion'] ?? $tasa['usuario_actualizacion']); ?>"
+                                    id="usuario_id"
+                                    name="usuario_id"
+                                    value="<?php echo htmlspecialchars($_POST['usuario_id'] ?? $tasa['usuario_id']); ?>"
                                     maxlength="100">
                             </div>
 

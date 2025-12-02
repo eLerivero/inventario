@@ -115,24 +115,54 @@ class VentaController
             // Calcular totales
             $total_usd = 0;
             $total_bs = 0;
+            $detalles_procesados = [];
 
             foreach ($data['detalles'] as $detalle) {
-                $subtotal_usd = $detalle['cantidad'] * $detalle['precio_unitario'];
-                $total_usd += $subtotal_usd;
-            }
-
-            $total_bs = $total_usd * $tasa_cambio;
-
-            // Validar stock disponible
-            foreach ($data['detalles'] as $detalle) {
+                // Obtener información completa del producto
                 $producto = $this->producto->obtenerPorId($detalle['producto_id']);
                 if (!$producto) {
                     throw new Exception("Producto no encontrado: " . $detalle['producto_id']);
                 }
 
+                // Verificar stock
                 if ($producto['stock_actual'] < $detalle['cantidad']) {
-                    throw new Exception("Stock insuficiente para el producto: " . $producto['nombre']);
+                    throw new Exception("Stock insuficiente para el producto: " . $producto['nombre'] . 
+                                      " (Stock disponible: " . $producto['stock_actual'] . ", Solicitado: " . $detalle['cantidad'] . ")");
                 }
+
+                // Verificar si el producto tiene precio fijo en BS
+                $usar_precio_fijo = isset($producto['usar_precio_fijo_bs']) && $producto['usar_precio_fijo_bs'];
+                
+                // Calcular precios
+                $precio_unitario_usd = $detalle['precio_unitario'];
+                
+                if ($usar_precio_fijo && !empty($producto['precio_bs']) && $producto['precio_bs'] > 0) {
+                    // Producto con precio fijo en BS
+                    $precio_unitario_bs = $producto['precio_bs'];
+                    $es_precio_fijo = true;
+                } else {
+                    // Producto sin precio fijo - convertir usando tasa de cambio
+                    $precio_unitario_bs = $precio_unitario_usd * $tasa_cambio;
+                    $es_precio_fijo = false;
+                }
+
+                $subtotal_usd = $detalle['cantidad'] * $precio_unitario_usd;
+                $subtotal_bs = $detalle['cantidad'] * $precio_unitario_bs;
+                
+                $total_usd += $subtotal_usd;
+                $total_bs += $subtotal_bs;
+
+                // Guardar detalle procesado
+                $detalles_procesados[] = [
+                    'producto_id' => $detalle['producto_id'],
+                    'cantidad' => $detalle['cantidad'],
+                    'precio_unitario' => $precio_unitario_usd,
+                    'precio_unitario_bs' => $precio_unitario_bs,
+                    'subtotal_usd' => $subtotal_usd,
+                    'subtotal_bs' => $subtotal_bs,
+                    'es_precio_fijo' => $es_precio_fijo,
+                    'producto_nombre' => $producto['nombre']
+                ];
             }
 
             // Crear la venta
@@ -156,21 +186,17 @@ class VentaController
             $venta_id = $resultado_venta['id'];
             $numero_venta = $resultado_venta['numero_venta'];
 
-            // Crear detalles de venta
+            // Crear detalles de venta en base de datos
             $detallesData = [];
-            foreach ($data['detalles'] as $detalle) {
-                $subtotal_usd = $detalle['cantidad'] * $detalle['precio_unitario'];
-                $subtotal_bs = $subtotal_usd * $tasa_cambio;
-                $precio_unitario_bs = $detalle['precio_unitario'] * $tasa_cambio;
-
+            foreach ($detalles_procesados as $detalle) {
                 $detallesData[] = [
                     'venta_id' => $venta_id,
                     'producto_id' => $detalle['producto_id'],
                     'cantidad' => $detalle['cantidad'],
                     'precio_unitario' => $detalle['precio_unitario'],
-                    'precio_unitario_bs' => $precio_unitario_bs,
-                    'subtotal' => $subtotal_usd,
-                    'subtotal_bs' => $subtotal_bs
+                    'precio_unitario_bs' => $detalle['precio_unitario_bs'],
+                    'subtotal' => $detalle['subtotal_usd'],
+                    'subtotal_bs' => $detalle['subtotal_bs']
                 ];
             }
 
@@ -180,7 +206,7 @@ class VentaController
 
             // Actualizar stock si la venta está completada
             if (($data['estado'] ?? 'pendiente') === 'completada') {
-                foreach ($data['detalles'] as $detalle) {
+                foreach ($detalles_procesados as $detalle) {
                     $producto_actual = $this->producto->obtenerPorId($detalle['producto_id']);
                     $nuevo_stock = $producto_actual['stock_actual'] - $detalle['cantidad'];
 
@@ -188,7 +214,7 @@ class VentaController
                         $detalle['producto_id'],
                         $nuevo_stock,
                         'venta',
-                        "Venta #$numero_venta"
+                        "Venta #$numero_venta - " . $detalle['producto_nombre']
                     );
                 }
             }
@@ -202,7 +228,8 @@ class VentaController
                 "numero_venta" => $numero_venta,
                 "tasa_cambio" => $tasa_cambio,
                 "total_usd" => $total_usd,
-                "total_bs" => $total_bs
+                "total_bs" => $total_bs,
+                "detalles_procesados" => $detalles_procesados
             ];
         } catch (Exception $e) {
             $this->db->rollBack();
@@ -329,6 +356,32 @@ class VentaController
             return [
                 "success" => false,
                 "message" => "Error al buscar ventas: " . $e->getMessage()
+            ];
+        }
+    }
+
+    // Nuevo método para obtener productos con precio fijo
+    public function obtenerProductosConInfoCompleta()
+    {
+        try {
+            $query = "SELECT p.*, c.nombre as categoria_nombre 
+                      FROM productos p
+                      LEFT JOIN categorias c ON p.categoria_id = c.id
+                      WHERE p.activo = TRUE
+                      ORDER BY p.nombre";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $productos = $stmt->fetchAll();
+
+            return [
+                "success" => true,
+                "data" => $productos
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener productos: " . $e->getMessage()
             ];
         }
     }
