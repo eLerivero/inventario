@@ -218,8 +218,19 @@ include '../layouts/header.php';
                                     <strong class="text-success"><?php echo $venta['total_formateado_bs'] ?? TasaCambioHelper::formatearBS($venta['total_bs']); ?></strong>
                                 </td>
                                 <td>
-                                    <small class="text-muted"><?php echo $venta['tasa_formateada'] ?? number_format($venta['tasa_cambio_utilizada'], 2); ?> Bs/$</small>
-                                </td>
+    <small class="text-muted">
+        <?php 
+        // Validar que exista la tasa de cambio
+        if (isset($venta['tasa_cambio_utilizada'])) {
+            echo number_format($venta['tasa_cambio_utilizada'], 2) . ' Bs/$';
+        } elseif (isset($venta['tasa_formateada'])) {
+            echo $venta['tasa_formateada'] . ' Bs/$';
+        } else {
+            echo 'N/A';
+        }
+        ?>
+    </small>
+</td>
                                 <td>
                                     <?php echo htmlspecialchars($venta['tipo_pago_nombre'] ?? 'No especificado'); ?>
                                 </td>

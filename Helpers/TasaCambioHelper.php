@@ -6,15 +6,22 @@ class TasaCambioHelper
      */
     public static function formatearUSD($cantidad, $incluirSimbolo = true)
     {
+        // Validar que la cantidad no sea nula
+        if ($cantidad === null || $cantidad === '') {
+            $cantidad = 0;
+        }
         $formateado = number_format($cantidad, 2);
         return $incluirSimbolo ? '$' . $formateado : $formateado;
     }
-
     /**
      * Formatear cantidad en Bolívares
      */
     public static function formatearBS($cantidad, $incluirSimbolo = true)
     {
+        // Validar que la cantidad no sea nula
+        if ($cantidad === null || $cantidad === '') {
+            $cantidad = 0;
+        }
         $formateado = number_format($cantidad, 2);
         return $incluirSimbolo ? 'Bs ' . $formateado : $formateado;
     }

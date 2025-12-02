@@ -37,9 +37,9 @@ class Venta
     public function crear($data)
     {
         $query = "INSERT INTO " . $this->table . " 
-                  (cliente_id, total, total_bs, tasa_cambio_utilizada, tipo_pago_id, estado, fecha_hora, observaciones) 
+                  (cliente_id, total, total_bs, tasa_cambio, tipo_pago_id, estado, fecha_hora, observaciones) 
                   VALUES 
-                  (:cliente_id, :total, :total_bs, :tasa_cambio_utilizada, :tipo_pago_id, :estado, :fecha_hora, :observaciones)
+                  (:cliente_id, :total, :total_bs, :tasa_cambio, :tipo_pago_id, :estado, :fecha_hora, :observaciones)
                   RETURNING id, numero_venta";
 
         $stmt = $this->conn->prepare($query);
@@ -47,7 +47,7 @@ class Venta
         $stmt->bindParam(":cliente_id", $data['cliente_id']);
         $stmt->bindParam(":total", $data['total']);
         $stmt->bindParam(":total_bs", $data['total_bs']);
-        $stmt->bindParam(":tasa_cambio_utilizada", $data['tasa_cambio_utilizada']);
+        $stmt->bindParam(":tasa_cambio", $data['tasa_cambio_utilizada']);
         $stmt->bindParam(":tipo_pago_id", $data['tipo_pago_id']);
         $stmt->bindParam(":estado", $data['estado']);
         $stmt->bindParam(":fecha_hora", $data['fecha_hora']);

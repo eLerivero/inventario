@@ -117,7 +117,7 @@ CREATE TABLE ventas (
     id SERIAL PRIMARY KEY,
     numero_venta VARCHAR(50) UNIQUE NOT NULL,
     cliente_id INTEGER,
-    usuario_id INTEGER NOT NULL,
+    usuario_id INTEGER,
     tipo_pago_id INTEGER,
     subtotal DECIMAL(10,2) NOT NULL DEFAULT 0,
     iva DECIMAL(10,2) DEFAULT 0,
