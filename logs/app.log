@@ -1,221 +1,37 @@
-[2025-12-02 13:20:14] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-02 13:20:22] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2025-12-02 13:28:08] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 13:28:27] [INFO] Categorías listadas {"total":10}
-[2025-12-02 13:28:52] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 13:29:04] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 13:29:34] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 13:29:36] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 13:43:58] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 13:44:02] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 13:44:07] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 13:44:17] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 13:44:46] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 13:44:48] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 09:45:11] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 09:45:11] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 09:45:11] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 170 
-[2025-12-02 09:45:11] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 170 
-[2025-12-02 09:45:11] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 09:45:11] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 09:45:11] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 281 
-[2025-12-02 09:45:11] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 281 
-[2025-12-02 09:45:14] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:45:14] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:45:14] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:45:14] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:45:14] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 187 
-[2025-12-02 09:45:14] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 187 
-[2025-12-02 09:45:20] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:45:20] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:45:20] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:45:20] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:45:30] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:45:30] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:45:30] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:45:30] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:48:18] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:48:18] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:48:18] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:48:18] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:51:33] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:51:33] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:51:33] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:51:33] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:51:37] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:51:37] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:51:37] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:51:37] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:51:40] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:51:40] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:51:40] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:51:40] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:53:14] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:53:14] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:53:14] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:53:14] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:55:53] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:55:53] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:55:53] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:55:53] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:55:53] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 187 
-[2025-12-02 09:55:57] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:55:57] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:55:57] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:55:57] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:55:57] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 187 
-[2025-12-02 09:56:19] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:56:19] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:56:19] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:56:19] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:56:26] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:56:26] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:56:26] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:56:26] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:57:22] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:57:22] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:57:22] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:57:22] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:57:26] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:57:26] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:57:26] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:57:26] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:57:28] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:57:28] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:57:28] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:57:28] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:58:20] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:58:20] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 09:58:20] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 09:58:20] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 14:02:34] [DEBUG] Todas las categorías obtenidas {"total":0}
-[2025-12-02 14:02:36] [DEBUG] Todas las categorías obtenidas {"total":0}
-[2025-12-02 17:31:12] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 17:31:40] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 17:31:46] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 17:32:10] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 17:32:12] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 13:32:13] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 13:32:13] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 13:32:13] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 170 
-[2025-12-02 13:32:13] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 170 
-[2025-12-02 13:32:13] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 13:32:13] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 13:32:13] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 281 
-[2025-12-02 13:32:13] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 281 
-[2025-12-02 13:32:16] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 13:32:16] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 13:32:16] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 13:32:16] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 13:32:16] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 187 
-[2025-12-02 13:32:22] [ERROR] WARNING: Undefined array key "created_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 13:32:22] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 98 
-[2025-12-02 13:32:22] [ERROR] WARNING: Undefined array key "updated_at" en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 13:32:22] [ERROR] DEPRECATED: strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 102 
-[2025-12-02 13:33:39] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 13:33:39] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 13:33:39] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 13:33:39] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 13:33:41] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
-[2025-12-02 13:33:52] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 13:33:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 13:33:52] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 13:33:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 13:33:52] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 13:33:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 13:34:01] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\editar.php línea 187 
-[2025-12-02 13:34:12] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 13:34:12] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 13:34:12] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 13:34:12] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 13:34:12] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 13:34:12] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 17:34:15] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 17:34:17] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 17:34:40] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 17:34:43] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:20:11] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 14:20:11] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 14:20:11] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:20:11] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:20:11] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:20:11] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 18:20:13] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:20:13] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::calcularMargenGanancia() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":248,"trace":"#0 {main}"}
-[2025-12-02 18:20:15] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:20:15] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::calcularMargenGanancia() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":248,"trace":"#0 {main}"}
-[2025-12-02 18:20:41] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:20:41] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::calcularMargenGanancia() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":248,"trace":"#0 {main}"}
-[2025-12-02 18:22:11] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:22:11] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":249,"trace":"#0 {main}"}
-[2025-12-02 18:22:14] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:22:14] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":249,"trace":"#0 {main}"}
-[2025-12-02 18:22:17] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:22:17] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":249,"trace":"#0 {main}"}
-[2025-12-02 18:23:37] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 18:23:56] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:23:57] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":249,"trace":"#0 {main}"}
-[2025-12-02 18:25:10] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:25:10] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":249,"trace":"#0 {main}"}
-[2025-12-02 18:27:43] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:27:43] [ERROR] Excepción no capturada: Call to undefined function obtenerClaseMargenLocal() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":119,"trace":"#0 {main}"}
-[2025-12-02 18:28:32] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:28:32] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":251,"trace":"#0 {main}"}
-[2025-12-02 18:29:30] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:29:31] [ERROR] Excepción no capturada: number_format(): Argument #1 ($num) must be of type float, array given {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":288,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\productos\\index.php(288): number_format(Array, 1)\n#1 {main}"}
-[2025-12-02 18:30:17] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:30:17] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":251,"trace":"#0 {main}"}
-[2025-12-02 18:31:13] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:31:13] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":254,"trace":"#0 {main}"}
-[2025-12-02 18:31:19] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:31:19] [ERROR] Excepción no capturada: Call to undefined method TasaCambioHelper::obtenerClaseMargen() {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":254,"trace":"#0 {main}"}
-[2025-12-02 18:33:06] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:33:06] [ERROR] Excepción no capturada: number_format(): Argument #1 ($num) must be of type float, array given {"file":"C:\\wamp64\\www\\inventario\\Views\\productos\\index.php","line":288,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\productos\\index.php(288): number_format(Array, 1)\n#1 {main}"}
-[2025-12-02 18:36:30] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 18:36:45] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 18:36:53] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 18:37:47] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 18:37:49] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 18:38:07] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 18:38:14] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 18:38:16] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 14:38:45] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 14:38:45] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 14:38:45] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:38:45] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:38:45] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:38:45] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:41:58] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 14:41:58] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 14:41:58] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:41:58] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:04] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
-[2025-12-02 14:42:13] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 14:42:13] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 14:42:13] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:13] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:13] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:13] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:30] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 14:42:30] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 14:42:30] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:30] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:30] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:30] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:30] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:30] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:42] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 14:42:42] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2025-12-02 14:42:42] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:42] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:42] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:42] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:42] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:42] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:42] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 14:42:42] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2025-12-02 18:42:50] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 18:44:19] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 18:44:21] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 18:44:38] [DEBUG] Todas las categorías obtenidas {"total":10}
-[2025-12-02 18:44:40] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-03 15:31:50] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-03 15:31:52] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-03 15:32:30] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-03 15:32:32] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-03 15:39:46] [DEBUG] Todas las categorías obtenidas {"total":10}
+[2025-12-03 11:44:22] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-03 11:44:22] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-03 11:44:22] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:44:22] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:44:22] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:44:22] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:44:22] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:44:22] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:44:22] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:44:22] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:03] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-03 11:45:03] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-03 11:45:03] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:03] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:03] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:03] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:03] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:03] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:03] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:03] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:21] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-03 11:45:21] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2025-12-03 11:45:21] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:21] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:21] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:21] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:21] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:21] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:21] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:21] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:21] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-03 11:45:21] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 

@@ -82,9 +82,9 @@ if ($_POST && isset($_POST['cliente_id'])) {
                 foreach ($result['detalles_procesados'] as $detalle) {
                     $tipo_precio = $detalle['es_precio_fijo'] ? " (Precio Fijo BS)" : " (Conversión automática)";
                     $success_message .= "<br>• " . $detalle['producto_nombre'] . 
-                                      " - Cant: " . $detalle['cantidad'] . 
-                                      " - Precio: $" . number_format($detalle['precio_unitario'], 2) . 
-                                      " / Bs " . number_format($detalle['precio_unitario_bs'], 2) . $tipo_precio;
+                                    " - Cant: " . $detalle['cantidad'] . 
+                                    " - Precio: $" . number_format($detalle['precio_unitario'], 2) . 
+                                    " / Bs " . number_format($detalle['precio_unitario_bs'], 2) . $tipo_precio;
                 }
             }
             

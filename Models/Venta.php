@@ -97,11 +97,11 @@ class Venta
     public function obtenerPorId($id)
     {
         $query = "SELECT v.*, c.nombre as cliente_nombre, c.email as cliente_email, 
-                         c.telefono as cliente_telefono, tp.nombre as tipo_pago_nombre
-                  FROM " . $this->table . " v
-                  LEFT JOIN clientes c ON v.cliente_id = c.id
-                  LEFT JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
-                  WHERE v.id = :id";
+                    c.telefono as cliente_telefono, tp.nombre as tipo_pago_nombre
+                FROM " . $this->table . " v
+                LEFT JOIN clientes c ON v.cliente_id = c.id
+                LEFT JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
+                WHERE v.id = :id";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $id);

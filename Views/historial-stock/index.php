@@ -38,7 +38,7 @@ $estadisticas = $historialController->obtenerEstadisticas();
 $stats_data = $estadisticas['success'] ? $estadisticas['data'] : [];
 
 // Obtener productos para el filtro
-$productos = $productoController->obtenerTodos();
+$productos = $productoController->obtenerProductosActivos();
 
 // 3. DEFINIR TÍTULO Y INCLUIR HEADER
 $page_title = $producto_id ? "Historial de Stock - " . ($producto_info['nombre'] ?? '') : "Historial de Stock";
@@ -301,7 +301,7 @@ require_once '../layouts/header.php';
                                         ?>
                                     </td>
                                     <td>
-                                        <small class="text-muted"><?php echo htmlspecialchars($movimiento['usuario']); ?></small>
+                                        <small class="text-muted"><?php echo htmlspecialchars($movimiento['usuario_id']); ?></small>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

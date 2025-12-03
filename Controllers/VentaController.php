@@ -32,7 +32,7 @@ class VentaController
             foreach ($ventas as &$venta) {
                 $venta['total_formateado_usd'] = TasaCambioHelper::formatearUSD($venta['total']);
                 $venta['total_formateado_bs'] = TasaCambioHelper::formatearBS($venta['total_bs']);
-                $venta['tasa_formateada'] = TasaCambioHelper::formatearBS($venta['tasa_cambio_utilizada'], false);
+                $venta['tasa_formateada'] = TasaCambioHelper::formatearBS($venta['tasa_cambio'], false);
             }
 
             return [
@@ -58,7 +58,7 @@ class VentaController
                 // Formatear precios para mostrar
                 $venta['total_formateado_usd'] = TasaCambioHelper::formatearUSD($venta['total']);
                 $venta['total_formateado_bs'] = TasaCambioHelper::formatearBS($venta['total_bs']);
-                $venta['tasa_formateada'] = TasaCambioHelper::formatearBS($venta['tasa_cambio_utilizada'], false);
+                $venta['tasa_formateada'] = TasaCambioHelper::formatearBS($venta['tasa_cambio'], false);
 
                 foreach ($venta['detalles'] as &$detalle) {
                     $detalle['precio_unitario_formateado_usd'] = TasaCambioHelper::formatearUSD($detalle['precio_unitario']);
@@ -241,55 +241,60 @@ class VentaController
     }
 
     public function actualizarEstado($id, $estado)
-    {
-        try {
-            $this->db->beginTransaction();
+{
+    try {
+        $this->db->beginTransaction();
 
-            $venta = $this->venta->obtenerPorId($id);
-            if (!$venta) {
-                throw new Exception("Venta no encontrada");
-            }
+        $venta = $this->venta->obtenerPorId($id);
+        if (!$venta) {
+            throw new Exception("Venta no encontrada");
+        }
 
-            // Actualizar estado
-            $query = "UPDATE ventas SET estado = :estado WHERE id = :id";
-            $stmt = $this->db->prepare($query);
-            $stmt->bindParam(":estado", $estado);
-            $stmt->bindParam(":id", $id);
+        // Actualizar estado
+        $query = "UPDATE ventas SET estado = :estado WHERE id = :id";
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(":estado", $estado);
+        $stmt->bindParam(":id", $id);
 
-            if (!$stmt->execute()) {
-                throw new Exception("Error al actualizar estado de la venta");
-            }
+        if (!$stmt->execute()) {
+            throw new Exception("Error al actualizar estado de la venta");
+        }
 
-            // Si se completa la venta, actualizar stock
-            if ($estado === 'completada' && $venta['estado'] !== 'completada') {
-                $detalles = $this->obtenerDetalles($id);
-                foreach ($detalles as $detalle) {
-                    $producto_actual = $this->producto->obtenerPorId($detalle['producto_id']);
-                    $nuevo_stock = $producto_actual['stock_actual'] - $detalle['cantidad'];
+        // Si se completa la venta, actualizar stock
+        if ($estado === 'completada' && $venta['estado'] !== 'completada') {
+            $detalles = $this->obtenerDetalles($id);
+            foreach ($detalles as $detalle) {
+                $producto_actual = $this->producto->obtenerPorId($detalle['producto_id']);
+                $nuevo_stock = $producto_actual['stock_actual'] - $detalle['cantidad'];
 
-                    $this->producto->actualizarStock(
-                        $detalle['producto_id'],
-                        $nuevo_stock,
-                        'venta',
-                        "Venta completada #{$venta['numero_venta']}"
-                    );
+                // Usar el método actualizarStock sin iniciar sesión
+                $result = $this->producto->actualizarStock(
+                    $detalle['producto_id'],
+                    $nuevo_stock,
+                    'venta',
+                    "Venta completada #{$venta['numero_venta']}"
+                );
+                
+                if (!$result['success']) {
+                    throw new Exception($result['message']);
                 }
             }
-
-            $this->db->commit();
-
-            return [
-                "success" => true,
-                "message" => "Estado de venta actualizado exitosamente"
-            ];
-        } catch (Exception $e) {
-            $this->db->rollBack();
-            return [
-                "success" => false,
-                "message" => "Error al actualizar estado: " . $e->getMessage()
-            ];
         }
+
+        $this->db->commit();
+
+        return [
+            "success" => true,
+            "message" => "Estado de venta actualizado exitosamente"
+        ];
+    } catch (Exception $e) {
+        $this->db->rollBack();
+        return [
+            "success" => false,
+            "message" => "Error al actualizar estado: " . $e->getMessage()
+        ];
     }
+}
 
     public function obtenerEstadisticas()
     {

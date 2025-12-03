@@ -13,7 +13,7 @@ class HistorialStock
     public $referencia_id;
     public $tipo_referencia;
     public $observaciones;
-    public $usuario;
+    public $usuario_id;
     public $fecha_hora;
     public $created_at;
 
@@ -48,39 +48,42 @@ class HistorialStock
         return $stmt;
     }
 
-    public function crear()
-    {
-        $query = "INSERT INTO " . $this->table . " 
-                  SET producto_id = :producto_id,
-                      cantidad_anterior = :cantidad_anterior,
-                      cantidad_nueva = :cantidad_nueva,
-                      diferencia = :diferencia,
-                      tipo_movimiento = :tipo_movimiento,
-                      referencia_id = :referencia_id,
-                      tipo_referencia = :tipo_referencia,
-                      observaciones = :observaciones,
-                      usuario = :usuario,
-                      fecha_hora = :fecha_hora,
-                      created_at = NOW()";
+public function crear()
+{
+    $query = "INSERT INTO " . $this->table . " 
+              SET producto_id = :producto_id,
+                  cantidad_anterior = :cantidad_anterior,
+                  cantidad_nueva = :cantidad_nueva,
+                  diferencia = :diferencia,
+                  tipo_movimiento = :tipo_movimiento,
+                  referencia_id = :referencia_id,
+                  tipo_referencia = :tipo_referencia,
+                  observaciones = :observaciones,
+                  usuario_id = :usuario_id,
+                  fecha_hora = :fecha_hora,
+                  created_at = NOW()";
 
-        $stmt = $this->conn->prepare($query);
+    $stmt = $this->conn->prepare($query);
 
-        $stmt->bindParam(":producto_id", $this->producto_id);
-        $stmt->bindParam(":cantidad_anterior", $this->cantidad_anterior);
-        $stmt->bindParam(":cantidad_nueva", $this->cantidad_nueva);
-        $stmt->bindParam(":diferencia", $this->diferencia);
-        $stmt->bindParam(":tipo_movimiento", $this->tipo_movimiento);
-        $stmt->bindParam(":referencia_id", $this->referencia_id);
-        $stmt->bindParam(":tipo_referencia", $this->tipo_referencia);
-        $stmt->bindParam(":observaciones", $this->observaciones);
-        $stmt->bindParam(":usuario", $this->usuario);
-        $stmt->bindParam(":fecha_hora", $this->fecha_hora);
+    // Usar valor por defecto si no está definido
+    $usuario_id = $this->usuario_id ?? 1;
+    
+    $stmt->bindParam(":producto_id", $this->producto_id);
+    $stmt->bindParam(":cantidad_anterior", $this->cantidad_anterior);
+    $stmt->bindParam(":cantidad_nueva", $this->cantidad_nueva);
+    $stmt->bindParam(":diferencia", $this->diferencia);
+    $stmt->bindParam(":tipo_movimiento", $this->tipo_movimiento);
+    $stmt->bindParam(":referencia_id", $this->referencia_id);
+    $stmt->bindParam(":tipo_referencia", $this->tipo_referencia);
+    $stmt->bindParam(":observaciones", $this->observaciones);
+    $stmt->bindParam(":usuario_id", $usuario_id);
+    $stmt->bindParam(":fecha_hora", $this->fecha_hora);
 
-        if ($stmt->execute()) {
-            return $this->conn->lastInsertId();
-        }
-        return false;
+    if ($stmt->execute()) {
+        return $this->conn->lastInsertId();
     }
+    return false;
+}
 
     public function eliminar($id)
     {

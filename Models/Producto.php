@@ -215,13 +215,13 @@ class Producto
         $stmt->bindParam(":id", $producto_id);
 
         if ($stmt->execute()) {
-            // Registrar en historial - VERSIÓN CORREGIDA
+            
             $historial_query = "INSERT INTO historial_stock 
-                               (producto_id, cantidad_anterior, cantidad_nueva, diferencia, 
-                                tipo_movimiento, observaciones, usuario) 
-                               VALUES 
-                               (:producto_id, :cantidad_anterior, :cantidad_nueva, :diferencia,
-                                :tipo_movimiento, :observaciones, :usuario)";
+                            (producto_id, cantidad_anterior, cantidad_nueva, diferencia, 
+                                tipo_movimiento, observaciones, usuario_id) 
+                            VALUES 
+                            (:producto_id, :cantidad_anterior, :cantidad_nueva, :diferencia,
+                                :tipo_movimiento, :observaciones, :usuario_id)";
 
             $historial_stmt = $this->conn->prepare($historial_query);
             
@@ -229,7 +229,7 @@ class Producto
             $cantidad_anterior = $producto['stock_actual'];
             $cantidad_nueva = $nuevo_stock;
             $observaciones_final = $observaciones ?: 'Actualización de stock';
-            $usuario = isset($_SESSION['usuario_nombre']) ? $_SESSION['usuario_nombre'] : 'Sistema';
+            $usuario_id = isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : 1;
             
             $historial_stmt->bindParam(":producto_id", $producto_id);
             $historial_stmt->bindParam(":cantidad_anterior", $cantidad_anterior);
@@ -237,7 +237,7 @@ class Producto
             $historial_stmt->bindParam(":diferencia", $diferencia);
             $historial_stmt->bindParam(":tipo_movimiento", $tipo_movimiento);
             $historial_stmt->bindParam(":observaciones", $observaciones_final);
-            $historial_stmt->bindParam(":usuario", $usuario);
+            $historial_stmt->bindParam(":usuario_id", $usuario_id);
 
             $historial_stmt->execute();
 

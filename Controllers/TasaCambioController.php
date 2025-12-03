@@ -65,7 +65,7 @@ class TasaCambioController
         }
     }
 
-    public function actualizarTasa($tasa, $usuario = 'Sistema')
+    public function actualizarTasa($tasa, $usuario = 1)
     {
         try {
             $this->db->beginTransaction();

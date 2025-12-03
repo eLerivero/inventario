@@ -115,7 +115,7 @@ class HistorialStockController
             $this->historialStock->referencia_id = null;
             $this->historialStock->tipo_referencia = 'ajuste_manual';
             $this->historialStock->observaciones = $data['observaciones'] ?? 'Ajuste manual de stock';
-            $this->historialStock->usuario = $data['usuario'] ?? 'Sistema';
+            $this->historialStock->usuario_id = $data['usuario_id'] ?? 1;
             $this->historialStock->fecha_hora = date('Y-m-d H:i:s');
 
             $historial_id = $this->historialStock->crear();
