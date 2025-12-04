@@ -67,19 +67,28 @@ class ProductoController
                 throw new Exception("El nombre del producto es obligatorio");
             }
 
-            if (empty($data['precio']) || $data['precio'] <= 0) {
-                throw new Exception("El precio debe ser mayor a 0");
-            }
-
             // Validar que el SKU sea único
             $producto_existente = $this->producto->obtenerPorSku($data['codigo_sku']);
             if ($producto_existente) {
                 throw new Exception("El código SKU ya existe");
             }
 
-            // Si se marca como precio fijo en BS, validar que se proporcione precio_bs
-            if (isset($data['usar_precio_fijo_bs']) && $data['usar_precio_fijo_bs'] && empty($data['precio_bs'])) {
-                throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
+            // MODIFICACIÓN: Manejar validación según tipo de precio
+            if (isset($data['usar_precio_fijo_bs']) && $data['usar_precio_fijo_bs']) {
+                // Para precio fijo en Bs, el precio_bs es obligatorio
+                if (empty($data['precio_bs']) || $data['precio_bs'] <= 0) {
+                    throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
+                }
+                // Para precio fijo, los precios en USD no son obligatorios
+                // Si no se proporcionan, se pueden establecer en 0
+                if (empty($data['precio']) || $data['precio'] < 0) {
+                    $data['precio'] = 0;
+                }
+            } else {
+                // Para precio NO fijo, el precio en USD es obligatorio
+                if (empty($data['precio']) || $data['precio'] <= 0) {
+                    throw new Exception("El precio en USD debe ser mayor a 0 para productos sin precio fijo");
+                }
             }
 
             return $this->producto->crear($data);
@@ -99,13 +108,21 @@ class ProductoController
                 throw new Exception("El nombre del producto es obligatorio");
             }
 
-            if (empty($data['precio']) || $data['precio'] <= 0) {
-                throw new Exception("El precio debe ser mayor a 0");
-            }
-
-            // Si se marca como precio fijo en BS, validar que se proporcione precio_bs
-            if (isset($data['usar_precio_fijo_bs']) && $data['usar_precio_fijo_bs'] && empty($data['precio_bs'])) {
-                throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
+            // MODIFICACIÓN: Manejar validación según tipo de precio
+            if (isset($data['usar_precio_fijo_bs']) && $data['usar_precio_fijo_bs']) {
+                // Para precio fijo en Bs, el precio_bs es obligatorio
+                if (empty($data['precio_bs']) || $data['precio_bs'] <= 0) {
+                    throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
+                }
+                // Para precio fijo, el precio en USD puede ser 0
+                if (empty($data['precio']) || $data['precio'] < 0) {
+                    $data['precio'] = 0;
+                }
+            } else {
+                // Para precio NO fijo, el precio en USD es obligatorio
+                if (empty($data['precio']) || $data['precio'] <= 0) {
+                    throw new Exception("El precio en USD debe ser mayor a 0 para productos sin precio fijo");
+                }
             }
 
             return $this->producto->actualizar($id, $data);
@@ -246,7 +263,7 @@ class ProductoController
         try {
             // Obtener tasa de cambio actual
             $tasaCambio = $this->obtenerTasaCambioActual();
-            
+
             $query = "SELECT 
                         p.id,
                         p.codigo_sku,
@@ -262,36 +279,36 @@ class ProductoController
                     FROM productos p
                     LEFT JOIN categorias c ON p.categoria_id = c.id
                     WHERE p.activo = TRUE";
-            
+
             $conditions = [];
             $params = [];
-            
+
             if (!empty($searchTerm)) {
                 $conditions[] = "(p.nombre ILIKE :searchTerm OR 
                                p.codigo_sku ILIKE :searchTerm OR 
                                p.descripcion ILIKE :searchTerm)";
                 $params[':searchTerm'] = "%" . $searchTerm . "%";
             }
-            
+
             if (!empty($categoria)) {
                 $conditions[] = "c.nombre = :categoria";
                 $params[':categoria'] = $categoria;
             }
-            
+
             if (!empty($conditions)) {
                 $query .= " AND " . implode(" AND ", $conditions);
             }
-            
+
             $query .= " ORDER BY p.nombre ASC";
-            
+
             $stmt = $this->db->prepare($query);
-            
+
             foreach ($params as $key => $val) {
                 $stmt->bindValue($key, $val);
             }
-            
+
             $stmt->execute();
-            
+
             $productos = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 // Calcular precio en bolívares según tipo
@@ -302,23 +319,22 @@ class ProductoController
                     // Conversión automática con tasa actual
                     $row['precio_bs'] = floatval($row['precio']) * $tasaCambio;
                 }
-                
+
                 // Asegurar tipos de datos correctos
                 $row['stock_actual'] = intval($row['stock_actual']);
                 $row['precio'] = floatval($row['precio']);
                 $row['usar_precio_fijo_bs'] = (bool)$row['usar_precio_fijo_bs'];
                 $row['activo'] = (bool)$row['activo'];
-                
+
                 $productos[] = $row;
             }
-            
+
             return [
                 "success" => true,
                 "data" => $productos,
                 "count" => count($productos),
                 "tasa_cambio" => $tasaCambio
             ];
-            
         } catch (Exception $e) {
             return [
                 "success" => false,
@@ -336,18 +352,17 @@ class ProductoController
                       WHERE activa = TRUE 
                       ORDER BY fecha_actualizacion DESC 
                       LIMIT 1";
-            
+
             $stmt = $this->db->prepare($query);
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             if ($result && isset($result['tasa_cambio'])) {
                 return floatval($result['tasa_cambio']);
             }
-            
+
             // Si no hay tasa activa, usar un valor por defecto
             return 35.00;
-            
         } catch (Exception $e) {
             // En caso de error, retornar un valor por defecto
             return 35.00;
@@ -360,16 +375,16 @@ class ProductoController
         try {
             // Usar el método del modelo
             $productos = $this->producto->obtenerProductosConInfoCompleta();
-            
+
             // Obtener tasa de cambio para calcular precios en bolívares
             $tasaCambio = $this->obtenerTasaCambioActual();
-            
+
             // Procesar productos para calcular precios en BS si no son fijos
             foreach ($productos as &$producto) {
                 if (!$producto['usar_precio_fijo_bs'] || $producto['precio_bs'] <= 0) {
                     $producto['precio_bs'] = floatval($producto['precio']) * $tasaCambio;
                 }
-                
+
                 // Asegurar tipos de datos
                 $producto['stock_actual'] = intval($producto['stock_actual']);
                 $producto['precio'] = floatval($producto['precio']);
@@ -377,14 +392,13 @@ class ProductoController
                 $producto['usar_precio_fijo_bs'] = (bool)$producto['usar_precio_fijo_bs'];
                 $producto['activo'] = (bool)$producto['activo'];
             }
-            
+
             return [
                 "success" => true,
                 "data" => $productos,
                 "count" => count($productos),
                 "tasa_cambio" => $tasaCambio
             ];
-            
         } catch (Exception $e) {
             return [
                 "success" => false,

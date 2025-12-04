@@ -320,4 +320,4 @@ function createToastContainer() {
 }
 </style>
 
-<?php include '../layouts/footer.php'; ?>
+<!-- <?php include '../layouts/footer.php'; ?> -->

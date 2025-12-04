@@ -49,43 +49,52 @@ class Producto
 
         $stmt = $this->conn->prepare($query);
 
-        // Obtener tasa de cambio actual para calcular precios en BS si no son fijos
-        $tasa_cambio = $this->obtenerTasaCambio();
+        // MODIFICACIÓN: Manejar lógica según tipo de precio
+        $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
 
-        // Calcular precios en BS si no se proporcionan y no es precio fijo
-        if (empty($data['precio_bs']) && (!isset($data['usar_precio_fijo_bs']) || !$data['usar_precio_fijo_bs'])) {
-            $data['precio_bs'] = round($data['precio'] * $tasa_cambio, 2);
-        }
+        if ($usarPrecioFijo) {
+            // Para precio fijo en BS
+            // Mantener el precio_bs tal como viene
+            $precio_bs = $data['precio_bs'] ?? 0;
+            $precio = $data['precio'] ?? 0;
 
-        // Asignar valores por defecto a variables
-        $precio_costo = $data['precio_costo'] ?? 0;
-        $precio_costo_bs = $data['precio_costo_bs'] ?? 0;
-        
-        // Si no se proporciona precio_costo_bs, calcularlo
-        if (empty($precio_costo_bs) && (!isset($data['usar_precio_fijo_bs']) || !$data['usar_precio_fijo_bs'])) {
+            // Para precio fijo, no calcular precios en BS basados en tasa
+            // Los precios en BS se mantienen fijos
+            $precio_costo_bs = $data['precio_costo_bs'] ?? 0;
+            $precio_costo = $data['precio_costo'] ?? 0;
+        } else {
+            // Para precio NO fijo
+            $precio = $data['precio'] ?? 0;
+
+            // Obtener tasa de cambio para calcular precios en BS
+            $tasa_cambio = $this->obtenerTasaCambio();
+
+            // Calcular precio_bs automáticamente
+            $precio_bs = round($precio * $tasa_cambio, 2);
+
+            $precio_costo = $data['precio_costo'] ?? 0;
+            // Calcular precio_costo_bs automáticamente
             $precio_costo_bs = round($precio_costo * $tasa_cambio, 2);
         }
 
         $stmt->bindParam(":codigo_sku", $data['codigo_sku']);
         $stmt->bindParam(":nombre", $data['nombre']);
         $stmt->bindParam(":descripcion", $data['descripcion']);
-        $stmt->bindParam(":precio", $data['precio']);
-        $stmt->bindParam(":precio_bs", $data['precio_bs']);
+        $stmt->bindParam(":precio", $precio);
+        $stmt->bindParam(":precio_bs", $precio_bs);
         $stmt->bindParam(":precio_costo", $precio_costo);
         $stmt->bindParam(":precio_costo_bs", $precio_costo_bs);
-        
-        $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
         $stmt->bindParam(":usar_precio_fijo_bs", $usarPrecioFijo, PDO::PARAM_BOOL);
-        
+
         $stock_actual = $data['stock_actual'] ?? 0;
         $stmt->bindParam(":stock_actual", $stock_actual);
-        
+
         $stock_minimo = $data['stock_minimo'] ?? 5;
         $stmt->bindParam(":stock_minimo", $stock_minimo);
-        
+
         $categoria_id = $data['categoria_id'] ?? null;
         $stmt->bindParam(":categoria_id", $categoria_id);
-        
+
         $activo = isset($data['activo']) ? (bool)$data['activo'] : true;
         $stmt->bindParam(":activo", $activo, PDO::PARAM_BOOL);
 
@@ -119,40 +128,46 @@ class Producto
 
         $stmt = $this->conn->prepare($query);
 
-        // Si no es precio fijo y no se proporciona precio_bs, calcularlo
-        if ((!isset($data['usar_precio_fijo_bs']) || !$data['usar_precio_fijo_bs']) && empty($data['precio_bs'])) {
-            $tasa_cambio = $this->obtenerTasaCambio();
-            $data['precio_bs'] = round($data['precio'] * $tasa_cambio, 2);
-        }
+        // MODIFICACIÓN: Manejar lógica según tipo de precio
+        $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
 
-        // Asignar valores por defecto a variables
-        $precio_costo = $data['precio_costo'] ?? 0;
-        $precio_costo_bs = $data['precio_costo_bs'] ?? 0;
-        
-        // Si no se proporciona precio_costo_bs, calcularlo
-        if (empty($precio_costo_bs) && (!isset($data['usar_precio_fijo_bs']) || !$data['usar_precio_fijo_bs'])) {
+        if ($usarPrecioFijo) {
+            // Para precio fijo en BS
+            // Mantener los precios en BS tal como vienen
+            $precio_bs = $data['precio_bs'] ?? 0;
+            $precio = $data['precio'] ?? 0;
+            $precio_costo_bs = $data['precio_costo_bs'] ?? 0;
+            $precio_costo = $data['precio_costo'] ?? 0;
+        } else {
+            // Para precio NO fijo
+            $precio = $data['precio'] ?? 0;
+            $precio_costo = $data['precio_costo'] ?? 0;
+
+            // Obtener tasa de cambio para calcular precios en BS
+            $tasa_cambio = $this->obtenerTasaCambio();
+
+            // Calcular precios en BS automáticamente
+            $precio_bs = round($precio * $tasa_cambio, 2);
             $precio_costo_bs = round($precio_costo * $tasa_cambio, 2);
         }
 
         $stmt->bindParam(":nombre", $data['nombre']);
         $stmt->bindParam(":descripcion", $data['descripcion']);
-        $stmt->bindParam(":precio", $data['precio']);
-        $stmt->bindParam(":precio_bs", $data['precio_bs']);
+        $stmt->bindParam(":precio", $precio);
+        $stmt->bindParam(":precio_bs", $precio_bs);
         $stmt->bindParam(":precio_costo", $precio_costo);
         $stmt->bindParam(":precio_costo_bs", $precio_costo_bs);
-        
-        $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
         $stmt->bindParam(":usar_precio_fijo_bs", $usarPrecioFijo, PDO::PARAM_BOOL);
-        
+
         $stock_minimo = $data['stock_minimo'] ?? 5;
         $stmt->bindParam(":stock_minimo", $stock_minimo);
-        
+
         $categoria_id = $data['categoria_id'] ?? null;
         $stmt->bindParam(":categoria_id", $categoria_id);
-        
+
         $activo = isset($data['activo']) ? (bool)$data['activo'] : true;
         $stmt->bindParam(":activo", $activo, PDO::PARAM_BOOL);
-        
+
         $stmt->bindParam(":id", $id);
 
         if ($stmt->execute()) {
@@ -215,7 +230,7 @@ class Producto
         $stmt->bindParam(":id", $producto_id);
 
         if ($stmt->execute()) {
-            
+
             $historial_query = "INSERT INTO historial_stock 
                             (producto_id, cantidad_anterior, cantidad_nueva, diferencia, 
                                 tipo_movimiento, observaciones, usuario_id) 
@@ -224,13 +239,13 @@ class Producto
                                 :tipo_movimiento, :observaciones, :usuario_id)";
 
             $historial_stmt = $this->conn->prepare($historial_query);
-            
+
             // Asignar a variables primero para evitar problemas de referencia
             $cantidad_anterior = $producto['stock_actual'];
             $cantidad_nueva = $nuevo_stock;
             $observaciones_final = $observaciones ?: 'Actualización de stock';
             $usuario_id = isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : 1;
-            
+
             $historial_stmt->bindParam(":producto_id", $producto_id);
             $historial_stmt->bindParam(":cantidad_anterior", $cantidad_anterior);
             $historial_stmt->bindParam(":cantidad_nueva", $cantidad_nueva);

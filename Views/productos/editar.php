@@ -213,17 +213,16 @@ require_once '../layouts/header.php';
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="precio" class="form-label">
-                                    <i class="fas fa-dollar-sign me-1"></i>Precio de Venta (USD) *
+                                    <i class="fas fa-dollar-sign me-1"></i>Precio de Venta (USD) <span id="precioRequired" class="text-danger">*</span>
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
                                     <input type="number"
-                                        class="form-control <?php echo isset($_POST['precio']) && (empty($_POST['precio']) || $_POST['precio'] <= 0) ? 'is-invalid' : ''; ?>"
+                                        class="form-control precio-usd <?php echo isset($_POST['precio']) && (empty($_POST['precio']) || $_POST['precio'] <= 0) ? 'is-invalid' : ''; ?>"
                                         id="precio"
                                         name="precio"
                                         value="<?php echo htmlspecialchars($_POST['precio'] ?? $producto['precio']); ?>"
-                                        required
-                                        min="0.01"
+                                        min="0"
                                         step="0.01"
                                         placeholder="0.00"
                                         onchange="calcularPreciosYMargenes()">
@@ -244,7 +243,7 @@ require_once '../layouts/header.php';
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
                                     <input type="number"
-                                        class="form-control"
+                                        class="form-control precio-usd"
                                         id="precio_costo"
                                         name="precio_costo"
                                         value="<?php echo htmlspecialchars($_POST['precio_costo'] ?? $producto['precio_costo']); ?>"
@@ -306,7 +305,7 @@ require_once '../layouts/header.php';
                         <div class="col-md-6">
                             <div class="mb-3" id="precio-fijo-container" style="<?php echo ($producto['usar_precio_fijo_bs'] ? 'display: block;' : 'display: none;'); ?>">
                                 <label for="precio_bs" class="form-label">
-                                    <i class="fas fa-money-bill-wave me-1"></i>Precio Fijo en Bolívares *
+                                    <i class="fas fa-money-bill-wave me-1"></i>Precio Fijo en Bolívares <span class="text-danger precio-bs-required">*</span>
                                 </label>
                                 <div class="input-group">
                                     <span class="input-group-text">Bs</span>
@@ -439,6 +438,7 @@ require_once '../layouts/header.php';
 <script>
     // Variables globales
     let tasaActual = 36.5; // Valor por defecto
+    let productoOriginal = <?php echo json_encode($producto ?? []); ?>;
 
     document.addEventListener('DOMContentLoaded', function() {
         const descripcion = document.getElementById('descripcion');
@@ -459,7 +459,7 @@ require_once '../layouts/header.php';
         });
 
         // Calcular márgenes inicialmente
-        calcularMargen();
+        calcularPreciosYMargenes();
 
         // Configurar toggle de precio fijo
         const usarPrecioFijoCheckbox = document.getElementById('usar_precio_fijo_bs');
@@ -487,13 +487,7 @@ require_once '../layouts/header.php';
                 isValid = false;
             }
 
-            if (!precioVal || precioVal <= 0) {
-                e.preventDefault();
-                precioInput.classList.add('is-invalid');
-                isValid = false;
-            }
-
-            // Validar precio fijo en BS
+            // Validación según tipo de precio
             if (usarPrecioFijo) {
                 const precioBsVal = parseFloat(precioBsInput.value);
                 if (!precioBsVal || precioBsVal <= 0) {
@@ -501,6 +495,15 @@ require_once '../layouts/header.php';
                     precioBsInput.classList.add('is-invalid');
                     isValid = false;
                     showToast('error', 'Debe ingresar un precio válido en bolívares para precio fijo.');
+                }
+                // Para precio fijo, el precio USD no es obligatorio
+            } else {
+                // Para precio NO fijo, el precio USD es obligatorio
+                if (!precioVal || precioVal <= 0) {
+                    e.preventDefault();
+                    precioInput.classList.add('is-invalid');
+                    isValid = false;
+                    showToast('error', 'El precio en USD debe ser mayor a 0 para productos sin precio fijo.');
                 }
             }
 
@@ -535,37 +538,51 @@ require_once '../layouts/header.php';
             } else {
                 this.classList.remove('is-valid');
             }
-            calcularMargen();
+            calcularPreciosYMargenes();
         });
     });
 
-    // Calcular margen de ganancia
-    function calcularMargen() {
-        const precioVenta = parseFloat(document.getElementById('precio').value) || 0;
-        const costo = parseFloat(document.getElementById('precio_costo').value) || 0;
+    // Calcular precios en Bolívares y márgenes
+    function calcularPreciosYMargenes() {
         const usarPrecioFijo = document.getElementById('usar_precio_fijo_bs')?.checked || false;
         const precioBsInput = document.getElementById('precio_bs');
 
-        if (costo > 0 && precioVenta > 0) {
-            const ganancia = precioVenta - costo;
-            const margen = ((ganancia / costo) * 100);
+        let precioBsCalculado, precioCostoBsCalculado;
+        let precioUSD, precioCostoUSD;
 
-            document.getElementById('margenGanancia').textContent = margen.toFixed(2) + '%';
-            document.getElementById('gananciaNeta').textContent = '$' + ganancia.toFixed(2);
-
-            // Cambiar color según el margen
-            const margenElement = document.getElementById('margenGanancia');
-            if (margen < 10) {
-                margenElement.className = 'badge bg-danger';
-            } else if (margen < 25) {
-                margenElement.className = 'badge bg-warning';
-            } else {
-                margenElement.className = 'badge bg-success';
-            }
+        if (usarPrecioFijo) {
+            // Para precio fijo, usar el valor del campo precio_bs
+            precioBsCalculado = parseFloat(precioBsInput.value) || 0;
+            precioUSD = parseFloat(document.getElementById('precio').value) || 0;
+            precioCostoUSD = parseFloat(document.getElementById('precio_costo').value) || 0;
+            precioCostoBsCalculado = precioCostoUSD * tasaActual;
         } else {
-            document.getElementById('margenGanancia').textContent = '0%';
-            document.getElementById('margenGanancia').className = 'badge bg-info';
-            document.getElementById('gananciaNeta').textContent = '$0.00';
+            // Para precio NO fijo, calcular basado en tasa
+            precioUSD = parseFloat(document.getElementById('precio').value) || 0;
+            precioCostoUSD = parseFloat(document.getElementById('precio_costo').value) || 0;
+            precioBsCalculado = precioUSD * tasaActual;
+            precioCostoBsCalculado = precioCostoUSD * tasaActual;
+        }
+
+        // Actualizar campos de visualización
+        document.getElementById('precioBsCalculado').textContent = 'Bs ' + precioBsCalculado.toFixed(2);
+        document.getElementById('precioCostoBsCalculado').textContent = 'Bs ' + precioCostoBsCalculado.toFixed(2);
+
+        // Calcular márgenes
+        const gananciaUSD = precioUSD - precioCostoUSD;
+        const margen = precioCostoUSD > 0 ? ((gananciaUSD / precioCostoUSD) * 100) : 0;
+
+        document.getElementById('margenGanancia').textContent = margen.toFixed(2) + '%';
+        document.getElementById('gananciaNeta').textContent = '$' + gananciaUSD.toFixed(2);
+
+        // Cambiar color según el margen
+        const margenElement = document.getElementById('margenGanancia');
+        if (margen < 10) {
+            margenElement.className = 'badge bg-danger';
+        } else if (margen < 25) {
+            margenElement.className = 'badge bg-warning';
+        } else {
+            margenElement.className = 'badge bg-success';
         }
     }
 
@@ -573,24 +590,68 @@ require_once '../layouts/header.php';
         const usarPrecioFijo = document.getElementById('usar_precio_fijo_bs').checked;
         const precioBsContainer = document.getElementById('precio-fijo-container');
         const precioBsInput = document.getElementById('precio_bs');
+        const precioUSDInput = document.getElementById('precio');
+        const precioCostoUSDInput = document.getElementById('precio_costo');
+        const precioRequiredLabel = document.getElementById('precioRequired');
 
         if (usarPrecioFijo) {
             precioBsContainer.style.display = 'block';
-            if (precioBsInput) {
-                precioBsInput.required = true;
+
+            // Para precio fijo, los campos en USD no son obligatorios
+            precioUSDInput.required = false;
+            precioUSDInput.classList.remove('is-valid', 'is-invalid');
+            precioCostoUSDInput.required = false;
+            precioCostoUSDInput.classList.remove('is-valid', 'is-invalid');
+
+            // Ocultar asterisco rojo en precio USD
+            if (precioRequiredLabel) {
+                precioRequiredLabel.style.display = 'none';
             }
         } else {
             precioBsContainer.style.display = 'none';
-            if (precioBsInput) {
-                precioBsInput.required = false;
+
+            // Para precio NO fijo, el precio USD es obligatorio
+            precioUSDInput.required = true;
+            precioCostoUSDInput.required = false; // Costo sigue siendo opcional
+
+            // Mostrar asterisco rojo en precio USD
+            if (precioRequiredLabel) {
+                precioRequiredLabel.style.display = 'inline';
             }
         }
+
+        // Recalcular márgenes
+        calcularPreciosYMargenes();
     }
 
     function limpiarFormulario() {
         if (confirm('¿Estás seguro de que deseas restaurar los valores originales? Se perderán los cambios no guardados.')) {
-            // Recargar la página para restaurar valores originales
-            window.location.reload();
+            // Restaurar valores originales del producto
+            document.getElementById('nombre').value = productoOriginal.nombre || '';
+            document.getElementById('descripcion').value = productoOriginal.descripcion || '';
+            document.getElementById('precio').value = productoOriginal.precio || '';
+            document.getElementById('precio_bs').value = productoOriginal.precio_bs || '';
+            document.getElementById('precio_costo').value = productoOriginal.precio_costo || '';
+            document.getElementById('stock_minimo').value = productoOriginal.stock_minimo || '5';
+            document.getElementById('categoria_id').value = productoOriginal.categoria_id || '';
+            document.getElementById('activo').checked = productoOriginal.activo || true;
+
+            // Restaurar estado del precio fijo
+            const usarPrecioFijoCheckbox = document.getElementById('usar_precio_fijo_bs');
+            if (usarPrecioFijoCheckbox) {
+                usarPrecioFijoCheckbox.checked = productoOriginal.usar_precio_fijo_bs || false;
+                togglePrecioFijo();
+            }
+
+            // Actualizar contador de caracteres
+            const descripcion = document.getElementById('descripcion');
+            const charCount = document.getElementById('charCount');
+            charCount.textContent = descripcion.value.length;
+
+            // Recalcular
+            calcularPreciosYMargenes();
+
+            showToast('info', 'Valores restaurados correctamente.');
         }
     }
 
@@ -647,6 +708,10 @@ require_once '../layouts/header.php';
 
     .char-counter-warning {
         color: #dc3545;
+        font-weight: bold;
+    }
+
+    .precio-bs-required {
         font-weight: bold;
     }
 </style>
