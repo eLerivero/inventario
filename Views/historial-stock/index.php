@@ -1,4 +1,6 @@
 <?php
+// Views/historial-stock/index.php
+
 // 1. INCLUIR CONTROLADORES Y CONFIGURACIÓN
 require_once '../../Controllers/HistorialStock.php';
 require_once '../../Controllers/ProductoController.php';
@@ -17,37 +19,60 @@ $fecha_inicio = $_GET['fecha_inicio'] ?? date('Y-m-01');
 $fecha_fin = $_GET['fecha_fin'] ?? date('Y-m-d');
 $search = $_GET['search'] ?? '';
 
+// Inicializar variables
+$movimientos = [];
+$producto_info = null;
+$stats_data = [];
+
 // Obtener datos según los parámetros
 if ($producto_id) {
     $resultado = $historialController->obtenerPorProducto($producto_id);
-    $producto_info = $resultado['producto'] ?? null;
+    if ($resultado['success']) {
+        $movimientos = $resultado['data'];
+        $producto_info = $resultado['producto'] ?? null;
+    } else {
+        $mensaje = $resultado['message'];
+        $tipoMensaje = 'danger';
+    }
 } else if ($search) {
     $resultado = $historialController->buscar($search);
+    if ($resultado['success']) {
+        $movimientos = $resultado['data'];
+    } else {
+        $mensaje = $resultado['message'];
+        $tipoMensaje = 'danger';
+    }
 } else {
     $resultado = $historialController->listar();
-}
-
-$movimientos = $resultado['success'] ? $resultado['data'] : [];
-if (!$resultado['success']) {
-    $mensaje = $resultado['message'];
-    $tipoMensaje = 'danger';
+    if ($resultado['success']) {
+        $movimientos = $resultado['data'];
+    } else {
+        $mensaje = $resultado['message'];
+        $tipoMensaje = 'danger';
+    }
 }
 
 // Obtener estadísticas
 $estadisticas = $historialController->obtenerEstadisticas();
-$stats_data = $estadisticas['success'] ? $estadisticas['data'] : [];
+if ($estadisticas['success']) {
+    $stats_data = $estadisticas['data'];
+}
 
 // Obtener productos para el filtro
-$productos = $productoController->obtenerProductosActivos();
+$productos_result = $productoController->obtenerProductosActivos();
+$productos = $productos_result['success'] ? $productos_result['data'] : [];
 
 // 3. DEFINIR TÍTULO Y INCLUIR HEADER
-$page_title = $producto_id ? "Historial de Stock - " . ($producto_info['nombre'] ?? '') : "Historial de Stock";
+$page_title = $producto_id && $producto_info ?
+    "Historial de Stock - " . ($producto_info['nombre'] ?? '') :
+    "Historial de Stock";
+
 require_once '../layouts/header.php';
 ?>
 
 <!-- 4. CONTENIDO PRINCIPAL DE LA VISTA -->
 <div class="content-wrapper historial-stock-content">
-    
+
     <!-- Header de la página -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <div>
@@ -57,7 +82,7 @@ require_once '../layouts/header.php';
             </h1>
             <?php if ($producto_id && $producto_info): ?>
                 <p class="text-muted mb-0">
-                    Producto: <strong><?php echo htmlspecialchars($producto_info['nombre']); ?></strong> 
+                    Producto: <strong><?php echo htmlspecialchars($producto_info['nombre']); ?></strong>
                     (SKU: <?php echo htmlspecialchars($producto_info['codigo_sku']); ?>)
                     - Stock actual: <span class="badge bg-<?php echo $producto_info['stock_actual'] <= $producto_info['stock_minimo'] ? 'warning' : 'success'; ?>">
                         <?php echo $producto_info['stock_actual']; ?>
@@ -103,7 +128,7 @@ require_once '../layouts/header.php';
                         <select class="form-select" id="producto_id" name="producto_id">
                             <option value="">Todos los productos</option>
                             <?php foreach ($productos as $prod): ?>
-                                <option value="<?php echo $prod['id']; ?>" 
+                                <option value="<?php echo $prod['id']; ?>"
                                     <?php echo ($producto_id == $prod['id']) ? 'selected' : ''; ?>>
                                     <?php echo htmlspecialchars($prod['nombre']); ?> (<?php echo htmlspecialchars($prod['codigo_sku']); ?>)
                                 </option>
@@ -113,25 +138,25 @@ require_once '../layouts/header.php';
                 <?php else: ?>
                     <input type="hidden" name="producto_id" value="<?php echo $producto_id; ?>">
                 <?php endif; ?>
-                
+
                 <div class="col-md-3">
                     <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
-                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
-                           value="<?php echo htmlspecialchars($fecha_inicio); ?>">
+                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio"
+                        value="<?php echo htmlspecialchars($fecha_inicio); ?>">
                 </div>
-                
+
                 <div class="col-md-3">
                     <label for="fecha_fin" class="form-label">Fecha Fin</label>
-                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
-                           value="<?php echo htmlspecialchars($fecha_fin); ?>">
+                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin"
+                        value="<?php echo htmlspecialchars($fecha_fin); ?>">
                 </div>
-                
+
                 <div class="col-md-2">
                     <label for="search" class="form-label">Buscar</label>
-                    <input type="text" class="form-control" id="search" name="search" 
-                           value="<?php echo htmlspecialchars($search); ?>" placeholder="Término...">
+                    <input type="text" class="form-control" id="search" name="search"
+                        value="<?php echo htmlspecialchars($search); ?>" placeholder="Término...">
                 </div>
-                
+
                 <div class="col-md-12 mt-4">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-search me-1"></i> Aplicar Filtros
@@ -145,53 +170,70 @@ require_once '../layouts/header.php';
     </div>
 
     <!-- Estadísticas Rápidas -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card bg-primary text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Total Movimientos</h5>
-                            <h3><?php echo number_format($stats_data['total_movimientos'] ?? 0); ?></h3>
+    <?php if (!empty($stats_data)): ?>
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h5 class="card-title">Total Movimientos</h5>
+                                <h3><?php echo number_format($stats_data['total_movimientos'] ?? 0); ?></h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-exchange-alt fa-2x"></i>
+                            </div>
                         </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-exchange-alt fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h5 class="card-title">Movimientos Mes</h5>
+                                <h3><?php echo number_format($stats_data['movimientos_mes'] ?? 0); ?></h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-calendar-alt fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h5 class="card-title">Productos con Movimientos</h5>
+                                <h3><?php echo count($stats_data['top_productos'] ?? []); ?></h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-boxes fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h5 class="card-title">Movimientos Mostrados</h5>
+                                <h3><?php echo count($movimientos); ?></h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-chart-line fa-2x"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Movimientos Mes</h5>
-                            <h3><?php echo number_format($stats_data['movimientos_mes'] ?? 0); ?></h3>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-calendar-alt fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <h5 class="card-title">Productos con Movimientos</h5>
-                            <h3><?php echo count($stats_data['top_productos'] ?? []); ?></h3>
-                        </div>
-                        <div class="align-self-center">
-                            <i class="fas fa-boxes fa-2x"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <?php endif; ?>
 
     <!-- Tabla de Movimientos -->
     <div class="card">
@@ -234,49 +276,61 @@ require_once '../layouts/header.php';
                                     <td><?php echo $index + 1; ?></td>
                                     <?php if (!$producto_id): ?>
                                         <td>
-                                            <strong><?php echo htmlspecialchars($movimiento['producto_nombre']); ?></strong>
+                                            <strong><?php echo htmlspecialchars($movimiento['producto_nombre'] ?? 'N/A'); ?></strong>
                                             <br>
-                                            <small class="text-muted">SKU: <?php echo htmlspecialchars($movimiento['codigo_sku']); ?></small>
+                                            <small class="text-muted">SKU: <?php echo htmlspecialchars($movimiento['codigo_sku'] ?? 'N/A'); ?></small>
                                         </td>
                                     <?php endif; ?>
                                     <td>
-                                        <?php echo date('d/m/Y H:i', strtotime($movimiento['fecha_hora'])); ?>
+                                        <?php
+                                        $fecha_hora = $movimiento['fecha_hora'] ?? $movimiento['created_at'] ?? '';
+                                        if ($fecha_hora) {
+                                            echo date('d/m/Y H:i', strtotime($fecha_hora));
+                                        } else {
+                                            echo 'N/A';
+                                        }
+                                        ?>
                                     </td>
                                     <td>
-                                        <span class="badge bg-secondary"><?php echo $movimiento['cantidad_anterior']; ?></span>
+                                        <span class="badge bg-secondary"><?php echo $movimiento['cantidad_anterior'] ?? 0; ?></span>
                                     </td>
                                     <td>
-                                        <span class="badge bg-primary"><?php echo $movimiento['cantidad_nueva']; ?></span>
+                                        <span class="badge bg-primary"><?php echo $movimiento['cantidad_nueva'] ?? 0; ?></span>
                                     </td>
                                     <td>
-                                        <?php if ($movimiento['diferencia'] > 0): ?>
-                                            <span class="badge bg-success">+<?php echo $movimiento['diferencia']; ?></span>
-                                        <?php elseif ($movimiento['diferencia'] < 0): ?>
-                                            <span class="badge bg-danger"><?php echo $movimiento['diferencia']; ?></span>
+                                        <?php
+                                        $diferencia = $movimiento['diferencia'] ?? 0;
+                                        if ($diferencia > 0): ?>
+                                            <span class="badge bg-success">+<?php echo $diferencia; ?></span>
+                                        <?php elseif ($diferencia < 0): ?>
+                                            <span class="badge bg-danger"><?php echo $diferencia; ?></span>
                                         <?php else: ?>
                                             <span class="badge bg-secondary">0</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php
+                                        $tipo_movimiento = $movimiento['tipo_movimiento'] ?? 'sin_cambio';
                                         $tipo_badge = [
                                             'entrada' => 'success',
                                             'salida' => 'danger',
                                             'sin_cambio' => 'secondary',
-                                            'ajuste' => 'warning'
+                                            'ajuste' => 'warning',
+                                            'venta' => 'info',
+                                            'compra' => 'primary'
                                         ];
-                                        $badge_class = $tipo_badge[$movimiento['tipo_movimiento']] ?? 'secondary';
+                                        $badge_class = $tipo_badge[$tipo_movimiento] ?? 'secondary';
                                         ?>
                                         <span class="badge bg-<?php echo $badge_class; ?>">
-                                            <?php echo ucfirst(str_replace('_', ' ', $movimiento['tipo_movimiento'])); ?>
+                                            <?php echo ucfirst(str_replace('_', ' ', $tipo_movimiento)); ?>
                                         </span>
                                     </td>
                                     <td>
                                         <small class="text-muted">
-                                            <?php 
-                                            if ($movimiento['tipo_referencia']) {
+                                            <?php
+                                            if (!empty($movimiento['tipo_referencia'])) {
                                                 echo ucfirst(str_replace('_', ' ', $movimiento['tipo_referencia']));
-                                                if ($movimiento['referencia_id']) {
+                                                if (!empty($movimiento['referencia_id'])) {
                                                     echo ' #' . $movimiento['referencia_id'];
                                                 }
                                             } else {
@@ -286,14 +340,15 @@ require_once '../layouts/header.php';
                                         </small>
                                     </td>
                                     <td>
-                                        <?php 
-                                        if (!empty($movimiento['observaciones'])) {
-                                            if (strlen($movimiento['observaciones']) > 50) {
-                                                echo '<span data-bs-toggle="tooltip" title="' . htmlspecialchars($movimiento['observaciones']) . '">';
-                                                echo htmlspecialchars(substr($movimiento['observaciones'], 0, 50)) . '...';
+                                        <?php
+                                        $observaciones = $movimiento['observaciones'] ?? '';
+                                        if (!empty($observaciones)) {
+                                            if (strlen($observaciones) > 50) {
+                                                echo '<span data-bs-toggle="tooltip" title="' . htmlspecialchars($observaciones) . '">';
+                                                echo htmlspecialchars(substr($observaciones, 0, 50)) . '...';
                                                 echo '</span>';
                                             } else {
-                                                echo htmlspecialchars($movimiento['observaciones']);
+                                                echo htmlspecialchars($observaciones);
                                             }
                                         } else {
                                             echo '<span class="text-muted">Sin observaciones</span>';
@@ -301,7 +356,17 @@ require_once '../layouts/header.php';
                                         ?>
                                     </td>
                                     <td>
-                                        <small class="text-muted"><?php echo htmlspecialchars($movimiento['usuario_id']); ?></small>
+                                        <small class="text-muted">
+                                            <?php
+                                            if (!empty($movimiento['usuario_nombre'])) {
+                                                echo htmlspecialchars($movimiento['usuario_nombre']);
+                                            } else if (!empty($movimiento['usuario_id'])) {
+                                                echo 'Usuario #' . $movimiento['usuario_id'];
+                                            } else {
+                                                echo 'Sistema';
+                                            }
+                                            ?>
+                                        </small>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -330,6 +395,8 @@ require_once '../layouts/header.php';
                         <li><span class="badge bg-success me-2">Entrada</span> Incremento en el stock</li>
                         <li><span class="badge bg-danger me-2">Salida</span> Disminución en el stock</li>
                         <li><span class="badge bg-warning me-2">Ajuste</span> Corrección manual</li>
+                        <li><span class="badge bg-info me-2">Venta</span> Registrada por sistema de ventas</li>
+                        <li><span class="badge bg-primary me-2">Compra</span> Registrada por sistema de compras</li>
                         <li><span class="badge bg-secondary me-2">Sin Cambio</span> Stock sin modificación</li>
                     </ul>
                 </div>
@@ -347,73 +414,53 @@ require_once '../layouts/header.php';
             </div>
         </div>
     </div>
-</div> 
-
-<!-- End content-wrapper -->
+</div>
 
 <!-- 5. SCRIPTS ESPECÍFICOS -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Configurar DataTables
-    $('#tablaHistorialStock').DataTable({
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
-        },
-        pageLength: 25,
-        order: [[2, 'desc']], // Ordenar por fecha descendente
-        dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-        initComplete: function() {
-            $('.dataTables_filter input').addClass('form-control form-control-sm');
-            $('.dataTables_length select').addClass('form-control form-control-sm');
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configurar DataTables
+        if (document.querySelector('#tablaHistorialStock')) {
+            $('#tablaHistorialStock').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                },
+                pageLength: 25,
+                order: [
+                    [2, 'desc']
+                ], // Ordenar por fecha descendente
+                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+                initComplete: function() {
+                    $('.dataTables_filter input').addClass('form-control form-control-sm');
+                    $('.dataTables_length select').addClass('form-control form-control-sm');
+                }
+            });
+
+            // Inicializar tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }
+
+        // Validación de fechas
+        const fechaInicio = document.getElementById('fecha_inicio');
+        const fechaFin = document.getElementById('fecha_fin');
+
+        if (fechaInicio && fechaFin) {
+            fechaInicio.addEventListener('change', function() {
+                if (this.value && fechaFin.value && this.value > fechaFin.value) {
+                    fechaFin.value = this.value;
+                }
+            });
+
+            fechaFin.addEventListener('change', function() {
+                if (this.value && fechaInicio.value && this.value < fechaInicio.value) {
+                    this.value = fechaInicio.value;
+                }
+            });
         }
     });
-
-    // Inicializar tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-
-    // Validación de fechas
-    const fechaInicio = document.getElementById('fecha_inicio');
-    const fechaFin = document.getElementById('fecha_fin');
-    
-    if (fechaInicio && fechaFin) {
-        fechaInicio.addEventListener('change', function() {
-            if (this.value && fechaFin.value && this.value > fechaFin.value) {
-                fechaFin.value = this.value;
-            }
-        });
-        
-        fechaFin.addEventListener('change', function() {
-            if (this.value && fechaInicio.value && this.value < fechaInicio.value) {
-                this.value = fechaInicio.value;
-            }
-        });
-    }
-});
-
-// Ajustar espacio del footer
-function ajustarEspacioFooter() {
-    const contentWrapper = document.querySelector('.historial-stock-content');
-    const footer = document.querySelector('.footer-container');
-    
-    if (contentWrapper && footer) {
-        const contentHeight = contentWrapper.scrollHeight;
-        const windowHeight = window.innerHeight;
-        const headerHeight = document.querySelector('.header-container')?.offsetHeight || 0;
-        
-        if (contentHeight + headerHeight < windowHeight - 100) {
-            contentWrapper.style.minHeight = `calc(100vh - ${headerHeight + 150}px)`;
-        } else {
-            contentWrapper.style.paddingBottom = '3rem';
-        }
-    }
-}
-
-window.addEventListener('resize', ajustarEspacioFooter);
-window.addEventListener('load', ajustarEspacioFooter);
 </script>
 
-<!-- 6. INCLUIR FOOTER AL FINAL -->
-<?php require_once '../layouts/footer.php'; ?>
+<!-- <?php require_once '../layouts/footer.php'; ?> -->
