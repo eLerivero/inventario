@@ -35,3 +35,4 @@
 [2025-12-03 11:45:21] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
 [2025-12-03 11:45:21] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
 [2025-12-03 11:45:21] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2025-12-04 14:41:08] [DEBUG] Todas las categorías obtenidas {"total":10}

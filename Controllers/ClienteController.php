@@ -69,7 +69,7 @@ class ClienteController
             $this->cliente->email = $data['email'] ?? '';
             $this->cliente->telefono = $data['telefono'] ?? '';
             $this->cliente->direccion = $data['direccion'] ?? '';
-            $this->cliente->documento_identidad = $data['documento_identidad'] ?? '';
+            $this->cliente->numero_documento = $data['numero_documento'] ?? '';
             $this->cliente->activo = $data['activo'] ?? 1;
 
             $cliente_id = $this->cliente->crear();
@@ -109,7 +109,7 @@ class ClienteController
             $this->cliente->email = $data['email'] ?? '';
             $this->cliente->telefono = $data['telefono'] ?? '';
             $this->cliente->direccion = $data['direccion'] ?? '';
-            $this->cliente->documento_identidad = $data['documento_identidad'] ?? '';
+            $this->cliente->numero_documento = $data['numero_documento'] ?? '';
             $this->cliente->activo = $data['activo'] ?? 1;
 
             if ($this->cliente->actualizar($id)) {

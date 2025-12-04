@@ -210,6 +210,7 @@ class ProductoController
         }
     }
 
+    // Método de búsqueda existente (mantener compatibilidad)
     public function buscar($search)
     {
         try {
@@ -235,6 +236,159 @@ class ProductoController
             return [
                 "success" => false,
                 "message" => "Error al buscar productos: " . $e->getMessage()
+            ];
+        }
+    }
+
+    // NUEVO MÉTODO: Búsqueda avanzada para el sistema de ventas
+    public function buscarProductosAvanzado($searchTerm = '', $categoria = '')
+    {
+        try {
+            // Obtener tasa de cambio actual
+            $tasaCambio = $this->obtenerTasaCambioActual();
+            
+            $query = "SELECT 
+                        p.id,
+                        p.codigo_sku,
+                        p.nombre,
+                        p.descripcion,
+                        p.precio,
+                        p.precio_bs,
+                        p.usar_precio_fijo_bs,
+                        p.activo,
+                        p.categoria_id,
+                        c.nombre as categoria_nombre,
+                        p.stock_actual
+                    FROM productos p
+                    LEFT JOIN categorias c ON p.categoria_id = c.id
+                    WHERE p.activo = TRUE";
+            
+            $conditions = [];
+            $params = [];
+            
+            if (!empty($searchTerm)) {
+                $conditions[] = "(p.nombre ILIKE :searchTerm OR 
+                               p.codigo_sku ILIKE :searchTerm OR 
+                               p.descripcion ILIKE :searchTerm)";
+                $params[':searchTerm'] = "%" . $searchTerm . "%";
+            }
+            
+            if (!empty($categoria)) {
+                $conditions[] = "c.nombre = :categoria";
+                $params[':categoria'] = $categoria;
+            }
+            
+            if (!empty($conditions)) {
+                $query .= " AND " . implode(" AND ", $conditions);
+            }
+            
+            $query .= " ORDER BY p.nombre ASC";
+            
+            $stmt = $this->db->prepare($query);
+            
+            foreach ($params as $key => $val) {
+                $stmt->bindValue($key, $val);
+            }
+            
+            $stmt->execute();
+            
+            $productos = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                // Calcular precio en bolívares según tipo
+                if ($row['usar_precio_fijo_bs'] && $row['precio_bs'] > 0) {
+                    // Precio fijo en bolívares (ya viene del modelo)
+                    $row['precio_bs'] = floatval($row['precio_bs']);
+                } else {
+                    // Conversión automática con tasa actual
+                    $row['precio_bs'] = floatval($row['precio']) * $tasaCambio;
+                }
+                
+                // Asegurar tipos de datos correctos
+                $row['stock_actual'] = intval($row['stock_actual']);
+                $row['precio'] = floatval($row['precio']);
+                $row['usar_precio_fijo_bs'] = (bool)$row['usar_precio_fijo_bs'];
+                $row['activo'] = (bool)$row['activo'];
+                
+                $productos[] = $row;
+            }
+            
+            return [
+                "success" => true,
+                "data" => $productos,
+                "count" => count($productos),
+                "tasa_cambio" => $tasaCambio
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al buscar productos: " . $e->getMessage()
+            ];
+        }
+    }
+
+    // Método auxiliar para obtener tasa de cambio actual
+    private function obtenerTasaCambioActual()
+    {
+        try {
+            $query = "SELECT tasa_cambio 
+                      FROM tasas_cambio 
+                      WHERE activa = TRUE 
+                      ORDER BY fecha_actualizacion DESC 
+                      LIMIT 1";
+            
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($result && isset($result['tasa_cambio'])) {
+                return floatval($result['tasa_cambio']);
+            }
+            
+            // Si no hay tasa activa, usar un valor por defecto
+            return 35.00;
+            
+        } catch (Exception $e) {
+            // En caso de error, retornar un valor por defecto
+            return 35.00;
+        }
+    }
+
+    // Método para obtener productos con información completa (usado en ventas)
+    public function obtenerProductosConInfoCompleta()
+    {
+        try {
+            // Usar el método del modelo
+            $productos = $this->producto->obtenerProductosConInfoCompleta();
+            
+            // Obtener tasa de cambio para calcular precios en bolívares
+            $tasaCambio = $this->obtenerTasaCambioActual();
+            
+            // Procesar productos para calcular precios en BS si no son fijos
+            foreach ($productos as &$producto) {
+                if (!$producto['usar_precio_fijo_bs'] || $producto['precio_bs'] <= 0) {
+                    $producto['precio_bs'] = floatval($producto['precio']) * $tasaCambio;
+                }
+                
+                // Asegurar tipos de datos
+                $producto['stock_actual'] = intval($producto['stock_actual']);
+                $producto['precio'] = floatval($producto['precio']);
+                $producto['precio_bs'] = floatval($producto['precio_bs']);
+                $producto['usar_precio_fijo_bs'] = (bool)$producto['usar_precio_fijo_bs'];
+                $producto['activo'] = (bool)$producto['activo'];
+            }
+            
+            return [
+                "success" => true,
+                "data" => $productos,
+                "count" => count($productos),
+                "tasa_cambio" => $tasaCambio
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener productos: " . $e->getMessage()
             ];
         }
     }

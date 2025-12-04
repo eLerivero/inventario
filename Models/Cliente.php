@@ -11,7 +11,7 @@ class Cliente
     public $email;
     public $telefono;
     public $direccion;
-    public $documento_identidad;
+    public $numero_documento;
     public $activo;
     public $created_at;
     public $updated_at;
@@ -51,7 +51,7 @@ class Cliente
             $this->email = $row['email'];
             $this->telefono = $row['telefono'];
             $this->direccion = $row['direccion'];
-            $this->documento_identidad = $row['documento_identidad'] ?? '';
+            $this->numero_documento = $row['numero_documento'] ?? '';
             $this->activo = $row['activo'] ?? true;
             $this->created_at = $row['created_at'];
             $this->updated_at = $row['updated_at'] ?? $row['created_at'];
@@ -64,9 +64,9 @@ class Cliente
     public function crear()
     {
         $query = "INSERT INTO " . $this->table . " 
-                  (nombre, email, telefono, direccion, documento_identidad, activo) 
+                  (nombre, email, telefono, direccion, numero_documento, activo) 
                   VALUES 
-                  (:nombre, :email, :telefono, :direccion, :documento_identidad, :activo)
+                  (:nombre, :email, :telefono, :direccion, :numero_documento, :activo)
                   RETURNING id";
 
         $stmt = $this->conn->prepare($query);
@@ -76,13 +76,13 @@ class Cliente
         $this->email = Ayuda::sanitizeInput($this->email);
         $this->telefono = Ayuda::sanitizeInput($this->telefono);
         $this->direccion = Ayuda::sanitizeInput($this->direccion);
-        $this->documento_identidad = Ayuda::sanitizeInput($this->documento_identidad);
+        $this->numero_documento = Ayuda::sanitizeInput($this->numero_documento);
 
         $stmt->bindParam(":nombre", $this->nombre);
         $stmt->bindParam(":email", $this->email);
         $stmt->bindParam(":telefono", $this->telefono);
         $stmt->bindParam(":direccion", $this->direccion);
-        $stmt->bindParam(":documento_identidad", $this->documento_identidad);
+        $stmt->bindParam(":numero_documento", $this->numero_documento);
         $stmt->bindParam(":activo", $this->activo, PDO::PARAM_BOOL);
 
         if ($stmt->execute()) {
@@ -99,7 +99,7 @@ class Cliente
                       email = :email, 
                       telefono = :telefono, 
                       direccion = :direccion,
-                      documento_identidad = :documento_identidad,
+                      numero_documento = :numero_documento,
                       activo = :activo,
                       updated_at = NOW()
                   WHERE id = :id";
@@ -111,13 +111,13 @@ class Cliente
         $this->email = Ayuda::sanitizeInput($this->email);
         $this->telefono = Ayuda::sanitizeInput($this->telefono);
         $this->direccion = Ayuda::sanitizeInput($this->direccion);
-        $this->documento_identidad = Ayuda::sanitizeInput($this->documento_identidad);
+        $this->numero_documento = Ayuda::sanitizeInput($this->numero_documento);
 
         $stmt->bindParam(":nombre", $this->nombre);
         $stmt->bindParam(":email", $this->email);
         $stmt->bindParam(":telefono", $this->telefono);
         $stmt->bindParam(":direccion", $this->direccion);
-        $stmt->bindParam(":documento_identidad", $this->documento_identidad);
+        $stmt->bindParam(":numero_documento", $this->numero_documento);
         $stmt->bindParam(":activo", $this->activo, PDO::PARAM_BOOL);
         $stmt->bindParam(":id", $id);
 
@@ -146,7 +146,7 @@ class Cliente
                   WHERE nombre ILIKE :search 
                      OR email ILIKE :search 
                      OR telefono ILIKE :search
-                     OR documento_identidad ILIKE :search
+                     OR numero_documento ILIKE :search
                   ORDER BY nombre";
 
         $stmt = $this->conn->prepare($query);
