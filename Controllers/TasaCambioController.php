@@ -276,17 +276,21 @@ class TasaCambioController
         }
     }
 
-    private function actualizarPreciosProductos($nuevaTasa)
-    {
-        $query = "UPDATE productos 
-                  SET precio_bs = ROUND(precio * :tasa, 2),
-                      precio_costo_bs = ROUND(precio_costo * :tasa, 2),
-                      updated_at = CURRENT_TIMESTAMP";
+private function actualizarPreciosProductos($nuevaTasa)
+{
+    // Solo actualiza productos que NO tienen precio fijo en bs
+    $query = "UPDATE productos 
+              SET precio_bs = ROUND(precio * :tasa, 2),
+                  precio_costo_bs = ROUND(precio_costo * :tasa, 2),
+                  updated_at = CURRENT_TIMESTAMP
+              WHERE usar_precio_fijo_bs = FALSE 
+                 OR precio_bs IS NULL 
+                 OR precio_bs = 0";
 
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(":tasa", $nuevaTasa);
-        return $stmt->execute();
-    }
+    $stmt = $this->db->prepare($query);
+    $stmt->bindParam(":tasa", $nuevaTasa);
+    return $stmt->execute();
+}
 
     public function listarHistorial($limite = 50)
     {

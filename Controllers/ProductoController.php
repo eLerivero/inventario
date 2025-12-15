@@ -55,7 +55,7 @@ class ProductoController
         }
     }
 
-    public function crear($data)
+    public function crearOLD($data)
     {
         try {
             // Validar datos requeridos
@@ -73,7 +73,6 @@ class ProductoController
                 throw new Exception("El código SKU ya existe");
             }
 
-            // MODIFICACIÓN: Manejar validación según tipo de precio
             if (isset($data['usar_precio_fijo_bs']) && $data['usar_precio_fijo_bs']) {
                 // Para precio fijo en Bs, el precio_bs es obligatorio
                 if (empty($data['precio_bs']) || $data['precio_bs'] <= 0) {
@@ -100,7 +99,60 @@ class ProductoController
         }
     }
 
-    public function actualizar($id, $data)
+        public function crear($data)
+    {
+        try {
+            // Validar datos requeridos
+            if (empty($data['codigo_sku'])) {
+                throw new Exception("El código SKU es obligatorio");
+            }
+
+            if (empty($data['nombre'])) {
+                throw new Exception("El nombre del producto es obligatorio");
+            }
+
+            // Validar que el SKU sea único
+            $producto_existente = $this->producto->obtenerPorSku($data['codigo_sku']);
+            if ($producto_existente) {
+                throw new Exception("El código SKU ya existe");
+            }
+
+            $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
+
+            if ($usarPrecioFijo) {
+                // Para precio fijo en Bs, el precio_bs es obligatorio
+                if (empty($data['precio_bs']) || $data['precio_bs'] <= 0) {
+                    throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
+                }
+                // Para precio fijo, los precios en USD son OPCIONALES
+                // Si no se proporcionan, se establecen en 0
+                if (empty($data['precio']) || $data['precio'] < 0) {
+                    $data['precio'] = 0;
+                }
+                if (empty($data['precio_costo']) || $data['precio_costo'] < 0) {
+                    $data['precio_costo'] = 0;
+                }
+            } else {
+                // Para precio NO fijo, el precio en USD es obligatorio
+                if (empty($data['precio']) || $data['precio'] <= 0) {
+                    throw new Exception("El precio en USD debe ser mayor a 0 para productos sin precio fijo");
+                }
+                // El precio de costo es opcional
+                if (empty($data['precio_costo']) || $data['precio_costo'] < 0) {
+                    $data['precio_costo'] = 0;
+                }
+            }
+
+            return $this->producto->crear($data);
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al crear producto: " . $e->getMessage()
+            ];
+        }
+    }
+
+    public function actualizarOLD($id, $data)
     {
         try {
             // Validar datos requeridos
@@ -133,6 +185,48 @@ class ProductoController
             ];
         }
     }
+
+    public function actualizar($id, $data)
+    {
+        try {
+            // Validar datos requeridos
+            if (empty($data['nombre'])) {
+                throw new Exception("El nombre del producto es obligatorio");
+            }
+
+            $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
+
+            if ($usarPrecioFijo) {
+                // Para precio fijo en Bs, el precio_bs es obligatorio
+                if (empty($data['precio_bs']) || $data['precio_bs'] <= 0) {
+                    throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
+                }
+                // Para precio fijo, los precios en USD son OPCIONALES
+                if (empty($data['precio']) || $data['precio'] < 0) {
+                    $data['precio'] = 0;
+                }
+                if (empty($data['precio_costo']) || $data['precio_costo'] < 0) {
+                    $data['precio_costo'] = 0;
+                }
+            } else {
+                // Para precio NO fijo, el precio en USD es obligatorio
+                if (empty($data['precio']) || $data['precio'] <= 0) {
+                    throw new Exception("El precio en USD debe ser mayor a 0 para productos sin precio fijo");
+                }
+                if (empty($data['precio_costo']) || $data['precio_costo'] < 0) {
+                    $data['precio_costo'] = 0;
+                }
+            }
+
+            return $this->producto->actualizar($id, $data);
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al actualizar producto: " . $e->getMessage()
+            ];
+        }
+    }
+
 
     public function eliminar($id)
     {
@@ -232,12 +326,12 @@ class ProductoController
     {
         try {
             $query = "SELECT p.*, c.nombre as categoria_nombre 
-                      FROM productos p
-                      LEFT JOIN categorias c ON p.categoria_id = c.id
-                      WHERE p.codigo_sku ILIKE :search 
-                         OR p.nombre ILIKE :search 
-                         OR p.descripcion ILIKE :search
-                      ORDER BY p.nombre";
+                    FROM productos p
+                    LEFT JOIN categorias c ON p.categoria_id = c.id
+                    WHERE p.codigo_sku ILIKE :search 
+                        OR p.nombre ILIKE :search 
+                        OR p.descripcion ILIKE :search
+                    ORDER BY p.nombre";
 
             $stmt = $this->db->prepare($query);
             $searchTerm = "%" . $search . "%";
@@ -257,7 +351,6 @@ class ProductoController
         }
     }
 
-    // NUEVO MÉTODO: Búsqueda avanzada para el sistema de ventas
     public function buscarProductosAvanzado($searchTerm = '', $categoria = '')
     {
         try {
@@ -285,8 +378,8 @@ class ProductoController
 
             if (!empty($searchTerm)) {
                 $conditions[] = "(p.nombre ILIKE :searchTerm OR 
-                               p.codigo_sku ILIKE :searchTerm OR 
-                               p.descripcion ILIKE :searchTerm)";
+                            p.codigo_sku ILIKE :searchTerm OR 
+                            p.descripcion ILIKE :searchTerm)";
                 $params[':searchTerm'] = "%" . $searchTerm . "%";
             }
 
@@ -348,10 +441,10 @@ class ProductoController
     {
         try {
             $query = "SELECT tasa_cambio 
-                      FROM tasas_cambio 
-                      WHERE activa = TRUE 
-                      ORDER BY fecha_actualizacion DESC 
-                      LIMIT 1";
+                    FROM tasas_cambio 
+                    WHERE activa = TRUE 
+                    ORDER BY fecha_actualizacion DESC 
+                    LIMIT 1";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute();
@@ -419,7 +512,7 @@ class ProductoController
                         AVG(precio) as precio_promedio,
                         SUM(stock_actual * precio_costo) as valor_inventario_costo,
                         SUM(stock_actual * precio) as valor_inventario_venta
-                      FROM productos";
+                    FROM productos";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute();

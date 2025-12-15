@@ -47,10 +47,10 @@ class TasaCambioHelper
      */
     public static function debeUsarPrecioFijo($producto)
     {
-        return isset($producto['usar_precio_fijo_bs']) && 
-               $producto['usar_precio_fijo_bs'] && 
-               !empty($producto['precio_bs']) && 
-               $producto['precio_bs'] > 0;
+        return isset($producto['usar_precio_fijo_bs']) &&
+            $producto['usar_precio_fijo_bs'] && 
+            !empty($producto['precio_bs']) && 
+            $producto['precio_bs'] > 0;
     }
 
     /**
@@ -159,9 +159,9 @@ class TasaCambioHelper
     {
         try {
             $query = "SELECT tasa_cambio FROM tasas_cambio 
-                     WHERE activa = 1 
-                     ORDER BY fecha_actualizacion DESC 
-                     LIMIT 1";
+                    WHERE activa = 1 
+                    ORDER BY fecha_actualizacion DESC 
+                    LIMIT 1";
             $stmt = $db->prepare($query);
             $stmt->execute();
             

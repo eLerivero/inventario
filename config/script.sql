@@ -309,20 +309,20 @@ INSERT INTO tipos_pago (nombre, descripcion, requiere_efectivo) VALUES
 ('Tarjeta de Débito', 'Pago con tarjeta de débito', FALSE),
 ('Tarjeta de Crédito', 'Pago con tarjeta de crédito', FALSE),
 ('Divisa', 'Pago en divisas físicas', TRUE),
-('Mixto', 'Combinación de métodos de pago', FALSE),
 ('Crédito', 'Venta a crédito', FALSE);
 
 -- Insertar categorías por defecto
 INSERT INTO categorias (nombre, descripcion) VALUES
-('Electrónica', 'Dispositivos electrónicos y componentes'),
+/* ('Electrónica', 'Dispositivos electrónicos y componentes'),
 ('Informática', 'Equipos de computación y accesorios'),
 ('Oficina', 'Artículos de oficina y papelería'),
-('Hogar', 'Artículos para el hogar'),
+('Hogar', 'Artículos para el hogar'), */
 ('Alimentos', 'Productos alimenticios'),
 ('Bebidas', 'Bebidas y refrescos'),
-('Limpieza', 'Productos de limpieza'),
+('Panadería', 'Productos de panadería'),
+/* ('Limpieza', 'Productos de limpieza'),
 ('Ropa', 'Prendas de vestir'),
-('Ferretería', 'Herramientas y materiales de construcción'),
+('Ferretería', 'Herramientas y materiales de construcción'), */
 ('Otros', 'Otras categorías');
 
 -- Insertar proveedores por defecto
@@ -341,8 +341,8 @@ INSERT INTO clientes (nombre, tipo_documento, numero_documento, telefono, email,
 ('Empresa ABC C.A.', 'J', 'J-123456789', '0414-4445566', 'contacto@empresaabc.com', 'empresa'),
 ('Consumidor Final', 'V', 'V-87654321', '0426-7778899', NULL, 'normal');
 
--- Insertar productos de ejemplo
-INSERT INTO productos (codigo_sku, nombre, descripcion, precio, precio_costo, stock_actual, stock_minimo, categoria_id, proveedor_id, activo) VALUES
+-- Insertar productos de ejemplo para hacer pruebas
+/* INSERT INTO productos (codigo_sku, nombre, descripcion, precio, precio_costo, stock_actual, stock_minimo, categoria_id, proveedor_id, activo) VALUES
 ('LAP-DEL-001', 'Laptop Dell Inspiron 15', 'Laptop Dell Inspiron 15, Intel Core i5, 8GB RAM, 256GB SSD', 850.00, 700.00, 10, 2, 2, 1, TRUE),
 ('MOUSE-LOG-001', 'Mouse Logitech M185', 'Mouse inalámbrico Logitech M185, color negro', 15.99, 10.50, 50, 10, 2, 1, TRUE),
 ('TECL-LOG-001', 'Teclado Logitech K120', 'Teclado USB Logitech K120, español', 19.99, 12.00, 30, 5, 2, 1, TRUE),
@@ -350,19 +350,19 @@ INSERT INTO productos (codigo_sku, nombre, descripcion, precio, precio_costo, st
 ('CAF-COL-001', 'Café Colombia 500g', 'Café molido Colombia, paquete de 500 gramos', 8.99, 5.00, 100, 20, 5, 3, TRUE),
 ('REF-COC-001', 'Refrescola Coca-Cola 2L', 'Refrescola Coca-Cola, botella de 2 litros', 2.50, 1.50, 200, 50, 6, 3, TRUE),
 ('DET-LIM-001', 'Detergente Ariel 1kg', 'Detergente en polvo Ariel, paquete de 1kg', 6.99, 4.00, 80, 15, 7, 3, TRUE),
-('CAM-POL-001', 'Camisa Polo Hombre', 'Camisa Polo para hombre, color azul, talla M', 25.00, 15.00, 40, 8, 8, 2, TRUE);
+('CAM-POL-001', 'Camisa Polo Hombre', 'Camisa Polo para hombre, color azul, talla M', 25.00, 15.00, 40, 8, 8, 2, TRUE); */
 
 -- Actualizar precios en bolívares basados en la tasa de cambio
-UPDATE productos 
+/* UPDATE productos 
 SET precio_bs = ROUND(precio * 36.50, 2),
     precio_costo_bs = ROUND(precio_costo * 36.50, 2)
-WHERE precio_bs = 0;
+WHERE precio_bs = 0; */
 
 -- Insertar algunos productos con precio fijo en bolívares
-INSERT INTO productos (codigo_sku, nombre, descripcion, precio, precio_bs, precio_costo, precio_costo_bs, usar_precio_fijo_bs, stock_actual, stock_minimo, categoria_id, activo) VALUES
+/* INSERT INTO productos (codigo_sku, nombre, descripcion, precio, precio_bs, precio_costo, precio_costo_bs, usar_precio_fijo_bs, stock_actual, stock_minimo, categoria_id, activo) VALUES
 ('PAN-BIM-001', 'Pan Bimbo Grande', 'Pan de molde Bimbo, paquete grande', 2.50, 100.00, 1.80, 65.70, TRUE, 60, 10, 5, TRUE),
 ('LEC-PRO-001', 'Leche Protinal 1L', 'Leche en polvo Protinal, lata 1kg', 8.00, 300.00, 6.00, 219.00, TRUE, 45, 8, 5, TRUE);
-
+ */
 -- FUNCIONES Y TRIGGERS
 
 -- Función para actualizar timestamp de updated_at
@@ -399,7 +399,7 @@ CREATE TRIGGER update_tipos_pago_updated_at
     BEFORE UPDATE ON tipos_pago 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Función para generar número de venta automático
+-- Función para generar número de venta automático (V- + AÑO + MES + DIAS + NUMERO DE VENTA)
 CREATE OR REPLACE FUNCTION generar_numero_venta()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -862,9 +862,9 @@ BEGIN
     RAISE NOTICE '   - Crédito';
     RAISE NOTICE '';
     RAISE NOTICE '📦 DATOS DE EJEMPLO INCLUIDOS:';
-    RAISE NOTICE '   - 10 categorías';
+    RAISE NOTICE '   - 3 categorías';
     RAISE NOTICE '   - 3 proveedores';
-    RAISE NOTICE '   - 10 productos';
+    RAISE NOTICE '   - 0 productos';
     RAISE NOTICE '   - 3 clientes';
     RAISE NOTICE '   - Tasa de cambio inicial: 36.50 Bs/USD';
     RAISE NOTICE '';

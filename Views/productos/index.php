@@ -86,52 +86,6 @@ require_once '../layouts/header.php';
         </div>
     <?php endif; ?>
 
-    <!-- Filtros -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="card-title mb-0">
-                <i class="fas fa-filter me-2"></i>Filtros de Búsqueda
-            </h5>
-        </div>
-
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-3">
-                    <label for="search" class="form-label">Buscar Producto</label>
-                    <input type="text" class="form-control" id="search" placeholder="Nombre, SKU o descripción...">
-                </div>
-                <div class="col-md-3">
-                    <label for="categoria" class="form-label">Categoría</label>
-                    <select class="form-select" id="categoria">
-                        <option value="">Todas las categorías</option>
-                        <?php foreach ($categorias as $categoria): ?>
-                            <option value="<?php echo htmlspecialchars($categoria['id']); ?>">
-                                <?php echo htmlspecialchars($categoria['nombre']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="stock" class="form-label">Estado de Stock</label>
-                    <select class="form-select" id="stock">
-                        <option value="">Todos</option>
-                        <option value="bajo">Bajo Stock</option>
-                        <option value="sin">Sin Stock</option>
-                        <option value="normal">Stock Normal</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="tipo_precio" class="form-label">Tipo de Precio</label>
-                    <select class="form-select" id="tipo_precio">
-                        <option value="">Todos</option>
-                        <option value="fijo">Precio Fijo (Bs)</option>
-                        <option value="variable">Precio Variable</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Estadísticas Rápidas -->
     <div class="row mb-4">
         <div class="col-md-3">
@@ -222,21 +176,6 @@ require_once '../layouts/header.php';
 
     <!-- Tabla de Productos -->
     <div class="card">
-        <div class="card-header">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-list me-2"></i>Lista de Productos
-                </h5>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnExportar">
-                        <i class="fas fa-download me-1"></i> Exportar
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnImprimir">
-                        <i class="fas fa-print me-1"></i> Imprimir
-                    </button>
-                </div>
-            </div>
-        </div>
         <div class="card-body">
             <?php if (empty($productos)): ?>
                 <div class="text-center py-5">

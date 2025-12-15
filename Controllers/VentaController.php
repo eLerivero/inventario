@@ -127,7 +127,7 @@ class VentaController
                 // Verificar stock
                 if ($producto['stock_actual'] < $detalle['cantidad']) {
                     throw new Exception("Stock insuficiente para el producto: " . $producto['nombre'] . 
-                                      " (Stock disponible: " . $producto['stock_actual'] . ", Solicitado: " . $detalle['cantidad'] . ")");
+                                    " (Stock disponible: " . $producto['stock_actual'] . ", Solicitado: " . $detalle['cantidad'] . ")");
                 }
 
                 // Verificar si el producto tiene precio fijo en BS

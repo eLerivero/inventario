@@ -167,76 +167,6 @@ require_once '../layouts/header.php';
                     </div>
                 </div>
 
-                <!-- Sección de Precios -->
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label for="precio" class="form-label">
-                                <i class="fas fa-dollar-sign me-1"></i>Precio de Venta (USD) <span id="precioRequired" class="text-danger">*</span>
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number"
-                                    class="form-control precio-usd <?php echo isset($_POST['precio']) && (empty($_POST['precio']) || $_POST['precio'] <= 0) ? 'is-invalid' : ''; ?>"
-                                    id="precio"
-                                    name="precio"
-                                    value="<?php echo htmlspecialchars($_POST['precio'] ?? ''); ?>"
-                                    min="0"
-                                    step="0.01"
-                                    placeholder="0.00"
-                                    onchange="calcularPreciosYMargenes()">
-                                <?php if (isset($_POST['precio']) && (empty($_POST['precio']) || $_POST['precio'] <= 0)): ?>
-                                    <div class="invalid-feedback">
-                                        El precio debe ser mayor a 0.
-                                    </div>
-                                <?php endif; ?>
-                            </div>
-                            <div class="form-text">Precio de venta al público en USD</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label for="precio_costo" class="form-label">
-                                <i class="fas fa-receipt me-1"></i>Precio de Costo (USD)
-                            </label>
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number"
-                                    class="form-control precio-usd"
-                                    id="precio_costo"
-                                    name="precio_costo"
-                                    value="<?php echo htmlspecialchars($_POST['precio_costo'] ?? ''); ?>"
-                                    min="0"
-                                    step="0.01"
-                                    placeholder="0.00"
-                                    onchange="calcularPreciosYMargenes()">
-                            </div>
-                            <div class="form-text">Precio de compra al proveedor en USD</div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label class="form-label">
-                                <i class="fas fa-calculator me-1"></i>Precio en Bolívares
-                            </label>
-                            <div class="card bg-light">
-                                <div class="card-body py-2">
-                                    <div class="row">
-                                        <div class="col-6">
-                                            <small class="text-muted">Venta:</small><br>
-                                            <strong id="precioBsCalculado" class="text-success">Bs 0.00</strong>
-                                        </div>
-                                        <div class="col-6">
-                                            <small class="text-muted">Costo:</small><br>
-                                            <strong id="precioCostoBsCalculado" class="text-muted">Bs 0.00</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Configuración de Precio Fijo -->
                 <div class="row mt-3">
                     <div class="col-md-6">
@@ -257,7 +187,7 @@ require_once '../layouts/header.php';
                                 </label>
                             </div>
                             <div class="form-text">
-                                Cuando está activado, el precio en Bs no cambiará con la tasa de cambio.
+                                Cuando está activado, el precio en Bs no cambiará con la tasa de cambio y los campos USD serán opcionales.
                             </div>
                         </div>
                     </div>
@@ -282,6 +212,81 @@ require_once '../layouts/header.php';
                     </div>
                 </div>
 
+                <!-- Sección de Precios EN USD-->
+                <div class="row">
+                    <!-- Campo Precio de Venta (USD) -->
+                    <div class="col-md-4" id="precio-usd-container">
+                        <div class="mb-3">
+                            <label for="precio" class="form-label">
+                                <i class="fas fa-dollar-sign me-1"></i>Precio de Venta (USD) <span id="precioRequired" class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number"
+                                    class="form-control precio-usd <?php echo isset($_POST['precio']) && (empty($_POST['precio']) || $_POST['precio'] <= 0) ? 'is-invalid' : ''; ?>"
+                                    id="precio"
+                                    name="precio"
+                                    value="<?php echo htmlspecialchars($_POST['precio'] ?? ''); ?>"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    onchange="calcularPreciosYMargenes()">
+                                <?php if (isset($_POST['precio']) && (empty($_POST['precio']) || $_POST['precio'] <= 0)): ?>
+                                    <div class="invalid-feedback">
+                                        El precio debe ser mayor a 0.
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            <div class="form-text">Precio de venta al público en USD</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Campo Precio de Costo (USD) -->
+                    <div class="col-md-4" id="precio-costo-usd-container">
+                        <div class="mb-3">
+                            <label for="precio_costo" class="form-label">
+                                <i class="fas fa-receipt me-1"></i>Precio de Costo (USD)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number"
+                                    class="form-control precio-usd"
+                                    id="precio_costo"
+                                    name="precio_costo"
+                                    value="<?php echo htmlspecialchars($_POST['precio_costo'] ?? ''); ?>"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    onchange="calcularPreciosYMargenes()">
+                            </div>
+                            <div class="form-text">Precio de compra al proveedor en USD</div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-calculator me-1"></i>Precio en Bolívares
+                            </label>
+                            <div class="card bg-light">
+                                <div class="card-body py-2">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted">Venta:</small><br>
+                                            <strong id="precioBsCalculado" class="text-success">Bs 0.00</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Costo:</small><br>
+                                            <strong id="precioCostoBsCalculado" class="text-muted">Bs 0.00</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuración del  Stock del producto -->
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
@@ -458,7 +463,7 @@ require_once '../layouts/header.php';
                     isValid = false;
                     showToast('error', 'Debe ingresar un precio válido en bolívares para precio fijo.');
                 }
-                // Para precio fijo, el precio USD no es obligatorio
+                // Para precio fijo, el precio USD NO es obligatorio
             } else {
                 // Para precio NO fijo, el precio USD es obligatorio
                 if (!precioVal || precioVal <= 0) {
@@ -524,8 +529,10 @@ require_once '../layouts/header.php';
         if (usarPrecioFijo) {
             // Para precio fijo, usar el valor del campo precio_bs
             precioBsCalculado = parseFloat(precioBsInput.value) || 0;
+            // Precio USD puede ser opcional para precio fijo
             precioUSD = parseFloat(document.getElementById('precio').value) || 0;
             precioCostoUSD = parseFloat(document.getElementById('precio_costo').value) || 0;
+            // Para precio fijo, el costo en Bs se calcula con tasa actual
             precioCostoBsCalculado = precioCostoUSD * tasaActual;
         } else {
             // Para precio NO fijo, calcular basado en tasa
@@ -539,8 +546,9 @@ require_once '../layouts/header.php';
         document.getElementById('precioBsCalculado').textContent = 'Bs ' + precioBsCalculado.toFixed(2);
         document.getElementById('precioCostoBsCalculado').textContent = 'Bs ' + precioCostoBsCalculado.toFixed(2);
 
-        // Calcular márgenes
-        const gananciaUSD = precioUSD - precioCostoUSD;
+        // Calcular márgenes (si no hay precio USD para fijo, usar 0)
+        const precioVentaUSD = precioUSD || 0;
+        const gananciaUSD = precioVentaUSD - precioCostoUSD;
         const gananciaBS = precioBsCalculado - precioCostoBsCalculado;
         const margen = precioCostoUSD > 0 ? ((gananciaUSD / precioCostoUSD) * 100) : 0;
 
@@ -567,10 +575,18 @@ require_once '../layouts/header.php';
         const precioUSDInput = document.getElementById('precio');
         const precioCostoUSDInput = document.getElementById('precio_costo');
         const precioRequiredLabel = document.getElementById('precioRequired');
+        
+        // Contenedores de los campos USD
+        const precioUSDContainer = document.getElementById('precio-usd-container');
+        const precioCostoUSDContainer = document.getElementById('precio-costo-usd-container');
 
         if (usarPrecioFijo) {
             precioBsContainer.style.display = 'block';
-
+            
+            // Ocultar campos USD
+            if (precioUSDContainer) precioUSDContainer.style.display = 'none';
+            if (precioCostoUSDContainer) precioCostoUSDContainer.style.display = 'none';
+            
             // Para precio fijo, los campos en USD no son obligatorios
             precioUSDInput.required = false;
             precioUSDInput.classList.remove('is-valid', 'is-invalid');
@@ -589,7 +605,11 @@ require_once '../layouts/header.php';
             }
         } else {
             precioBsContainer.style.display = 'none';
-
+            
+            // Mostrar campos USD
+            if (precioUSDContainer) precioUSDContainer.style.display = 'block';
+            if (precioCostoUSDContainer) precioCostoUSDContainer.style.display = 'block';
+            
             // Para precio NO fijo, el precio USD es obligatorio
             precioUSDInput.required = true;
             precioCostoUSDInput.required = false; // Costo sigue siendo opcional
@@ -612,6 +632,12 @@ require_once '../layouts/header.php';
 
             // Ocultar contenedor de precio fijo
             document.getElementById('precio-fijo-container').style.display = 'none';
+            
+            // Mostrar campos USD (modo por defecto)
+            const precioUSDContainer = document.getElementById('precio-usd-container');
+            const precioCostoUSDContainer = document.getElementById('precio-costo-usd-container');
+            if (precioUSDContainer) precioUSDContainer.style.display = 'block';
+            if (precioCostoUSDContainer) precioCostoUSDContainer.style.display = 'block';
 
             // Mostrar asterisco rojo en precio USD (modo por defecto)
             const precioRequiredLabel = document.getElementById('precioRequired');
@@ -695,6 +721,10 @@ require_once '../layouts/header.php';
 
     .precio-bs-required {
         font-weight: bold;
+    }
+    
+    .hidden-field {
+        display: none !important;
     }
 </style>
 
