@@ -1,11 +1,12 @@
 <?php
-require_once '../../Config/Database.php';
-require_once '../../Controllers/VentaController.php';
-require_once '../../Controllers/ClienteController.php';
-require_once '../../Controllers/ProductoController.php';
-require_once '../../Controllers/TipoPagoController.php';
-require_once '../../Controllers/TasaCambioController.php';
-require_once '../../Helpers/TasaCambioHelper.php';
+// Usar rutas absolutas para evitar problemas de inclusión
+require_once __DIR__ . '/../../Config/Database.php';
+require_once __DIR__ . '/../../Controllers/VentaController.php';
+require_once __DIR__ . '/../../Controllers/ClienteController.php';
+require_once __DIR__ . '/../../Controllers/ProductoController.php';
+require_once __DIR__ . '/../../Controllers/TipoPagoController.php';
+require_once __DIR__ . '/../../Controllers/TasaCambioController.php';
+require_once __DIR__ . '/../../Helpers/TasaCambioHelper.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -21,7 +22,7 @@ $success_message = '';
 
 // Obtener datos para formulario
 $clientes = $clienteController->obtenerClientesActivos();
-$productos = $ventaController->obtenerProductosConInfoCompleta(); // Usar el nuevo método
+$productos = $ventaController->obtenerProductosConInfoCompleta();
 $tiposPago = $tipoPagoController->listar();
 $tasaActual = $tasaController->obtenerTasaActual();
 
@@ -31,72 +32,107 @@ $productos_data = $productos['success'] ? $productos['data'] : [];
 $tiposPago_data = $tiposPago['success'] ? $tiposPago['data'] : [];
 $tasa_info = $tasaActual['success'] ? $tasaActual['data'] : null;
 
-// Procesar formulario de venta
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cliente_id'])) {
-    try {
-        // Preparar datos de la venta
-        $datosVenta = [
-            'cliente_id' => $_POST['cliente_id'],
-            'tipo_pago_id' => $_POST['tipo_pago_id'],
-            'observaciones' => $_POST['observaciones'] ?? '',
-            'estado' => 'pendiente',
-            'detalles' => []
-        ];
+        // Procesar formulario de venta
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cliente_id'])) {
+            try {
+                // Preparar datos de la venta
+                $datosVenta = [
+                    'cliente_id' => $_POST['cliente_id'],
+                    'tipo_pago_id' => $_POST['tipo_pago_id'],
+                    'observaciones' => $_POST['observaciones'] ?? '',
+                    'estado' => 'pendiente',
+                    'detalles' => []
+                ];
 
-        // Procesar detalles de la venta
+        // Procesar detalles de la venta 
         if (isset($_POST['productos']) && is_array($_POST['productos'])) {
-            $total_venta = 0;
-
             foreach ($_POST['productos'] as $index => $producto_id) {
-                if (!empty($producto_id) && !empty($_POST['cantidades'][$index]) && !empty($_POST['precios'][$index])) {
+                if (!empty($producto_id) && isset($_POST['cantidades'][$index])) {
                     $cantidad = intval($_POST['cantidades'][$index]);
-                    $precio = floatval($_POST['precios'][$index]);
-                    
-                    $datosVenta['detalles'][] = [
-                        'producto_id' => $producto_id,
-                        'cantidad' => $cantidad,
-                        'precio_unitario' => $precio
-                    ];
+
+                    // **OBTENER INFORMACIÓN EXACTA DEL PRODUCTO**
+                    $producto_info = null;
+                    foreach ($productos_data as $prod) {
+                        if ($prod['id'] == $producto_id) {
+                            $producto_info = $prod;
+                            break;
+                        }
+                    }
+
+                    if ($producto_info) {
+                        // **DETERMINAR SI ES PRECIO FIJO DESDE LA BD**
+                        $es_precio_fijo = isset($producto_info['usar_precio_fijo_bs']) &&
+                            $producto_info['usar_precio_fijo_bs'] == true;
+
+                        // **PARA PRECIO FIJO: ENVIAR 0 COMO PRECIO USD (EL CONTROLADOR USARÁ precio_bs)**
+                        // **PARA PRODUCTO NORMAL: ENVIAR EL PRECIO USD DEL FORMULARIO**
+                        $precio_usd = 0;
+
+                        if (!$es_precio_fijo && isset($_POST['precios'][$index])) {
+                            $precio_usd = floatval($_POST['precios'][$index]);
+                        }
+
+                        // **DEBUG EN EL FORMULARIO**
+                        error_log("Formulario - Producto ID: " . $producto_id);
+                        error_log("  Nombre: " . $producto_info['nombre']);
+                        error_log("  Es precio fijo: " . ($es_precio_fijo ? 'Sí' : 'No'));
+                        error_log("  Precio BS en BD: " . ($producto_info['precio_bs'] ?? '0'));
+                        error_log("  Precio USD enviado: " . $precio_usd);
+
+                        if ($cantidad > 0) {
+                            $datosVenta['detalles'][] = [
+                                'producto_id' => $producto_id,
+                                'cantidad' => $cantidad,
+                                'precio_unitario' => $precio_usd, // 0 para precio fijo
+                                'es_precio_fijo' => $es_precio_fijo
+                            ];
+                        }
+                    }
                 }
             }
         }
 
-        if (empty($datosVenta['detalles'])) {
-            throw new Exception("Debe agregar al menos un producto a la venta");
-        }
-
-        $result = $ventaController->crear($datosVenta);
-
-        if ($result['success']) {
-            $success_message = $result['message'];
-            // Mostrar resumen de la venta
-            $success_message .= "<br><br><strong>Resumen de la Venta:</strong>";
-            $success_message .= "<br>Número: " . $result['numero_venta'];
-            $success_message .= "<br>Tasa de Cambio: " . number_format($result['tasa_cambio'], 2) . " Bs/USD";
-            $success_message .= "<br>Total USD: " . TasaCambioHelper::formatearUSD($result['total_usd']);
-            $success_message .= "<br>Total Bs: " . TasaCambioHelper::formatearBS($result['total_bs']);
-            
-            // Mostrar detalles
-            if (isset($result['detalles_procesados'])) {
-                $success_message .= "<br><br><strong>Detalles:</strong>";
-                foreach ($result['detalles_procesados'] as $detalle) {
-                    $tipo_precio = $detalle['es_precio_fijo'] ? " (Precio Fijo BS)" : " (Conversión automática)";
-                    $success_message .= "<br>• " . $detalle['producto_nombre'] . 
-                                    " - Cant: " . $detalle['cantidad'] . 
-                                    " - Precio: $" . number_format($detalle['precio_unitario'], 2) . 
-                                    " / Bs " . number_format($detalle['precio_unitario_bs'], 2) . $tipo_precio;
+                if (empty($datosVenta['detalles'])) {
+                    throw new Exception("Debe agregar al menos un producto a la venta");
                 }
+
+                $result = $ventaController->crear($datosVenta);
+
+                if ($result['success']) {
+                    $success_message = $result['message'];
+                    // Mostrar resumen de la venta
+                    $success_message .= "<br><br><strong>Resumen de la Venta:</strong>";
+                    $success_message .= "<br>Número: " . $result['numero_venta'];
+                    $success_message .= "<br>Tasa de Cambio: " . number_format($result['tasa_cambio'], 2) . " Bs/USD";
+                    $success_message .= "<br>Total USD: " . TasaCambioHelper::formatearUSD($result['total_usd']);
+                    $success_message .= "<br>Total Bs: " . TasaCambioHelper::formatearBS($result['total_bs']);
+
+                    // Mostrar detalles
+                    if (isset($result['detalles_procesados'])) {
+                        $success_message .= "<br><br><strong>Detalles:</strong>";
+                        foreach ($result['detalles_procesados'] as $detalle) {
+                            $tipo_precio = $detalle['es_precio_fijo'] ? " (Precio Fijo BS)" : " (Conversión automática)";
+                            $success_message .= "<br>• " . $detalle['producto_nombre'] .
+                                " - Cant: " . $detalle['cantidad'] .
+                                " - Precio: $" . number_format($detalle['precio_unitario'], 2) .
+                                " / Bs " . number_format($detalle['precio_unitario_bs'], 2) . $tipo_precio;
+
+                            // Si es precio fijo, mostrar el precio exacto
+                            if ($detalle['es_precio_fijo']) {
+                                $success_message .= " [Precio fijo exacto: Bs " . number_format($detalle['precio_fijo_original'], 2) . "]";
+                            }
+                        }
+                    }
+
+                    // Redirigir después de 5 segundos
+                    header("Refresh: 5; URL=index.php");
+                } else {
+                    $error_message = $result['message'];
+                }
+            } catch (Exception $e) {
+                $error_message = "Error inesperado: " . $e->getMessage();
             }
-            
-            // Redirigir después de 5 segundos
-            header("Refresh: 5; URL=index.php");
-        } else {
-            $error_message = $result['message'];
         }
-    } catch (Exception $e) {
-        $error_message = "Error inesperado: " . $e->getMessage();
-    }
-}
 
 // Procesar creación de nuevo cliente desde AJAX
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'crear_cliente') {
@@ -126,12 +162,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Nuevo endpoint para buscar productos
 if (isset($_GET['action']) && $_GET['action'] === 'buscar_productos') {
     header('Content-Type: application/json');
-    
+
     $searchTerm = $_GET['q'] ?? '';
     $categoria = $_GET['categoria'] ?? '';
-    
+
     $resultado = $productoController->buscarProductosAvanzado($searchTerm, $categoria);
-    
+
     echo json_encode($resultado);
     exit;
 }
@@ -148,7 +184,9 @@ if (!empty($productos_data)) {
 }
 
 $page_title = "Crear Nueva Venta - Sistema Avanzado";
-include '../layouts/header.php';
+
+// Incluir header con rutas corregidas
+include __DIR__ . '/../layouts/header.php';
 ?>
 
 <!-- Header con Botón de Volver -->
@@ -284,11 +322,11 @@ include '../layouts/header.php';
                                 <div class="col-md-6">
                                     <label class="form-label">Buscar Producto</label>
                                     <div class="input-group">
-                                        <input type="text" 
-                                               class="form-control" 
-                                               id="buscar-producto" 
-                                               placeholder="Escribe el nombre, SKU o descripción del producto..."
-                                               autocomplete="off">
+                                        <input type="text"
+                                            class="form-control"
+                                            id="buscar-producto"
+                                            placeholder="Escribe el nombre, SKU o descripción del producto..."
+                                            autocomplete="off">
                                         <span class="input-group-text">
                                             <i class="fas fa-search"></i>
                                         </span>
@@ -506,560 +544,18 @@ include '../layouts/header.php';
     </div>
 </div>
 
-<style>
-    .producto-busqueda {
-        cursor: pointer;
-        transition: all 0.2s;
-        border-left: 4px solid transparent;
-    }
-    
-    .producto-busqueda:hover {
-        background-color: #f8f9fa;
-        border-left-color: #0d6efd;
-        transform: translateX(2px);
-    }
-    
-    .producto-busqueda.seleccionado {
-        background-color: #e7f1ff;
-        border-left-color: #0d6efd;
-    }
-    
-    .producto-seleccionado {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        transition: all 0.3s;
-        border-left: 4px solid #0d6efd;
-    }
-    
-    .producto-seleccionado:hover {
-        background-color: #e9ecef;
-    }
-    
-    .badge-stock {
-        font-size: 0.7em;
-        padding: 2px 6px;
-    }
-    
-    .precio-fijo-badge {
-        background-color: #198754;
-    }
-    
-    .stock-alto {
-        background-color: #198754;
-    }
-    
-    .stock-medio {
-        background-color: #ffc107;
-        color: #000;
-    }
-    
-    .stock-bajo {
-        background-color: #dc3545;
-    }
-    
-    #resultados-busqueda {
-        border-top: 1px solid #dee2e6;
-        padding-top: 15px;
-    }
-    
-    .producto-info {
-        font-size: 0.85em;
-        color: #6c757d;
-    }
-    
-    .cantidad-input-container {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-    
-    .btn-cantidad {
-        padding: 2px 8px;
-        font-size: 0.8em;
-    }
-</style>
+<!-- Incluir CSS personalizado -->
+<link rel="stylesheet" href="crear-venta.css">
 
 <script>
-    let tasaCambio = <?php echo $tasa_info ? $tasa_info['tasa_cambio'] : 0; ?>;
-    let productosData = <?php echo json_encode($productos_data); ?>;
-    let productosSeleccionados = [];
-
-    document.addEventListener('DOMContentLoaded', function() {
-        inicializarBusqueda();
-        actualizarContadores();
-        
-        <?php if (empty($productos_data)): ?>
-            showToast('warning', 'No hay productos disponibles. Debes crear productos primero.');
-        <?php endif; ?>
-        
-        <?php if (!$tasa_info): ?>
-            showToast('error', 'No hay tasa de cambio configurada. Configure la tasa primero.');
-        <?php endif; ?>
-    });
-
-    // Sistema de búsqueda avanzada
-    function inicializarBusqueda() {
-        const buscarInput = document.getElementById('buscar-producto');
-        const filtroCategoria = document.getElementById('filtro-categoria');
-        
-        // Búsqueda en tiempo real
-        buscarInput.addEventListener('input', function() {
-            buscarProductos();
-        });
-        
-        // Filtro por categoría
-        filtroCategoria.addEventListener('change', function() {
-            buscarProductos();
-        });
-        
-        // Prevenir envío del formulario al presionar Enter en la búsqueda
-        buscarInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                buscarProductos();
-            }
-        });
-    }
-
-    function buscarProductos() {
-        const termino = document.getElementById('buscar-producto').value.trim();
-        const categoria = document.getElementById('filtro-categoria').value;
-        
-        // Si no hay término y no hay categoría, ocultar resultados
-        if (!termino && !categoria) {
-            document.getElementById('resultados-busqueda').classList.add('d-none');
-            document.getElementById('contador-resultados').textContent = '';
-            return;
-        }
-        
-        // Mostrar loading
-        const resultadosDiv = document.getElementById('resultados-busqueda');
-        const listaProductos = document.getElementById('lista-productos');
-        
-        resultadosDiv.classList.remove('d-none');
-        listaProductos.innerHTML = `
-            <div class="text-center py-3">
-                <div class="spinner-border spinner-border-sm text-primary me-2"></div>
-                Buscando productos...
-            </div>
-        `;
-        
-        // Hacer búsqueda en el servidor
-        const url = `crear.php?action=buscar_productos&q=${encodeURIComponent(termino)}&categoria=${encodeURIComponent(categoria)}`;
-        
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                mostrarResultadosBusqueda(data);
-            })
-            .catch(error => {
-                console.error('Error en búsqueda:', error);
-                listaProductos.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Error al buscar productos
-                    </div>
-                `;
-            });
-    }
-
-    function mostrarResultadosBusqueda(data) {
-        const listaProductos = document.getElementById('lista-productos');
-        const contador = document.getElementById('contador-resultados');
-        
-        if (!data.success || data.data.length === 0) {
-            listaProductos.innerHTML = `
-                <div class="alert alert-warning mb-0">
-                    <i class="fas fa-search me-2"></i>
-                    No se encontraron productos que coincidan con la búsqueda.
-                </div>
-            `;
-            contador.textContent = '0 productos encontrados';
-            return;
-        }
-        
-        let html = '';
-        let contadorProductos = 0;
-        
-        data.data.forEach(producto => {
-            // Verificar si el producto ya está seleccionado
-            const yaSeleccionado = productosSeleccionados.some(p => p.id === producto.id);
-            
-            // Determinar clase de stock
-            let stockClase = 'stock-alto';
-            if (producto.stock_actual <= 10) stockClase = 'stock-medio';
-            if (producto.stock_actual <= 3) stockClase = 'stock-bajo';
-            
-            html += `
-                <div class="list-group-item producto-busqueda ${yaSeleccionado ? 'seleccionado' : ''}" 
-                     data-producto-id="${producto.id}"
-                     onclick="${!yaSeleccionado ? `seleccionarProducto(${JSON.stringify(producto).replace(/"/g, '&quot;')})` : ''}">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center mb-1">
-                                <strong>${producto.nombre}</strong>
-                                ${producto.usar_precio_fijo_bs ? 
-                                    '<span class="badge precio-fijo-badge ms-2">Precio Fijo</span>' : ''}
-                                <span class="badge ${stockClase} badge-stock ms-2">
-                                    Stock: ${producto.stock_actual}
-                                </span>
-                            </div>
-                            <div class="producto-info">
-                                ${producto.codigo_sku ? `<span class="me-3"><i class="fas fa-barcode"></i> ${producto.codigo_sku}</span>` : ''}
-                                ${producto.categoria_nombre ? `<span class="me-3"><i class="fas fa-tag"></i> ${producto.categoria_nombre}</span>` : ''}
-                                <span><i class="fas fa-dollar-sign"></i> ${parseFloat(producto.precio).toFixed(2)} USD</span>
-                                ${producto.usar_precio_fijo_bs ? 
-                                    `<span class="ms-3"><i class="fas fa-bolt"></i> ${parseFloat(producto.precio_bs).toFixed(2)} Bs (Fijo)</span>` :
-                                    `<span class="ms-3"><i class="fas fa-calculator"></i> ${(parseFloat(producto.precio) * tasaCambio).toFixed(2)} Bs</span>`}
-                            </div>
-                        </div>
-                        <div>
-                            ${yaSeleccionado ? 
-                                '<span class="badge bg-success"><i class="fas fa-check"></i> Agregado</span>' : 
-                                '<button class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Agregar</button>'}
-                        </div>
-                    </div>
-                </div>
-            `;
-            contadorProductos++;
-        });
-        
-        listaProductos.innerHTML = html;
-        contador.textContent = `${contadorProductos} producto${contadorProductos !== 1 ? 's' : ''} encontrado${contadorProductos !== 1 ? 's' : ''}`;
-    }
-
-    function seleccionarProducto(producto) {
-        // Verificar si ya está seleccionado
-        if (productosSeleccionados.some(p => p.id === producto.id)) {
-            showToast('info', 'Este producto ya está en la lista');
-            return;
-        }
-        
-        // Verificar stock
-        if (producto.stock_actual <= 0) {
-            showToast('error', 'Producto sin stock disponible');
-            return;
-        }
-        
-        // Agregar producto a la lista
-        productosSeleccionados.push({
-            id: producto.id,
-            nombre: producto.nombre,
-            precio: parseFloat(producto.precio),
-            precio_bs: parseFloat(producto.precio_bs),
-            usar_precio_fijo_bs: producto.usar_precio_fijo_bs,
-            stock_actual: producto.stock_actual,
-            cantidad: 1,
-            sku: producto.codigo_sku || '',
-            categoria: producto.categoria_nombre || ''
-        });
-        
-        // Actualizar interfaz
-        actualizarListaProductos();
-        actualizarContadores();
-        calcularTotal();
-        
-        // Mostrar mensaje y actualizar búsqueda
-        showToast('success', 'Producto agregado correctamente');
-        buscarProductos(); // Para actualizar el estado en la búsqueda
-    }
-
-    function actualizarListaProductos() {
-        const container = document.getElementById('productos-container');
-        const mensajeSinProductos = document.getElementById('mensaje-sin-productos');
-        
-        if (productosSeleccionados.length === 0) {
-            if (!mensajeSinProductos) {
-                container.innerHTML = `
-                    <div class="text-center text-muted py-4" id="mensaje-sin-productos">
-                        <i class="fas fa-box-open fa-2x mb-2"></i>
-                        <p>No hay productos agregados. Busca y selecciona productos para comenzar.</p>
-                    </div>
-                `;
-            } else {
-                mensajeSinProductos.classList.remove('d-none');
-            }
-            return;
-        }
-        
-        // Ocultar mensaje si existe
-        if (mensajeSinProductos) {
-            mensajeSinProductos.classList.add('d-none');
-        }
-        
-        let html = '';
-        
-        productosSeleccionados.forEach((producto, index) => {
-            const subtotalUSD = producto.cantidad * producto.precio;
-            let subtotalBS = 0;
-            
-            if (producto.usar_precio_fijo_bs) {
-                subtotalBS = producto.cantidad * producto.precio_bs;
-            } else {
-                subtotalBS = subtotalUSD * tasaCambio;
-            }
-            
-            html += `
-                <div class="producto-seleccionado p-3" data-index="${index}">
-                    <div class="row align-items-center">
-                        <div class="col-md-4">
-                            <strong>${producto.nombre}</strong>
-                            <div class="producto-info">
-                                ${producto.sku ? `<div><i class="fas fa-barcode"></i> ${producto.sku}</div>` : ''}
-                                ${producto.categoria ? `<div><i class="fas fa-tag"></i> ${producto.categoria}</div>` : ''}
-                                <div>
-                                    <i class="fas fa-box"></i> Stock: ${producto.stock_actual} |
-                                    <i class="fas fa-dollar-sign"></i> ${producto.precio.toFixed(2)} USD
-                                    ${producto.usar_precio_fijo_bs ? 
-                                        `| <i class="fas fa-lock"></i> ${producto.precio_bs.toFixed(2)} Bs (Fijo)` : 
-                                        `| <i class="fas fa-calculator"></i> ${(producto.precio * tasaCambio).toFixed(2)} Bs`}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="cantidad-input-container">
-                                <button class="btn btn-sm btn-outline-secondary btn-cantidad" onclick="cambiarCantidad(${index}, -1)">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <input type="number" 
-                                       class="form-control form-control-sm text-center" 
-                                       value="${producto.cantidad}" 
-                                       min="1" 
-                                       max="${producto.stock_actual}"
-                                       onchange="actualizarCantidad(${index}, this.value)"
-                                       data-producto-index="${index}">
-                                <button class="btn btn-sm btn-outline-secondary btn-cantidad" onclick="cambiarCantidad(${index}, 1)">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                                <small class="ms-2 text-muted">max ${producto.stock_actual}</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="text-end">
-                                <div><strong>Subtotal:</strong></div>
-                                <div>$${subtotalUSD.toFixed(2)} USD</div>
-                                <div><small>Bs ${subtotalBS.toFixed(2)}</small></div>
-                            </div>
-                        </div>
-                        <div class="col-md-2 text-end">
-                            <button class="btn btn-sm btn-danger" onclick="eliminarProductoSeleccionado(${index})">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Campos ocultos para el formulario -->
-                    <input type="hidden" name="productos[]" value="${producto.id}">
-                    <input type="hidden" name="cantidades[]" value="${producto.cantidad}">
-                    <input type="hidden" name="precios[]" value="${producto.precio}">
-                </div>
-            `;
-        });
-        
-        container.innerHTML = html;
-    }
-
-    function actualizarCantidad(index, nuevaCantidad) {
-        nuevaCantidad = parseInt(nuevaCantidad);
-        
-        if (isNaN(nuevaCantidad) || nuevaCantidad < 1) {
-            nuevaCantidad = 1;
-        }
-        
-        // Verificar stock máximo
-        const stockMaximo = productosSeleccionados[index].stock_actual;
-        if (nuevaCantidad > stockMaximo) {
-            nuevaCantidad = stockMaximo;
-            showToast('warning', 'No hay suficiente stock disponible');
-        }
-        
-        productosSeleccionados[index].cantidad = nuevaCantidad;
-        actualizarListaProductos();
-        calcularTotal();
-    }
-
-    function cambiarCantidad(index, cambio) {
-        const nuevaCantidad = productosSeleccionados[index].cantidad + cambio;
-        actualizarCantidad(index, nuevaCantidad);
-    }
-
-    function eliminarProductoSeleccionado(index) {
-        productosSeleccionados.splice(index, 1);
-        actualizarListaProductos();
-        actualizarContadores();
-        calcularTotal();
-        buscarProductos(); // Actualizar búsqueda para quitar "agregado"
-        showToast('info', 'Producto eliminado de la lista');
-    }
-
-    function actualizarContadores() {
-        const contadorProductos = document.getElementById('contador-productos');
-        const cantidadTotalProductos = document.getElementById('cantidad-total-productos');
-        const btnGuardar = document.getElementById('btn-guardar-venta');
-        
-        // Contar productos únicos
-        contadorProductos.textContent = productosSeleccionados.length;
-        
-        // Contar cantidad total de productos
-        const totalItems = productosSeleccionados.reduce((total, producto) => total + producto.cantidad, 0);
-        cantidadTotalProductos.textContent = totalItems;
-        
-        // Habilitar/deshabilitar botón de guardar
-        btnGuardar.disabled = productosSeleccionados.length === 0 || tasaCambio === 0;
-    }
-
-    function calcularTotal() {
-        let subtotalUSD = 0;
-        let subtotalBS = 0;
-
-        productosSeleccionados.forEach(producto => {
-            const subtotalItemUSD = producto.cantidad * producto.precio;
-            let subtotalItemBS = 0;
-            
-            if (producto.usar_precio_fijo_bs) {
-                subtotalItemBS = producto.cantidad * producto.precio_bs;
-            } else {
-                subtotalItemBS = subtotalItemUSD * tasaCambio;
-            }
-
-            subtotalUSD += subtotalItemUSD;
-            subtotalBS += subtotalItemBS;
-        });
-
-        document.getElementById('total-usd').textContent = '$' + subtotalUSD.toFixed(2);
-        document.getElementById('total-bs').textContent = 'Bs ' + subtotalBS.toFixed(2);
-        
-        actualizarContadores();
-    }
-
-    function limpiarBusqueda() {
-        document.getElementById('buscar-producto').value = '';
-        document.getElementById('filtro-categoria').value = '';
-        document.getElementById('resultados-busqueda').classList.add('d-none');
-        document.getElementById('contador-resultados').textContent = '';
-    }
-
-    // Funciones para gestión de clientes
-    function crearCliente() {
-        const form = document.getElementById('formNuevoCliente');
-        const formData = new FormData(form);
-        formData.append('action', 'crear_cliente');
-
-        // Mostrar loading
-        const submitBtn = document.querySelector('#modalNuevoCliente .btn-primary');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Guardando...';
-        submitBtn.disabled = true;
-
-        fetch('crear.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('cliente-message').innerHTML = `
-                        <div class="alert alert-success">
-                            <i class="fas fa-check-circle me-2"></i>
-                            ${data.message}
-                        </div>
-                    `;
-
-                    actualizarSelectClientes(data.id, formData.get('nombre'), formData.get('numero_documento'));
-
-                    setTimeout(() => {
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevoCliente'));
-                        modal.hide();
-                        form.reset();
-                        document.getElementById('cliente-message').innerHTML = '';
-                    }, 2000);
-                } else {
-                    document.getElementById('cliente-message').innerHTML = `
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            ${data.message}
-                        </div>
-                    `;
-                }
-            })
-            .catch(error => {
-                document.getElementById('cliente-message').innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Error de conexión: ${error}
-                    </div>
-                `;
-            })
-            .finally(() => {
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            });
-    }
-
-    function actualizarSelectClientes(clienteId, clienteNombre, documento) {
-        const select = document.getElementById('cliente_id');
-        const option = document.createElement('option');
-        option.value = clienteId;
-        option.text = clienteNombre + (documento ? ` (${documento})` : '');
-        option.selected = true;
-
-        select.appendChild(option);
-    }
-
-    function limpiarFormulario() {
-        if (confirm('¿Estás seguro de que deseas limpiar todo el formulario? Se perderán todos los datos ingresados.')) {
-            document.getElementById('formVenta').reset();
-            productosSeleccionados = [];
-            actualizarListaProductos();
-            actualizarContadores();
-            calcularTotal();
-            limpiarBusqueda();
-            showToast('info', 'Formulario limpiado correctamente.');
-        }
-    }
-
-    function showToast(type, message) {
-        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-        const toast = document.createElement('div');
-
-        toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : type} border-0`;
-        toast.setAttribute('role', 'alert');
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        `;
-
-        toastContainer.appendChild(toast);
-
-        const bsToast = new bootstrap.Toast(toast);
-        bsToast.show();
-
-        toast.addEventListener('hidden.bs.toast', function() {
-            toast.remove();
-        });
-    }
-
-    function createToastContainer() {
-        const container = document.createElement('div');
-        container.id = 'toastContainer';
-        container.className = 'toast-container position-fixed top-0 end-0 p-3';
-        container.style.zIndex = '9999';
-        document.body.appendChild(container);
-        return container;
-    }
-
-    // Limpiar mensajes del modal cuando se cierre
-    document.getElementById('modalNuevoCliente').addEventListener('hidden.bs.modal', function() {
-        document.getElementById('formNuevoCliente').reset();
-        document.getElementById('cliente-message').innerHTML = '';
-    });
+    // Variables globales que necesitan ser accesibles desde crear-venta.js
+    window.tasaCambio = <?php echo $tasa_info ? $tasa_info['tasa_cambio'] : 0; ?>;
+    window.productosData = <?php echo json_encode($productos_data); ?>;
+    window.tasaInfo = <?php echo json_encode($tasa_info); ?>;
 </script>
+
+<!-- Incluir JavaScript personalizado -->
+<script src="crear-venta.js"></script>
 
 <!-- Modal de confirmación rápida -->
 <div class="modal fade" id="modalConfirmacion" tabindex="-1">
@@ -1077,4 +573,4 @@ include '../layouts/header.php';
     </div>
 </div>
 
-<!-- <?php include '../layouts/footer.php'; ?> -->
+<!-- <?php include __DIR__ . '/../layouts/footer.php'; ?> -->

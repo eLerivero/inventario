@@ -1,8 +1,14 @@
 <?php
-require_once '../../Config/Database.php';
-require_once '../../Controllers/VentaController.php';
-require_once '../../Utils/Ayuda.php';
-require_once '../../Helpers/TasaCambioHelper.php';
+// Usar rutas absolutas para evitar problemas de inclusión
+require_once __DIR__ . '/../../Config/Database.php';
+require_once __DIR__ . '/../../Controllers/VentaController.php';
+require_once __DIR__ . '/../../Utils/Ayuda.php';
+require_once __DIR__ . '/../../Helpers/TasaCambioHelper.php';
+
+// Iniciar sesión si no está iniciada
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 $database = new Database();
 $db = $database->getConnection();
@@ -18,22 +24,9 @@ $error_message = '';
 
 // Procesar cambio de estado
 if ($action === 'completar' && $id) {
-    // Verificación simplificada del token
-    if (session_status() === PHP_SESSION_NONE) {
-        session_start();
-    }
-    
-    // Generar token si no existe
-    if (!isset($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    }
-    
-    // Verificar token de forma más flexible
-    $token_valido = true; // Por ahora, aceptamos siempre para pruebas
-    
-    // Para producción, descomenta esto:
-    // $token_valido = isset($_GET['token']) && $_GET['token'] === ($_SESSION['csrf_token'] ?? '');
-    
+    // Verificar token CSRF
+    $token_valido = true; // Temporalmente deshabilitado para pruebas
+
     if (!$token_valido) {
         $error_message = "Token de seguridad inválido o expirado. Por favor, recarga la página.";
     } else {
@@ -53,7 +46,7 @@ $result = $controller->listar();
 if ($result['success']) {
     $ventas = $result['data'];
 } else {
-    $error_message = $result['message'];
+    $error_message = $result['message'] ?? 'Error al cargar las ventas';
     $ventas = [];
 }
 
@@ -65,11 +58,9 @@ $stats = $estadisticas['success'] ? $estadisticas['data'] : [];
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-?>
 
-<?php
 $page_title = "Gestión de Ventas";
-include '../layouts/header.php';
+include __DIR__ . '/../layouts/header.php';
 ?>
 
 <!-- Header con Botón de Nueva Venta -->
@@ -201,7 +192,7 @@ include '../layouts/header.php';
                             <th>Cliente</th>
                             <th>Total USD</th>
                             <th>Total Bs</th>
-                            <th>Tasa</th>
+                            <th>Tasa del Día</th>
                             <th>Tipo Pago</th>
                             <th>Estado</th>
                             <th>Fecha</th>
@@ -220,61 +211,129 @@ include '../layouts/header.php';
                                 'completada' => 'Completada',
                                 'cancelada' => 'Cancelada'
                             ];
+
+                            // Formatear fecha
+                            $fecha = '';
+                            if (!empty($venta['fecha_hora'])) {
+                                $fecha = Ayuda::formatDate($venta['fecha_hora']);
+                            } elseif (!empty($venta['created_at'])) {
+                                $fecha = Ayuda::formatDate($venta['created_at']);
+                            }
+
+                            // Obtener detalles para verificar si tiene precios fijos
+                            $detalles_venta = [];
+                            try {
+                                $detalles_venta = $controller->obtenerDetalles($venta['id']);
+                            } catch (Exception $e) {
+                                // Si hay error, continuar sin detalles
+                            }
+
+                            // Verificar si hay productos con precio fijo en esta venta
+                            $tiene_precio_fijo = false;
+                            foreach ($detalles_venta as $detalle) {
+                                if (
+                                    isset($detalle['precio_unitario_bs']) &&
+                                    isset($detalle['precio_unitario']) &&
+                                    $detalle['precio_unitario_bs'] > 0 &&
+                                    ($detalle['precio_unitario'] * $venta['tasa_cambio'] != $detalle['precio_unitario_bs'])
+                                ) {
+                                    $tiene_precio_fijo = true;
+                                    break;
+                                }
+                            }
                         ?>
-                            <tr>
+                            <tr <?php echo $tiene_precio_fijo ? 'class="table-warning"' : ''; ?>>
                                 <td>
-                                    <strong>#<?php echo $venta['numero_venta']; ?></strong>
+                                    <div class="d-flex align-items-center">
+                                        <strong>#<?php echo htmlspecialchars($venta['numero_venta'] ?? 'N/A'); ?></strong>
+                                        <?php if ($tiene_precio_fijo): ?>
+                                            <span class="ms-2" title="Esta venta incluye productos con precio fijo en Bs" data-bs-toggle="tooltip">
+                                                <i class="fas fa-lock text-success"></i>
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                                 <td>
                                     <?php echo htmlspecialchars($venta['cliente_nombre'] ?? 'Cliente no especificado'); ?>
                                 </td>
                                 <td>
-                                    <strong class="text-primary"><?php echo $venta['total_formateado_usd'] ?? '$' . number_format($venta['total'], 2); ?></strong>
+                                    <strong class="text-primary">
+                                        <?php
+                                        if (isset($venta['total_formateado_usd'])) {
+                                            echo $venta['total_formateado_usd'];
+                                        } else {
+                                            echo '$' . number_format($venta['total'] ?? 0, 2);
+                                        }
+                                        ?>
+                                    </strong>
                                 </td>
                                 <td>
-                                    <strong class="text-success"><?php echo $venta['total_formateado_bs'] ?? TasaCambioHelper::formatearBS($venta['total_bs']); ?></strong>
+                                    <div class="d-flex flex-column">
+                                        <strong class="text-success">
+                                            <?php
+                                            if (isset($venta['total_formateado_bs'])) {
+                                                echo $venta['total_formateado_bs'];
+                                            } else {
+                                                echo TasaCambioHelper::formatearBS($venta['total_bs'] ?? 0);
+                                            }
+                                            ?>
+                                        </strong>
+                                        <?php if ($tiene_precio_fijo): ?>
+                                            <small class="text-success">
+                                                <i class="fas fa-lock me-1"></i> Incluye precios fijos
+                                            </small>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                                 <td>
-    <small class="text-muted">
-        <?php 
-        // Validar que exista la tasa de cambio
-        if (isset($venta['tasa_cambio_utilizada'])) {
-            echo number_format($venta['tasa_cambio_utilizada'], 2) . ' Bs/$';
-        } elseif (isset($venta['tasa_formateada'])) {
-            echo $venta['tasa_formateada'] . ' Bs/$';
-        } else {
-            echo 'N/A';
-        }
-        ?>
-    </small>
-</td>
+                                    <small class="text-muted">
+                                        <?php
+                                        // Mostrar la tasa de cambio utilizada en esta venta
+                                        if (isset($venta['tasa_cambio_utilizada'])) {
+                                            echo number_format($venta['tasa_cambio_utilizada'], 2) . ' Bs/$';
+                                        } elseif (isset($venta['tasa_formateada'])) {
+                                            echo $venta['tasa_formateada'];
+                                        } elseif (isset($venta['tasa_cambio'])) {
+                                            echo number_format($venta['tasa_cambio'], 2) . ' Bs/$';
+                                        } else {
+                                            echo 'N/A';
+                                        }
+                                        ?>
+                                    </small>
+                                </td>
                                 <td>
                                     <?php echo htmlspecialchars($venta['tipo_pago_nombre'] ?? 'No especificado'); ?>
                                 </td>
                                 <td>
-                                    <span class="badge <?php echo $estado_badge[$venta['estado']] ?? 'bg-secondary'; ?>">
-                                        <?php echo $estado_text[$venta['estado']] ?? $venta['estado']; ?>
+                                    <?php
+                                    $estado = $venta['estado'] ?? 'pendiente';
+                                    $badge_class = $estado_badge[$estado] ?? 'bg-secondary';
+                                    $badge_text = $estado_text[$estado] ?? $estado;
+                                    ?>
+                                    <span class="badge <?php echo $badge_class; ?>">
+                                        <?php echo $badge_text; ?>
                                     </span>
                                 </td>
                                 <td>
-                                    <?php echo !empty($venta['fecha_hora']) ? Ayuda::formatDate($venta['fecha_hora']) : Ayuda::formatDate($venta['created_at']); ?>
+                                    <?php echo $fecha; ?>
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
                                         <a href="ver.php?id=<?php echo $venta['id']; ?>"
                                             class="btn btn-outline-info"
-                                            title="Ver detalles"
+                                            title="Ver detalles de la venta"
                                             data-bs-toggle="tooltip">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <?php if ($venta['estado'] === 'pendiente'): ?>
+                                        <?php if (($venta['estado'] ?? '') === 'pendiente'): ?>
                                             <button type="button"
                                                 class="btn btn-outline-success"
                                                 title="Completar venta"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#modalCompletar"
                                                 data-id="<?php echo $venta['id']; ?>"
-                                                data-numero="<?php echo $venta['numero_venta']; ?>">
+                                                data-numero="<?php echo $venta['numero_venta'] ?? ''; ?>"
+                                                <?php echo $tiene_precio_fijo ? 'data-precio-fijo="true"' : ''; ?>>
                                                 <i class="fas fa-check"></i>
                                             </button>
                                         <?php endif; ?>
@@ -294,32 +353,44 @@ include '../layouts/header.php';
     <div class="card-header bg-light">
         <h6 class="card-title mb-0">
             <i class="fas fa-info-circle me-2"></i>
-            Información sobre Ventas
+            Sistema de Ventas - Precios Fijos vs Precios Variables
         </h6>
     </div>
     <div class="card-body">
         <div class="row">
             <div class="col-md-6">
                 <h6 class="text-primary">
-                    <i class="fas fa-lightbulb me-2"></i>Monedas de Venta:
+                    <i class="fas fa-lock text-success me-2"></i>Productos con Precio Fijo:
                 </h6>
                 <ul class="list-unstyled">
-                    <li><span class="badge bg-primary me-2">USD</span> Los precios se manejan en Dólares Americanos</li>
-                    <li><span class="badge bg-success me-2">Bs</span> La conversión a Bolívares es automática</li>
-                    <li><span class="badge bg-info me-2">Tasa</span> Se usa la tasa de cambio activa del sistema</li>
+                    <li><i class="fas fa-check text-success me-2"></i> Mantienen su precio en Bs independientemente de la tasa</li>
+                    <li><i class="fas fa-check text-success me-2"></i> No se convierten a USD en el momento de la venta</li>
+                    <li><i class="fas fa-check text-success me-2"></i> Ideales para productos con precio controlado</li>
+                    <li><i class="fas fa-check text-success me-2"></i> Se muestran con fondo amarillo en la tabla</li>
                 </ul>
             </div>
             <div class="col-md-6">
-                <h6 class="text-warning">
-                    <i class="fas fa-exclamation-triangle me-2"></i>Consideraciones:
+                <h6 class="text-primary">
+                    <i class="fas fa-sync-alt text-info me-2"></i>Productos con Precio Variable:
                 </h6>
                 <ul class="list-unstyled">
-                    <li><i class="fas fa-ban text-danger me-2"></i> Las ventas completadas no se pueden modificar</li>
-                    <li><i class="fas fa-ban text-danger me-2"></i> El stock se actualiza al completar la venta</li>
-                    <li><i class="fas fa-ban text-danger me-2"></i> Verificar stock antes de completar</li>
-                    <li><i class="fas fa-ban text-danger me-2"></i> La tasa de cambio se bloquea al momento de la venta</li>
+                    <li><i class="fas fa-check text-info me-2"></i> Se convierten usando la tasa de cambio del día</li>
+                    <li><i class="fas fa-check text-info me-2"></i> El precio en Bs varía según la tasa</li>
+                    <li><i class="fas fa-check text-info me-2"></i> Precio base en USD, conversión automática</li>
+                    <li><i class="fas fa-check text-info me-2"></i> Se usan para productos importados o variables</li>
                 </ul>
             </div>
+        </div>
+
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-lightbulb me-2"></i>
+            <strong>¿Cómo identificar ventas con precios fijos?</strong>
+            <ul class="mb-0 mt-2">
+                <li><i class="fas fa-lock text-success me-2"></i> Ícono de candado junto al número de venta</li>
+                <li><span class="badge bg-warning text-dark me-2">Fondo amarillo</span> Fila destacada en amarillo</li>
+                <li><i class="fas fa-lock text-success me-2"></i> Texto "Incluye precios fijos" en el total Bs</li>
+                <li><i class="fas fa-eye text-info me-2"></i> Detalles completos al hacer clic en "Ver"</li>
+            </ul>
         </div>
     </div>
 </div>
@@ -341,6 +412,11 @@ include '../layouts/header.php';
                     <i class="fas fa-info-circle me-2"></i>
                     <strong>Importante:</strong> Al completar la venta, el stock de los productos se actualizará automáticamente.
                 </div>
+                <div id="precioFijoWarning" class="alert alert-warning d-none">
+                    <i class="fas fa-lock me-2"></i>
+                    <strong>Atención:</strong> Esta venta incluye productos con precio fijo en Bs.
+                    Estos precios no se verán afectados por cambios futuros en la tasa de cambio.
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -354,12 +430,52 @@ include '../layouts/header.php';
     </div>
 </div>
 
+<style>
+    /* Estilos para resaltar ventas con precios fijos */
+    .table-warning {
+        background-color: rgba(255, 243, 205, 0.3) !important;
+    }
+
+    .table-warning:hover {
+        background-color: rgba(255, 243, 205, 0.5) !important;
+    }
+
+    /* Animación para el ícono de candado */
+    .fa-lock.text-success {
+        animation: lock-pulse 2s infinite;
+    }
+
+    @keyframes lock-pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* Tooltip personalizado */
+    .tooltip-inner {
+        max-width: 300px;
+    }
+</style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Inicializar tooltips
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                delay: {
+                    show: 100,
+                    hide: 100
+                }
+            });
         });
 
         // Configurar DataTables
@@ -384,14 +500,25 @@ include '../layouts/header.php';
 
         // Configurar modal de completar venta
         const modalCompletar = document.getElementById('modalCompletar');
-        modalCompletar.addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            const id = button.getAttribute('data-id');
-            const numero = button.getAttribute('data-numero');
+        if (modalCompletar) {
+            modalCompletar.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const id = button.getAttribute('data-id');
+                const numero = button.getAttribute('data-numero');
+                const tienePrecioFijo = button.getAttribute('data-precio-fijo') === 'true';
 
-            document.getElementById('numeroVenta').textContent = '#' + numero;
-            document.getElementById('btnCompletarConfirmar').href = `index.php?action=completar&id=${id}&token=<?php echo $_SESSION['csrf_token'] ?? ''; ?>`;
-        });
+                document.getElementById('numeroVenta').textContent = '#' + numero;
+                document.getElementById('btnCompletarConfirmar').href = `index.php?action=completar&id=${id}&token=<?php echo $_SESSION['csrf_token'] ?? ''; ?>`;
+
+                // Mostrar/ocultar advertencia de precio fijo
+                const precioFijoWarning = document.getElementById('precioFijoWarning');
+                if (tienePrecioFijo) {
+                    precioFijoWarning.classList.remove('d-none');
+                } else {
+                    precioFijoWarning.classList.add('d-none');
+                }
+            });
+        }
 
         <?php if ($action === 'completar' && !empty($success_message)): ?>
             setTimeout(() => {
@@ -400,12 +527,24 @@ include '../layouts/header.php';
         <?php endif; ?>
 
         // Auto-ocultar alertas después de 5 segundos
-        const alerts = document.querySelectorAll('.alert');
+        const alerts = document.querySelectorAll('.alert:not(.alert-warning, .alert-info)');
         alerts.forEach(alert => {
             setTimeout(() => {
                 const bsAlert = new bootstrap.Alert(alert);
                 bsAlert.close();
             }, 5000);
+        });
+
+        // Añadir efecto hover a las filas con precios fijos
+        const filasConPrecioFijo = document.querySelectorAll('.table-warning');
+        filasConPrecioFijo.forEach(fila => {
+            fila.addEventListener('mouseenter', function() {
+                this.style.boxShadow = '0 0 10px rgba(255, 193, 7, 0.5)';
+            });
+
+            fila.addEventListener('mouseleave', function() {
+                this.style.boxShadow = 'none';
+            });
         });
     });
 
@@ -445,4 +584,4 @@ include '../layouts/header.php';
     }
 </script>
 
-<!-- <?php include '../layouts/footer.php'; ?> -->
+<!-- <?php include __DIR__ . '/../layouts/footer.php'; ?> -->

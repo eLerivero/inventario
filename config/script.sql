@@ -1,5 +1,4 @@
--- data.sql
--- Sistema de Inventario - Base de datos completa
+-- data.sql - SISTEMA DE INVENTARIO (ORIGINAL CON CORRECCIONES)
 -- PostgreSQL
 
 -- Eliminar tablas existentes (en orden inverso por dependencias)
@@ -313,16 +312,9 @@ INSERT INTO tipos_pago (nombre, descripcion, requiere_efectivo) VALUES
 
 -- Insertar categorías por defecto
 INSERT INTO categorias (nombre, descripcion) VALUES
-/* ('Electrónica', 'Dispositivos electrónicos y componentes'),
-('Informática', 'Equipos de computación y accesorios'),
-('Oficina', 'Artículos de oficina y papelería'),
-('Hogar', 'Artículos para el hogar'), */
 ('Alimentos', 'Productos alimenticios'),
 ('Bebidas', 'Bebidas y refrescos'),
 ('Panadería', 'Productos de panadería'),
-/* ('Limpieza', 'Productos de limpieza'),
-('Ropa', 'Prendas de vestir'),
-('Ferretería', 'Herramientas y materiales de construcción'), */
 ('Otros', 'Otras categorías');
 
 -- Insertar proveedores por defecto
@@ -341,28 +333,20 @@ INSERT INTO clientes (nombre, tipo_documento, numero_documento, telefono, email,
 ('Empresa ABC C.A.', 'J', 'J-123456789', '0414-4445566', 'contacto@empresaabc.com', 'empresa'),
 ('Consumidor Final', 'V', 'V-87654321', '0426-7778899', NULL, 'normal');
 
--- Insertar productos de ejemplo para hacer pruebas
-/* INSERT INTO productos (codigo_sku, nombre, descripcion, precio, precio_costo, stock_actual, stock_minimo, categoria_id, proveedor_id, activo) VALUES
-('LAP-DEL-001', 'Laptop Dell Inspiron 15', 'Laptop Dell Inspiron 15, Intel Core i5, 8GB RAM, 256GB SSD', 850.00, 700.00, 10, 2, 2, 1, TRUE),
-('MOUSE-LOG-001', 'Mouse Logitech M185', 'Mouse inalámbrico Logitech M185, color negro', 15.99, 10.50, 50, 10, 2, 1, TRUE),
-('TECL-LOG-001', 'Teclado Logitech K120', 'Teclado USB Logitech K120, español', 19.99, 12.00, 30, 5, 2, 1, TRUE),
-('MON-24-001', 'Monitor Samsung 24"', 'Monitor LED Samsung 24 pulgadas, Full HD', 199.99, 150.00, 15, 3, 1, 2, TRUE),
-('CAF-COL-001', 'Café Colombia 500g', 'Café molido Colombia, paquete de 500 gramos', 8.99, 5.00, 100, 20, 5, 3, TRUE),
-('REF-COC-001', 'Refrescola Coca-Cola 2L', 'Refrescola Coca-Cola, botella de 2 litros', 2.50, 1.50, 200, 50, 6, 3, TRUE),
-('DET-LIM-001', 'Detergente Ariel 1kg', 'Detergente en polvo Ariel, paquete de 1kg', 6.99, 4.00, 80, 15, 7, 3, TRUE),
-('CAM-POL-001', 'Camisa Polo Hombre', 'Camisa Polo para hombre, color azul, talla M', 25.00, 15.00, 40, 8, 8, 2, TRUE); */
+-- NO insertar productos de ejemplo (los crearás tú mismo)
+-- INSERT INTO productos (codigo_sku, nombre, descripcion, precio, precio_costo, stock_actual, stock_minimo, categoria_id, proveedor_id, activo) VALUES
+-- ('LAP-DEL-001', 'Laptop Dell Inspiron 15', 'Laptop Dell Inspiron 15, Intel Core i5, 8GB RAM, 256GB SSD', 850.00, 700.00, 10, 2, 2, 1, TRUE);
 
--- Actualizar precios en bolívares basados en la tasa de cambio
-/* UPDATE productos 
-SET precio_bs = ROUND(precio * 36.50, 2),
-    precio_costo_bs = ROUND(precio_costo * 36.50, 2)
-WHERE precio_bs = 0; */
+-- NO actualizar precios en bolívares basados en la tasa de cambio
+-- UPDATE productos 
+-- SET precio_bs = ROUND(precio * 36.50, 2),
+--     precio_costo_bs = ROUND(precio_costo * 36.50, 2)
+-- WHERE precio_bs = 0;
 
--- Insertar algunos productos con precio fijo en bolívares
-/* INSERT INTO productos (codigo_sku, nombre, descripcion, precio, precio_bs, precio_costo, precio_costo_bs, usar_precio_fijo_bs, stock_actual, stock_minimo, categoria_id, activo) VALUES
-('PAN-BIM-001', 'Pan Bimbo Grande', 'Pan de molde Bimbo, paquete grande', 2.50, 100.00, 1.80, 65.70, TRUE, 60, 10, 5, TRUE),
-('LEC-PRO-001', 'Leche Protinal 1L', 'Leche en polvo Protinal, lata 1kg', 8.00, 300.00, 6.00, 219.00, TRUE, 45, 8, 5, TRUE);
- */
+-- NO insertar productos con precio fijo en bolívares
+-- INSERT INTO productos (codigo_sku, nombre, descripcion, precio, precio_bs, precio_costo, precio_costo_bs, usar_precio_fijo_bs, stock_actual, stock_minimo, categoria_id, activo) VALUES
+-- ('PAN-BIM-001', 'Pan Bimbo Grande', 'Pan de molde Bimbo, paquete grande', 2.50, 100.00, 1.80, 65.70, TRUE, 60, 10, 5, TRUE);
+
 -- FUNCIONES Y TRIGGERS
 
 -- Función para actualizar timestamp de updated_at
@@ -498,7 +482,7 @@ CREATE TRIGGER validar_stock_detalle_venta
     FOR EACH ROW
     EXECUTE FUNCTION validar_stock_venta();
 
--- Función para actualizar totales de venta cuando se modifica el detalle
+-- CORRECCIÓN CRÍTICA: Función para actualizar totales de venta (SOLUCIÓN PARA PRECIOS FIJOS)
 CREATE OR REPLACE FUNCTION actualizar_totales_venta()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -515,22 +499,19 @@ BEGIN
             FROM detalle_ventas dv 
             WHERE dv.venta_id = COALESCE(NEW.venta_id, OLD.venta_id)
         ), 0) + COALESCE(v.iva, 0),
-        total_bs = CASE 
-            WHEN v.tasa_cambio IS NOT NULL THEN 
-                (COALESCE((
-                    SELECT SUM(subtotal) 
-                    FROM detalle_ventas dv 
-                    WHERE dv.venta_id = COALESCE(NEW.venta_id, OLD.venta_id)
-                ), 0) + COALESCE(v.iva, 0)) * v.tasa_cambio
-            ELSE v.total_bs
-        END
+        -- CRÍTICO: Usar subtotal_bs directamente, NO convertir para precios fijos
+        total_bs = COALESCE((
+            SELECT SUM(subtotal_bs) 
+            FROM detalle_ventas dv 
+            WHERE dv.venta_id = COALESCE(NEW.venta_id, OLD.venta_id)
+        ), 0) + COALESCE(v.iva, 0)
     WHERE v.id = COALESCE(NEW.venta_id, OLD.venta_id);
     
     RETURN NEW;
 END;
 $$ language 'plpgsql';
 
--- Trigger para actualizar totales de venta
+-- Trigger para actualizar totales de venta (CORREGIDO)
 CREATE TRIGGER actualizar_totales_detalle_venta
     AFTER INSERT OR UPDATE OR DELETE ON detalle_ventas
     FOR EACH ROW
@@ -650,7 +631,7 @@ ORDER BY total_vendido DESC, total_ingresos_usd DESC
 LIMIT 10;
 
 -- Vista para ventas por tipo de pago
-CREATE OR REPlACE VIEW vista_ventas_por_tipo_pago AS
+CREATE OR REPLACE VIEW vista_ventas_por_tipo_pago AS
 SELECT 
     tp.nombre as tipo_pago,
     COUNT(v.id) as total_ventas,
@@ -704,7 +685,7 @@ BEGIN
 END;
 $$;
 
--- Procedimiento para generar alertas de inventario (VERSIÓN CORREGIDA)
+-- Procedimiento para generar alertas de inventario
 CREATE OR REPLACE PROCEDURE sp_generar_alertas_inventario()
 LANGUAGE plpgsql
 AS $$
@@ -833,7 +814,6 @@ BEGIN
         (SELECT COUNT(*) FROM proveedores) +
         (SELECT COUNT(*) FROM tipos_pago) +
         (SELECT COUNT(*) FROM clientes) +
-        (SELECT COUNT(*) FROM productos) +
         (SELECT COUNT(*) FROM tasas_cambio)
     INTO total_registros;
     
@@ -846,6 +826,7 @@ BEGIN
     RAISE NOTICE '   Vistas creadas: 9';
     RAISE NOTICE '   Funciones creadas: 6';
     RAISE NOTICE '   Triggers creados: 8';
+    RAISE NOTICE '   Procedimientos: 2';
     RAISE NOTICE '   Registros insertados: %', total_registros;
     RAISE NOTICE '';
     RAISE NOTICE '👤 USUARIO POR DEFECTO:';
@@ -855,29 +836,38 @@ BEGIN
     RAISE NOTICE '';
     RAISE NOTICE '💳 TIPOS DE PAGO DISPONIBLES:';
     RAISE NOTICE '   - Efectivo';
+    RAISE NOTICE '   - Efectivo USD';
     RAISE NOTICE '   - Transferencia';
     RAISE NOTICE '   - Pago Móvil';
-    RAISE NOTICE '   - Tarjeta de Débito/Crédito';
-    RAISE NOTICE '   - Mixto';
+    RAISE NOTICE '   - Tarjeta de Débito';
+    RAISE NOTICE '   - Tarjeta de Crédito';
+    RAISE NOTICE '   - Divisa';
     RAISE NOTICE '   - Crédito';
     RAISE NOTICE '';
-    RAISE NOTICE '📦 DATOS DE EJEMPLO INCLUIDOS:';
-    RAISE NOTICE '   - 3 categorías';
+    RAISE NOTICE '📦 DATOS INICIALES INCLUIDOS:';
+    RAISE NOTICE '   - 4 categorías';
     RAISE NOTICE '   - 3 proveedores';
-    RAISE NOTICE '   - 0 productos';
+    RAISE NOTICE '   - 0 productos (los crearás tú mismo)';
     RAISE NOTICE '   - 3 clientes';
     RAISE NOTICE '   - Tasa de cambio inicial: 36.50 Bs/USD';
     RAISE NOTICE '';
     RAISE NOTICE '🚀 FUNCIONALIDADES INCLUIDAS:';
+    RAISE NOTICE '   ✅ Sistema de precios fijos en BS CORREGIDO';
+    RAISE NOTICE '   ✅ Precios fijos se mantienen exactos (100.00 = 100.00)';
     RAISE NOTICE '   ✅ Validación de stock en tiempo real';
     RAISE NOTICE '   ✅ Números de venta automáticos';
-    RAISE NOTICE '   ✅ Cálculo automático de totales';
+    RAISE NOTICE '   ✅ Cálculo automático de totales (corregido)';
     RAISE NOTICE '   ✅ Historial completo de movimientos';
     RAISE NOTICE '   ✅ Sistema dual USD/BS';
-    RAISE NOTICE '   ✅ Precios fijos en bolívares';
+    RAISE NOTICE '   ✅ Precios fijos en bolívares (funcionando)';
     RAISE NOTICE '   ✅ Alertas de stock bajo';
     RAISE NOTICE '   ✅ Reportes integrados';
     RAISE NOTICE '   ✅ Búsqueda avanzada de productos';
+    RAISE NOTICE '';
+    RAISE NOTICE '🔧 CORRECCIÓN APLICADA:';
+    RAISE NOTICE '   ✅ Trigger actualizar_totales_venta() CORREGIDO';
+    RAISE NOTICE '   ✅ Ahora usa subtotal_bs directamente para precios fijos';
+    RAISE NOTICE '   ✅ Producto con precio fijo 100.00 BS = SIEMPRE 100.00 BS';
     RAISE NOTICE '';
     RAISE NOTICE '📋 COMANDOS ÚTILES:';
     RAISE NOTICE '   -- Alertas de inventario';
@@ -887,7 +877,7 @@ BEGIN
     RAISE NOTICE '   CALL sp_reporte_ventas(''2024-01-01'', ''2024-12-31'');';
     RAISE NOTICE '';
     RAISE NOTICE '   -- Buscar productos';
-    RAISE NOTICE '   SELECT * FROM buscar_productos(''laptop'');';
+    RAISE NOTICE '   SELECT * FROM buscar_productos(''producto'');';
     RAISE NOTICE '';
     RAISE NOTICE '   -- Ver productos bajo stock';
     RAISE NOTICE '   SELECT * FROM vista_productos_bajo_stock;';

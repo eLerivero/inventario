@@ -142,12 +142,12 @@ function handleError($errno, $errstr, $errfile, $errline)
         E_WARNING => 'WARNING',
         E_PARSE => 'PARSE',
         E_NOTICE => 'NOTICE',
-        E_STRICT => 'STRICT',
+        //       E_STRICT => 'STRICT',
         E_DEPRECATED => 'DEPRECATED'
     ];
 
     $type = isset($errorType[$errno]) ? $errorType[$errno] : 'UNKNOWN';
-    
+
     // Usar appLog si está disponible, si no, error_log normal
     if (function_exists('appLog')) {
         appLog('ERROR', "$type: $errstr en $errfile línea $errline");
@@ -171,8 +171,8 @@ function handleException($exception)
             'trace' => $exception->getTraceAsString()
         ]);
     } else {
-        error_log("Excepción no capturada: " . $exception->getMessage() . 
-                 " en " . $exception->getFile() . " línea " . $exception->getLine());
+        error_log("Excepción no capturada: " . $exception->getMessage() .
+            " en " . $exception->getFile() . " línea " . $exception->getLine());
     }
 
     if (APP_ENV === 'development') {

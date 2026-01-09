@@ -1,0 +1,102 @@
+/* Estilos para la página de crear venta */
+.producto-busqueda {
+    cursor: pointer;
+    transition: all 0.2s;
+    border-left: 4px solid transparent;
+}
+
+.producto-busqueda:hover {
+    background-color: #f8f9fa;
+    border-left-color: #0d6efd;
+    transform: translateX(2px);
+}
+
+.producto-busqueda.seleccionado {
+    background-color: #e7f1ff;
+    border-left-color: #0d6efd;
+}
+
+.producto-seleccionado {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.3s;
+    border-left: 4px solid #0d6efd;
+}
+
+.producto-seleccionado:hover {
+    background-color: #e9ecef;
+}
+
+.badge-stock {
+    font-size: 0.7em;
+    padding: 2px 6px;
+}
+
+.precio-fijo-badge {
+    background-color: #198754;
+}
+
+.precio-normal-badge {
+    background-color: #0d6efd;
+}
+
+.stock-alto {
+    background-color: #198754;
+}
+
+.stock-medio {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.stock-bajo {
+    background-color: #dc3545;
+}
+
+#resultados-busqueda {
+    border-top: 1px solid #dee2e6;
+    padding-top: 15px;
+}
+
+.producto-info {
+    font-size: 0.85em;
+    color: #6c757d;
+}
+
+.cantidad-input-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-cantidad {
+    padding: 2px 8px;
+    font-size: 0.8em;
+}
+
+/* Estilos específicos para precios fijos */
+.precio-fijo {
+    color: #198754;
+    font-weight: bold;
+}
+
+.precio-normal {
+    color: #0d6efd;
+}
+
+/* Toast container */
+#toastContainer {
+    z-index: 9999;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+    .producto-seleccionado .row>div {
+        margin-bottom: 10px;
+    }
+
+    .cantidad-input-container {
+        justify-content: center;
+    }
+}

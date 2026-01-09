@@ -47,7 +47,7 @@ class VentaController
         }
     }
 
-    public function obtener($id)
+    public function obtenerOLD($id)
     {
         try {
             $venta = $this->venta->obtenerPorId($id);
@@ -85,6 +85,80 @@ class VentaController
         }
     }
 
+    public function obtener($id)
+    {
+        try {
+            $venta = $this->venta->obtenerPorId($id);
+
+            if ($venta) {
+                $venta['detalles'] = $this->obtenerDetallesCompletos($id);
+
+                // Formatear precios para mostrar
+                $venta['total_formateado_usd'] = TasaCambioHelper::formatearUSD($venta['total']);
+                $venta['total_formateado_bs'] = TasaCambioHelper::formatearBS($venta['total_bs']);
+                $venta['tasa_formateada'] = TasaCambioHelper::formatearBS($venta['tasa_cambio'], false);
+
+                foreach ($venta['detalles'] as &$detalle) {
+                    $detalle['precio_unitario_formateado_usd'] = TasaCambioHelper::formatearUSD($detalle['precio_unitario']);
+                    $detalle['precio_unitario_formateado_bs'] = TasaCambioHelper::formatearBS($detalle['precio_unitario_bs']);
+                    $detalle['subtotal_formateado_usd'] = TasaCambioHelper::formatearUSD($detalle['subtotal']);
+                    $detalle['subtotal_formateado_bs'] = TasaCambioHelper::formatearBS($detalle['subtotal_bs']);
+
+                    // Añadir información específica de precio fijo
+                    if ($detalle['es_precio_fijo']) {
+                        $detalle['precio_fijo_formateado'] = TasaCambioHelper::formatearBS($detalle['precio_unitario_bs']);
+                    }
+                }
+
+                return [
+                    "success" => true,
+                    "data" => $venta
+                ];
+            } else {
+                return [
+                    "success" => false,
+                    "message" => "Venta no encontrada"
+                ];
+            }
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener la venta: " . $e->getMessage()
+            ];
+        }
+    }
+
+    public function obtenerDetallesCompletos($venta_id)
+    {
+        try {
+            $query = "SELECT 
+                dv.*, 
+                p.nombre as producto_nombre, 
+                p.codigo_sku,
+                p.usar_precio_fijo_bs,
+                p.precio_bs as precio_fijo_original
+              FROM detalle_ventas dv
+              JOIN productos p ON dv.producto_id = p.id
+              WHERE dv.venta_id = :venta_id";
+
+            // CORRECCIÓN: Cambiar $this->conn por $this->db
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":venta_id", $venta_id);
+            $stmt->execute();
+            $detalles = $stmt->fetchAll();
+
+            // Marcar qué detalles tienen precio fijo
+            foreach ($detalles as &$detalle) {
+                $detalle['es_precio_fijo'] = isset($detalle['usar_precio_fijo_bs']) && $detalle['usar_precio_fijo_bs'] && !empty($detalle['precio_fijo_original']);
+            }
+
+            return $detalles;
+        } catch (Exception $e) {
+            error_log("Error al obtener detalles completos: " . $e->getMessage());
+            return [];
+        }
+    }
+
     public function obtenerDetalles($venta_id)
     {
         try {
@@ -95,7 +169,7 @@ class VentaController
         }
     }
 
-    public function crear($data)
+    public function crearOLD($data)
     {
         try {
             $this->db->beginTransaction();
@@ -240,61 +314,240 @@ class VentaController
         }
     }
 
-    public function actualizarEstado($id, $estado)
-{
-    try {
-        $this->db->beginTransaction();
+    public function crear($data)
+    {
+        try {
+            $this->db->beginTransaction();
 
-        $venta = $this->venta->obtenerPorId($id);
-        if (!$venta) {
-            throw new Exception("Venta no encontrada");
-        }
+            // Validar datos requeridos
+            if (empty($data['cliente_id']) || empty($data['detalles']) || !is_array($data['detalles'])) {
+                throw new Exception("Datos incompletos para crear la venta");
+            }
 
-        // Actualizar estado
-        $query = "UPDATE ventas SET estado = :estado WHERE id = :id";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(":estado", $estado);
-        $stmt->bindParam(":id", $id);
+            // Obtener tasa de cambio actual
+            $tasa_actual = $this->tasaCambio->obtenerTasaActual();
+            if (!$tasa_actual) {
+                throw new Exception("No hay tasa de cambio configurada. Configure la tasa primero.");
+            }
+            $tasa_cambio = $tasa_actual['tasa_cambio'];
 
-        if (!$stmt->execute()) {
-            throw new Exception("Error al actualizar estado de la venta");
-        }
+            // Calcular totales
+            $total_usd = 0;
+            $total_bs = 0;
+            $detalles_procesados = [];
 
-        // Si se completa la venta, actualizar stock
-        if ($estado === 'completada' && $venta['estado'] !== 'completada') {
-            $detalles = $this->obtenerDetalles($id);
-            foreach ($detalles as $detalle) {
-                $producto_actual = $this->producto->obtenerPorId($detalle['producto_id']);
-                $nuevo_stock = $producto_actual['stock_actual'] - $detalle['cantidad'];
+            foreach ($data['detalles'] as $detalle) {
+                // Obtener información completa del producto
+                $producto = $this->producto->obtenerPorId($detalle['producto_id']);
+                if (!$producto) {
+                    throw new Exception("Producto no encontrado: " . $detalle['producto_id']);
+                }
 
-                // Usar el método actualizarStock sin iniciar sesión
-                $result = $this->producto->actualizarStock(
-                    $detalle['producto_id'],
-                    $nuevo_stock,
-                    'venta',
-                    "Venta completada #{$venta['numero_venta']}"
-                );
-                
-                if (!$result['success']) {
-                    throw new Exception($result['message']);
+                // Verificar stock
+                if ($producto['stock_actual'] < $detalle['cantidad']) {
+                    throw new Exception("Stock insuficiente para el producto: " . $producto['nombre'] .
+                        " (Stock disponible: " . $producto['stock_actual'] . ", Solicitado: " . $detalle['cantidad'] . ")");
+                }
+
+                // Determinar si es producto con precio fijo en BS
+                $es_precio_fijo = isset($producto['usar_precio_fijo_bs']) && $producto['usar_precio_fijo_bs'] == true;
+
+                // Variables para precios
+                $precio_unitario_usd = 0;
+                $precio_unitario_bs = 0;
+                $subtotal_usd = 0;
+                $subtotal_bs = 0;
+
+                if ($es_precio_fijo) {
+                    // PRODUCTO CON PRECIO FIJO EN BS
+                    if (!empty($producto['precio_bs']) && $producto['precio_bs'] > 0) {
+                        // CRÍTICO: Tomar EXACTAMENTE el precio fijo de la BD
+                        $precio_unitario_bs = floatval($producto['precio_bs']);
+
+                        // Calcular subtotal BS (cantidad * precio fijo exacto)
+                        $subtotal_bs = $detalle['cantidad'] * $precio_unitario_bs;
+
+                        // Para USD: calcular solo para registro (no afecta precio BS)
+                        if ($tasa_cambio > 0) {
+                            $precio_unitario_usd = $precio_unitario_bs / $tasa_cambio;
+                            $subtotal_usd = $subtotal_bs / $tasa_cambio;
+                        }
+                    } else {
+                        throw new Exception("El producto '{$producto['nombre']}' está marcado como precio fijo pero no tiene precio en BS definido.");
+                    }
+                } else {
+                    // PRODUCTO SIN PRECIO FIJO
+                    // Usar precio USD del formulario o del producto
+                    if (isset($detalle['precio_unitario']) && $detalle['precio_unitario'] > 0) {
+                        $precio_unitario_usd = floatval($detalle['precio_unitario']);
+                    } else if (isset($producto['precio']) && $producto['precio'] > 0) {
+                        $precio_unitario_usd = floatval($producto['precio']);
+                    } else {
+                        throw new Exception("El producto '{$producto['nombre']}' no tiene precio definido.");
+                    }
+
+                    // Calcular BS convirtiendo desde USD
+                    $precio_unitario_bs = $precio_unitario_usd * $tasa_cambio;
+                    $subtotal_usd = $detalle['cantidad'] * $precio_unitario_usd;
+                    $subtotal_bs = $detalle['cantidad'] * $precio_unitario_bs;
+                }
+
+                // Acumular totales
+                $total_usd += $subtotal_usd;
+                $total_bs += $subtotal_bs;
+
+                // Guardar detalle procesado
+                $detalles_procesados[] = [
+                    'producto_id' => $detalle['producto_id'],
+                    'cantidad' => $detalle['cantidad'],
+                    'precio_unitario' => $precio_unitario_usd,
+                    'precio_unitario_bs' => $precio_unitario_bs,  // ¡EXACTO para precios fijos!
+                    'subtotal_usd' => $subtotal_usd,
+                    'subtotal_bs' => $subtotal_bs,
+                    'es_precio_fijo' => $es_precio_fijo,
+                    'producto_nombre' => $producto['nombre'],
+                    'precio_fijo_original' => $es_precio_fijo ? floatval($producto['precio_bs']) : null
+                ];
+            }
+
+            // Crear la venta
+            $ventaData = [
+                'cliente_id' => $data['cliente_id'],
+                'tipo_pago_id' => $data['tipo_pago_id'],
+                'subtotal' => $total_usd,
+                'total' => $total_usd,
+                'tasa_cambio_utilizada' => $tasa_cambio,
+                'total_bs' => $total_bs,
+                'estado' => $data['estado'] ?? 'pendiente',
+                'fecha_hora' => $data['fecha_hora'] ?? date('Y-m-d H:i:s'),
+                'observaciones' => $data['observaciones'] ?? ''
+            ];
+
+            $resultado_venta = $this->venta->crear($ventaData);
+
+            if (!$resultado_venta) {
+                throw new Exception("Error al crear la venta");
+            }
+
+            $venta_id = $resultado_venta['id'];
+            $numero_venta = $resultado_venta['numero_venta'];
+
+            // Crear detalles de venta
+            $detallesData = [];
+            foreach ($detalles_procesados as $detalle) {
+                $detallesData[] = [
+                    'venta_id' => $venta_id,
+                    'producto_id' => $detalle['producto_id'],
+                    'cantidad' => $detalle['cantidad'],
+                    'precio_unitario' => $detalle['precio_unitario'],
+                    'precio_unitario_bs' => $detalle['precio_unitario_bs'],  // ¡EXACTO!
+                    'subtotal' => $detalle['subtotal_usd'],
+                    'subtotal_bs' => $detalle['subtotal_bs']  // ¡EXACTO!
+                ];
+            }
+
+            if (!$this->venta->crearDetalles($detallesData)) {
+                throw new Exception("Error al crear los detalles de venta");
+            }
+
+            // Actualizar stock
+            if (($data['estado'] ?? 'pendiente') === 'completada') {
+                foreach ($detalles_procesados as $detalle) {
+                    $producto_actual = $this->producto->obtenerPorId($detalle['producto_id']);
+                    $nuevo_stock = $producto_actual['stock_actual'] - $detalle['cantidad'];
+
+                    $this->producto->actualizarStock(
+                        $detalle['producto_id'],
+                        $nuevo_stock,
+                        'venta',
+                        "Venta #$numero_venta - " . $detalle['producto_nombre']
+                    );
                 }
             }
+
+            $this->db->commit();
+
+            // RETORNO MODIFICADO PARA REDIRECCIÓN
+            return [
+                "success" => true,
+                "message" => "Venta creada exitosamente",
+                "venta_id" => $venta_id,
+                "numero_venta" => $numero_venta,
+                "tasa_cambio" => $tasa_cambio,
+                "total_usd" => $total_usd,
+                "total_bs" => $total_bs,
+                "detalles_procesados" => $detalles_procesados,
+                "redirect_url" => "index.php"  // NUEVO: URL para redirección
+            ];
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            error_log("ERROR en VentaController::crear: " . $e->getMessage());
+            return [
+                "success" => false,
+                "message" => "Error al crear la venta: " . $e->getMessage()
+            ];
         }
-
-        $this->db->commit();
-
-        return [
-            "success" => true,
-            "message" => "Estado de venta actualizado exitosamente"
-        ];
-    } catch (Exception $e) {
-        $this->db->rollBack();
-        return [
-            "success" => false,
-            "message" => "Error al actualizar estado: " . $e->getMessage()
-        ];
     }
-}
+
+
+    public function actualizarEstado($id, $estado)
+    {
+        try {
+            $this->db->beginTransaction();
+
+            // Primero, obtener información de la venta
+            $venta = $this->venta->obtenerPorId($id);
+            if (!$venta) {
+                throw new Exception("Venta no encontrada");
+            }
+
+            // Actualizar estado en la venta
+            $query = "UPDATE ventas SET estado = :estado WHERE id = :id";
+            $stmt = $this->db->prepare($query);
+            $stmt->bindParam(":estado", $estado);
+            $stmt->bindParam(":id", $id);
+
+            if (!$stmt->execute()) {
+                throw new Exception("Error al actualizar estado de la venta");
+            }
+
+            // Si se está completando la venta, actualizar stock
+            if ($estado === 'completada' && $venta['estado'] !== 'completada') {
+                // Obtener detalles de la venta
+                $detalles = $this->obtenerDetallesCompletos($id);
+
+                foreach ($detalles as $detalle) {
+                    // Obtener producto actual
+                    $producto_actual = $this->producto->obtenerPorId($detalle['producto_id']);
+                    if ($producto_actual) {
+                        $nuevo_stock = $producto_actual['stock_actual'] - $detalle['cantidad'];
+
+                        // Actualizar stock
+                        $this->producto->actualizarStock(
+                            $detalle['producto_id'],
+                            $nuevo_stock,
+                            'venta',
+                            "Venta #{$venta['numero_venta']} completada - " . $detalle['producto_nombre']
+                        );
+                    }
+                }
+            }
+
+            $this->db->commit();
+
+            return [
+                "success" => true,
+                "message" => "Estado de la venta #{$venta['numero_venta']} actualizado a '{$estado}'"
+            ];
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            return [
+                "success" => false,
+                "message" => "Error al actualizar estado: " . $e->getMessage()
+            ];
+        }
+    }
+
 
     public function obtenerEstadisticas()
     {
