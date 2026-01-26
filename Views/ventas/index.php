@@ -50,9 +50,13 @@ if ($result['success']) {
     $ventas = [];
 }
 
-// Obtener estadísticas
+// Obtener estadísticas generales
 $estadisticas = $controller->obtenerEstadisticas();
 $stats = $estadisticas['success'] ? $estadisticas['data'] : [];
+
+// Obtener total de ventas completadas en Bs
+$totalCompletadas = $controller->obtenerTotalVentasCompletadasBs();
+$totales = $totalCompletadas['success'] ? $totalCompletadas['data'] : [];
 
 // Generar token CSRF para seguridad
 if (!isset($_SESSION['csrf_token'])) {
@@ -110,6 +114,7 @@ include __DIR__ . '/../layouts/header.php';
                     <div>
                         <h5 class="card-title">Total Ventas</h5>
                         <h3><?php echo $stats['total_ventas'] ?? 0; ?></h3>
+                        <small class="opacity-75">Últimos 30 días</small>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-receipt fa-2x"></i>
@@ -123,11 +128,28 @@ include __DIR__ . '/../layouts/header.php';
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <h5 class="card-title">Ingresos Totales</h5>
+                        <h5 class="card-title">Ingresos USD</h5>
                         <h3><?php echo $stats['ingresos_totales_formateado'] ?? '$0.00'; ?></h3>
+                        <small class="opacity-75">Últimos 30 días</small>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-dollar-sign fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h5 class="card-title">Total Bs</h5>
+                        <h3><?php echo isset($totales['total_bs']) ? TasaCambioHelper::formatearBS($totales['total_bs']) : 'Bs 0.00'; ?></h3>
+                        <small class="opacity-75">Ventas completadas</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-bolt fa-2x"></i>
                     </div>
                 </div>
             </div>
@@ -140,6 +162,7 @@ include __DIR__ . '/../layouts/header.php';
                     <div>
                         <h5 class="card-title">Ticket Promedio</h5>
                         <h3><?php echo $stats['ticket_promedio_formateado'] ?? '$0.00'; ?></h3>
+                        <small class="opacity-75">Por venta</small>
                     </div>
                     <div class="align-self-center">
                         <i class="fas fa-chart-line fa-2x"></i>
@@ -148,18 +171,76 @@ include __DIR__ . '/../layouts/header.php';
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card bg-warning text-white">
+</div>
+
+<!-- Resumen Detallado -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Resumen Financiero
+                </h5>
+            </div>
             <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h5 class="card-title">Clientes Activos</h5>
-                        <h3><?php echo $stats['clientes_activos'] ?? 0; ?></h3>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center p-3 border rounded">
+                            <div class="text-muted mb-2">
+                                <i class="fas fa-check-circle text-success me-1"></i>
+                                Ventas Completadas
+                            </div>
+                            <h3 class="text-success"><?php echo $totales['total_ventas'] ?? 0; ?></h3>
+                            <small class="text-muted">Total de transacciones</small>
+                        </div>
                     </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-users fa-2x"></i>
+                    <div class="col-md-4">
+                        <div class="text-center p-3 border rounded">
+                            <div class="text-muted mb-2">
+                                <i class="fas fa-dollar-sign text-primary me-1"></i>
+                                Total USD
+                            </div>
+                            <h3 class="text-primary">$<?php echo isset($totales['total_usd']) ? number_format($totales['total_usd'], 2) : '0.00'; ?></h3>
+                            <small class="text-muted">Ingresos en dólares</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center p-3 border rounded">
+                            <div class="text-muted mb-2">
+                                <i class="fas fa-bolt text-warning me-1"></i>
+                                Total Bs
+                            </div>
+                            <h3 class="text-warning"><?php echo isset($totales['total_bs']) ? TasaCambioHelper::formatearBS($totales['total_bs']) : 'Bs 0.00'; ?></h3>
+                            <small class="text-muted">Ingresos en bolívares</small>
+                        </div>
                     </div>
                 </div>
+                
+                <?php if (isset($totales['total_bs']) && $totales['total_bs'] > 0): ?>
+                <div class="mt-4">
+                    <div class="alert alert-info">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-info-circle fa-2x me-3"></i>
+                            <div>
+                                <h6 class="mb-1">Total acumulado en bolívares:</h6>
+                                <p class="mb-0">
+                                    <strong class="fs-4"><?php echo TasaCambioHelper::formatearBS($totales['total_bs']); ?></strong>
+                                    <span class="ms-3 text-muted">
+                                        <?php echo isset($totales['total_usd']) && $totales['total_usd'] > 0 ? 
+                                            '(Aprox. $' . number_format($totales['total_usd'], 2) . ' USD)' : 
+                                            ''; ?>
+                                    </span>
+                                </p>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Este total incluye TODAS las ventas completadas en el sistema
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -200,7 +281,13 @@ include __DIR__ . '/../layouts/header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($ventas as $venta):
+                        <?php 
+                        $totalVentasUsd = 0;
+                        $totalVentasBs = 0;
+                        $totalCompletadasUsd = 0;
+                        $totalCompletadasBs = 0;
+                        
+                        foreach ($ventas as $venta):
                             $estado_badge = [
                                 'pendiente' => 'bg-warning',
                                 'completada' => 'bg-success',
@@ -240,6 +327,15 @@ include __DIR__ . '/../layouts/header.php';
                                     $tiene_precio_fijo = true;
                                     break;
                                 }
+                            }
+                            
+                            // Acumular totales
+                            $totalVentasUsd += $venta['total'] ?? 0;
+                            $totalVentasBs += $venta['total_bs'] ?? 0;
+                            
+                            if (($venta['estado'] ?? '') === 'completada') {
+                                $totalCompletadasUsd += $venta['total'] ?? 0;
+                                $totalCompletadasBs += $venta['total_bs'] ?? 0;
                             }
                         ?>
                             <tr <?php echo $tiene_precio_fijo ? 'class="table-warning"' : ''; ?>>
@@ -342,56 +438,25 @@ include __DIR__ . '/../layouts/header.php';
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
+                    <tfoot>
+                        <tr class="table-active">
+                            <td colspan="2" class="text-end"><strong>Totales:</strong></td>
+                            <td><strong class="text-primary">$<?php echo number_format($totalVentasUsd, 2); ?></strong></td>
+                            <td><strong class="text-success"><?php echo TasaCambioHelper::formatearBS($totalVentasBs); ?></strong></td>
+                            <td colspan="5" class="text-end">
+                                <small class="text-muted">
+                                    <i class="fas fa-check-circle text-success me-1"></i>
+                                    Ventas completadas: 
+                                    <strong class="text-success">$<?php echo number_format($totalCompletadasUsd, 2); ?> USD</strong>
+                                    / 
+                                    <strong class="text-warning"><?php echo TasaCambioHelper::formatearBS($totalCompletadasBs); ?></strong>
+                                </small>
+                            </td>
+                        </tr>
+                    </tfoot>
                 </table>
             </div>
         <?php endif; ?>
-    </div>
-</div>
-
-<!-- Información Adicional -->
-<div class="card mt-4">
-    <div class="card-header bg-light">
-        <h6 class="card-title mb-0">
-            <i class="fas fa-info-circle me-2"></i>
-            Sistema de Ventas - Precios Fijos vs Precios Variables
-        </h6>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <h6 class="text-primary">
-                    <i class="fas fa-lock text-success me-2"></i>Productos con Precio Fijo:
-                </h6>
-                <ul class="list-unstyled">
-                    <li><i class="fas fa-check text-success me-2"></i> Mantienen su precio en Bs independientemente de la tasa</li>
-                    <li><i class="fas fa-check text-success me-2"></i> No se convierten a USD en el momento de la venta</li>
-                    <li><i class="fas fa-check text-success me-2"></i> Ideales para productos con precio controlado</li>
-                    <li><i class="fas fa-check text-success me-2"></i> Se muestran con fondo amarillo en la tabla</li>
-                </ul>
-            </div>
-            <div class="col-md-6">
-                <h6 class="text-primary">
-                    <i class="fas fa-sync-alt text-info me-2"></i>Productos con Precio Variable:
-                </h6>
-                <ul class="list-unstyled">
-                    <li><i class="fas fa-check text-info me-2"></i> Se convierten usando la tasa de cambio del día</li>
-                    <li><i class="fas fa-check text-info me-2"></i> El precio en Bs varía según la tasa</li>
-                    <li><i class="fas fa-check text-info me-2"></i> Precio base en USD, conversión automática</li>
-                    <li><i class="fas fa-check text-info me-2"></i> Se usan para productos importados o variables</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="alert alert-info mt-3">
-            <i class="fas fa-lightbulb me-2"></i>
-            <strong>¿Cómo identificar ventas con precios fijos?</strong>
-            <ul class="mb-0 mt-2">
-                <li><i class="fas fa-lock text-success me-2"></i> Ícono de candado junto al número de venta</li>
-                <li><span class="badge bg-warning text-dark me-2">Fondo amarillo</span> Fila destacada en amarillo</li>
-                <li><i class="fas fa-lock text-success me-2"></i> Texto "Incluye precios fijos" en el total Bs</li>
-                <li><i class="fas fa-eye text-info me-2"></i> Detalles completos al hacer clic en "Ver"</li>
-            </ul>
-        </div>
     </div>
 </div>
 
@@ -463,6 +528,11 @@ include __DIR__ . '/../layouts/header.php';
     .tooltip-inner {
         max-width: 300px;
     }
+
+    /* Estilos para los totales */
+    .table-active {
+        background-color: rgba(0, 0, 0, 0.05) !important;
+    }
 </style>
 
 <script>
@@ -495,8 +565,38 @@ include __DIR__ . '/../layouts/header.php';
             initComplete: function() {
                 $('.dataTables_filter input').addClass('form-control form-control-sm');
                 $('.dataTables_length select').addClass('form-control form-control-sm');
+            },
+            footerCallback: function(row, data, start, end, display) {
+                var api = this.api();
+                
+                // Actualizar totales en el footer
+                $(api.column(2).footer()).html(
+                    '<strong class="text-primary">$' + 
+                    api.column(2, {page: 'current'}).data().reduce(function(a, b) {
+                        // Extraer el valor numérico del formato
+                        var val = parseFloat(b.replace(/[^0-9.-]+/g, ""));
+                        return (parseFloat(a) + (isNaN(val) ? 0 : val)).toFixed(2);
+                    }, 0) + '</strong>'
+                );
+                
+                $(api.column(3).footer()).html(
+                    '<strong class="text-success">' + 
+                    formatBsTotal(api.column(3, {page: 'current'}).data().reduce(function(a, b) {
+                        // Extraer el valor numérico del formato Bs
+                        var val = parseFloat(b.replace(/[^0-9.-]+/g, ""));
+                        return (parseFloat(a) + (isNaN(val) ? 0 : val)).toFixed(2);
+                    }, 0)) + '</strong>'
+                );
             }
         });
+
+        // Función para formatear total en Bs
+        function formatBsTotal(value) {
+            return 'Bs ' + parseFloat(value).toLocaleString('es-VE', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
 
         // Configurar modal de completar venta
         const modalCompletar = document.getElementById('modalCompletar');

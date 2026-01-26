@@ -188,75 +188,70 @@ class Producto
     }
 
     public function actualizar($id, $data)
-    {
-        $query = "UPDATE " . $this->table . " SET
-                  nombre = :nombre,
-                  descripcion = :descripcion,
-                  precio = :precio,
-                  precio_bs = :precio_bs,
-                  precio_costo = :precio_costo,
-                  precio_costo_bs = :precio_costo_bs,
-                  usar_precio_fijo_bs = :usar_precio_fijo_bs,
-                  stock_minimo = :stock_minimo,
-                  categoria_id = :categoria_id,
-                  activo = :activo
-                  WHERE id = :id";
-
-        $stmt = $this->conn->prepare($query);
-
-        // MODIFICACIÓN: Manejar lógica según tipo de precio
-        $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
-
-        if ($usarPrecioFijo) {
-            // Para precio fijo en BS
-            // Mantener los precios en BS tal como vienen
-            $precio_bs = $data['precio_bs'] ?? 0;
-            $precio = $data['precio'] ?? 0;
-            $precio_costo_bs = $data['precio_costo_bs'] ?? 0;
-            $precio_costo = $data['precio_costo'] ?? 0;
-        } else {
-            // Para precio NO fijo
-            $precio = $data['precio'] ?? 0;
-            $precio_costo = $data['precio_costo'] ?? 0;
-
-            // Obtener tasa de cambio para calcular precios en BS
-            $tasa_cambio = $this->obtenerTasaCambio();
-
-            // Calcular precios en BS automáticamente
-            $precio_bs = round($precio * $tasa_cambio, 2);
-            $precio_costo_bs = round($precio_costo * $tasa_cambio, 2);
+{
+    // Construir la consulta dinámicamente basada en los campos proporcionados
+    $fields = [];
+    $params = [':id' => $id];
+    
+    // Campos que se pueden actualizar (todos excepto id y codigo_sku)
+    // ¡AHORA INCLUYE stock_actual!
+    $camposPermitidos = [
+        'nombre', 'descripcion', 'precio', 'precio_bs', 
+        'precio_costo', 'precio_costo_bs', 'usar_precio_fijo_bs',
+        'stock_actual', 'stock_minimo', 'categoria_id', 'activo'
+    ];
+    
+    foreach ($camposPermitidos as $campo) {
+        if (isset($data[$campo])) {
+            $fields[] = "$campo = :$campo";
+            $params[":$campo"] = $data[$campo];
         }
-
-        $stmt->bindParam(":nombre", $data['nombre']);
-        $stmt->bindParam(":descripcion", $data['descripcion']);
-        $stmt->bindParam(":precio", $precio);
-        $stmt->bindParam(":precio_bs", $precio_bs);
-        $stmt->bindParam(":precio_costo", $precio_costo);
-        $stmt->bindParam(":precio_costo_bs", $precio_costo_bs);
-        $stmt->bindParam(":usar_precio_fijo_bs", $usarPrecioFijo, PDO::PARAM_BOOL);
-
-        $stock_minimo = $data['stock_minimo'] ?? 5;
-        $stmt->bindParam(":stock_minimo", $stock_minimo);
-
-        $categoria_id = $data['categoria_id'] ?? null;
-        $stmt->bindParam(":categoria_id", $categoria_id);
-
-        $activo = isset($data['activo']) ? (bool)$data['activo'] : true;
-        $stmt->bindParam(":activo", $activo, PDO::PARAM_BOOL);
-
-        $stmt->bindParam(":id", $id);
-
-        if ($stmt->execute()) {
-            return [
-                "success" => true,
-                "message" => "Producto actualizado exitosamente"
-            ];
-        }
+    }
+    
+    // Añadir fecha de actualización
+    $fields[] = "updated_at = CURRENT_TIMESTAMP";
+    
+    if (empty($fields)) {
         return [
             "success" => false,
-            "message" => "Error al actualizar producto: " . $stmt->errorInfo()[2]
+            "message" => "No hay campos para actualizar"
         ];
     }
+    
+    $query = "UPDATE " . $this->table . " SET " . implode(', ', $fields) . " WHERE id = :id";
+    
+    $stmt = $this->conn->prepare($query);
+    
+    // Asignar parámetros
+    foreach ($params as $key => $value) {
+        // Manejar tipos de datos
+        if (is_bool($value)) {
+            $stmt->bindValue($key, $value, PDO::PARAM_BOOL);
+        } else if (is_int($value)) {
+            $stmt->bindValue($key, $value, PDO::PARAM_INT);
+        } else if (is_float($value)) {
+            // Para valores decimales, usar string para mantener precisión
+            $stmt->bindValue($key, (string)$value, PDO::PARAM_STR);
+        } else if (is_null($value)) {
+            $stmt->bindValue($key, $value, PDO::PARAM_NULL);
+        } else {
+            $stmt->bindValue($key, $value);
+        }
+    }
+    
+    if ($stmt->execute()) {
+        return [
+            "success" => true,
+            "message" => "Producto actualizado exitosamente"
+        ];
+    }
+    
+    error_log("Error en Producto->actualizar(): " . print_r($stmt->errorInfo(), true));
+    return [
+        "success" => false,
+        "message" => "Error al actualizar producto: " . $stmt->errorInfo()[2]
+    ];
+}
 
     public function obtenerPorId($id)
     {

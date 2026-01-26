@@ -167,3 +167,43 @@
 [2026-01-26 14:41:50] [DEBUG] Todas las categorías obtenidas {"total":4}
 [2026-01-26 14:42:39] [DEBUG] Todas las categorías obtenidas {"total":4}
 [2026-01-26 14:43:13] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 10:56:41] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2026-01-26 10:56:41] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2026-01-26 10:56:41] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 10:56:41] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 10:56:41] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 10:56:41] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 14:59:51] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:00:13] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:01:24] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:01:52] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:02:05] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:02:21] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:02:25] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:03:06] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:03:30] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:08:45] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:14:08] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:14:41] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:14:57] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:19:17] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:20:47] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:22:04] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:22:20] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:22:48] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:23:04] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:23:06] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:23:16] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:24:49] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:24:54] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:29:20] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:38:12] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:38:43] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:39:08] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:39:10] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:39:28] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:39:33] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:46:51] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:47:11] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:47:34] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 15:47:36] [DEBUG] Todas las categorías obtenidas {"total":4}

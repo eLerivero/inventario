@@ -187,46 +187,115 @@ class ProductoController
     }
 
     public function actualizar($id, $data)
-    {
-        try {
-            // Validar datos requeridos
-            if (empty($data['nombre'])) {
-                throw new Exception("El nombre del producto es obligatorio");
-            }
-
-            $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
-
-            if ($usarPrecioFijo) {
-                // Para precio fijo en Bs, el precio_bs es obligatorio
-                if (empty($data['precio_bs']) || $data['precio_bs'] <= 0) {
-                    throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
-                }
-                // Para precio fijo, los precios en USD son OPCIONALES
-                if (empty($data['precio']) || $data['precio'] < 0) {
-                    $data['precio'] = 0;
-                }
-                if (empty($data['precio_costo']) || $data['precio_costo'] < 0) {
-                    $data['precio_costo'] = 0;
-                }
-            } else {
-                // Para precio NO fijo, el precio en USD es obligatorio
-                if (empty($data['precio']) || $data['precio'] <= 0) {
-                    throw new Exception("El precio en USD debe ser mayor a 0 para productos sin precio fijo");
-                }
-                if (empty($data['precio_costo']) || $data['precio_costo'] < 0) {
-                    $data['precio_costo'] = 0;
-                }
-            }
-
-            return $this->producto->actualizar($id, $data);
-        } catch (Exception $e) {
-            return [
-                "success" => false,
-                "message" => "Error al actualizar producto: " . $e->getMessage()
-            ];
+{
+    try {
+        // Validar datos requeridos
+        if (empty($data['nombre'])) {
+            throw new Exception("El nombre del producto es obligatorio");
         }
-    }
 
+        $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
+
+        if ($usarPrecioFijo) {
+            // Para precio fijo en Bs, el precio_bs es obligatorio
+            if (empty($data['precio_bs']) || $data['precio_bs'] <= 0) {
+                throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
+            }
+            // Para precio fijo, los precios en USD son OPCIONALES
+            if (empty($data['precio']) || $data['precio'] < 0) {
+                $data['precio'] = 0;
+            }
+            if (empty($data['precio_costo']) || $data['precio_costo'] < 0) {
+                $data['precio_costo'] = 0;
+            }
+            if (empty($data['precio_costo_bs']) || $data['precio_costo_bs'] < 0) {
+                $data['precio_costo_bs'] = 0;
+            }
+        } else {
+            // Para precio NO fijo, el precio en USD es obligatorio
+            if (empty($data['precio']) || $data['precio'] <= 0) {
+                throw new Exception("El precio en USD debe ser mayor a 0 para productos sin precio fijo");
+            }
+            if (empty($data['precio_costo']) || $data['precio_costo'] < 0) {
+                $data['precio_costo'] = 0;
+            }
+            // Para precio no fijo, NO permitir modificar precio_costo_bs directamente
+            // Se calculará automáticamente
+            if (isset($data['precio_costo_bs'])) {
+                unset($data['precio_costo_bs']); // No permitir modificar directamente
+            }
+        }
+
+        // ¡IMPORTANTE! NO permitir modificar el código SKU
+        if (isset($data['codigo_sku'])) {
+            unset($data['codigo_sku']);
+        }
+
+        // ¡IMPORTANTE! AHORA SÍ permitir modificar el stock_actual
+        // Pero validar que sea un número válido
+        if (isset($data['stock_actual'])) {
+            $stock_actual = intval($data['stock_actual']);
+            if ($stock_actual < 0) {
+                throw new Exception("El stock actual no puede ser negativo");
+            }
+            $data['stock_actual'] = $stock_actual;
+            
+            // Registrar en historial de stock (solo si cambió)
+            $producto_actual = $this->producto->obtenerPorId($id);
+            if ($producto_actual && $producto_actual['stock_actual'] != $stock_actual) {
+                $diferencia = $stock_actual - $producto_actual['stock_actual'];
+                
+                // Registrar en historial de stock
+                $historialData = [
+                    'producto_id' => $id,
+                    'cantidad_anterior' => $producto_actual['stock_actual'],
+                    'cantidad_nueva' => $stock_actual,
+                    'diferencia' => $diferencia,
+                    'tipo_movimiento' => 'Edición de Productos',
+                    'observaciones' => 'Ajuste manual desde edición de producto',
+                    'usuario_id' => $_SESSION['usuario_id'] ?? 1
+                ];
+                
+                $this->registrarCambioStock($historialData);
+            }
+        }
+
+        return $this->producto->actualizar($id, $data);
+    } catch (Exception $e) {
+        return [
+            "success" => false,
+            "message" => "Error al actualizar producto: " . $e->getMessage()
+        ];
+    }
+}
+
+// Nuevo método para registrar cambios de stock
+private function registrarCambioStock($data)
+{
+    try {
+        $query = "INSERT INTO historial_stock 
+                  (producto_id, cantidad_anterior, cantidad_nueva, diferencia, 
+                   tipo_movimiento, observaciones, usuario_id) 
+                  VALUES 
+                  (:producto_id, :cantidad_anterior, :cantidad_nueva, :diferencia,
+                   :tipo_movimiento, :observaciones, :usuario_id)";
+
+        $stmt = $this->db->prepare($query);
+        
+        $stmt->bindParam(":producto_id", $data['producto_id']);
+        $stmt->bindParam(":cantidad_anterior", $data['cantidad_anterior']);
+        $stmt->bindParam(":cantidad_nueva", $data['cantidad_nueva']);
+        $stmt->bindParam(":diferencia", $data['diferencia']);
+        $stmt->bindParam(":tipo_movimiento", $data['tipo_movimiento']);
+        $stmt->bindParam(":observaciones", $data['observaciones']);
+        $stmt->bindParam(":usuario_id", $data['usuario_id']);
+        
+        return $stmt->execute();
+    } catch (Exception $e) {
+        error_log("Error al registrar cambio de stock: " . $e->getMessage());
+        return false;
+    }
+}
 
     public function eliminar($id)
     {

@@ -422,4 +422,30 @@ class VentaController
             ];
         }
     }
+
+    public function obtenerTotalVentasCompletadasBs()
+{
+    try {
+        $query = "SELECT 
+                    COUNT(*) as total_ventas,
+                    SUM(total) as total_usd,
+                    SUM(total_bs) as total_bs
+                  FROM ventas 
+                  WHERE estado = 'completada'";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute();
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return [
+            "success" => true,
+            "data" => $resultado
+        ];
+    } catch (Exception $e) {
+        return [
+            "success" => false,
+            "message" => "Error al obtener total de ventas completadas: " . $e->getMessage()
+        ];
+    }
+}
 }
