@@ -1,4 +1,4 @@
--- data.sql - SISTEMA DE INVENTARIO (ORIGINAL CON CORRECCIONES)
+-- data.sql - SISTEMA DE INVENTARIO (CON CORRECCIÓN DE DOBLE DESCUENTO)
 -- PostgreSQL
 
 -- Eliminar tablas existentes (en orden inverso por dependencias)
@@ -333,20 +333,6 @@ INSERT INTO clientes (nombre, tipo_documento, numero_documento, telefono, email,
 ('Empresa ABC C.A.', 'J', 'J-123456789', '0414-4445566', 'contacto@empresaabc.com', 'empresa'),
 ('Consumidor Final', 'V', 'V-87654321', '0426-7778899', NULL, 'normal');
 
--- NO insertar productos de ejemplo (los crearás tú mismo)
--- INSERT INTO productos (codigo_sku, nombre, descripcion, precio, precio_costo, stock_actual, stock_minimo, categoria_id, proveedor_id, activo) VALUES
--- ('LAP-DEL-001', 'Laptop Dell Inspiron 15', 'Laptop Dell Inspiron 15, Intel Core i5, 8GB RAM, 256GB SSD', 850.00, 700.00, 10, 2, 2, 1, TRUE);
-
--- NO actualizar precios en bolívares basados en la tasa de cambio
--- UPDATE productos 
--- SET precio_bs = ROUND(precio * 36.50, 2),
---     precio_costo_bs = ROUND(precio_costo * 36.50, 2)
--- WHERE precio_bs = 0;
-
--- NO insertar productos con precio fijo en bolívares
--- INSERT INTO productos (codigo_sku, nombre, descripcion, precio, precio_bs, precio_costo, precio_costo_bs, usar_precio_fijo_bs, stock_actual, stock_minimo, categoria_id, activo) VALUES
--- ('PAN-BIM-001', 'Pan Bimbo Grande', 'Pan de molde Bimbo, paquete grande', 2.50, 100.00, 1.80, 65.70, TRUE, 60, 10, 5, TRUE);
-
 -- FUNCIONES Y TRIGGERS
 
 -- Función para actualizar timestamp de updated_at
@@ -420,56 +406,34 @@ CREATE TRIGGER generar_numero_venta_trigger
     FOR EACH ROW
     EXECUTE FUNCTION generar_numero_venta();
 
--- Función para actualizar stock cuando se crea un detalle de venta
-CREATE OR REPLACE FUNCTION actualizar_stock_venta()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- Actualizar stock del producto
-    UPDATE productos 
-    SET stock_actual = stock_actual - NEW.cantidad,
-        updated_at = CURRENT_TIMESTAMP
-    WHERE id = NEW.producto_id;
-    
-    -- Registrar en historial de stock
-    INSERT INTO historial_stock 
-        (producto_id, cantidad_anterior, cantidad_nueva, diferencia, tipo_movimiento, referencia_id, referencia_tabla, observaciones)
-    SELECT 
-        p.id,
-        p.stock_actual + NEW.cantidad,
-        p.stock_actual,
-        -NEW.cantidad,
-        'venta',
-        NEW.venta_id,
-        'ventas',
-        'Venta #' || (SELECT numero_venta FROM ventas WHERE id = NEW.venta_id) || ' - Producto: ' || p.nombre
-    FROM productos p
-    WHERE p.id = NEW.producto_id;
-    
-    RETURN NEW;
-END;
-$$ language 'plpgsql';
+-- =========================================================================
+-- CORRECCIÓN: FUNCIONES Y TRIGGERS DE STOCK MODIFICADOS
+-- =========================================================================
 
--- Trigger para actualizar stock al crear detalle de venta
-CREATE TRIGGER actualizar_stock_detalle_venta
-    AFTER INSERT ON detalle_ventas
-    FOR EACH ROW
-    EXECUTE FUNCTION actualizar_stock_venta();
-
--- Función para validar stock antes de vender
+-- 1. Función para validar stock (SOLO VALIDACIÓN, NO DESCUENTO)
 CREATE OR REPLACE FUNCTION validar_stock_venta()
 RETURNS TRIGGER AS $$
 DECLARE
     stock_disponible INTEGER;
+    venta_estado VARCHAR(20);
 BEGIN
-    -- Obtener stock disponible
-    SELECT stock_actual INTO stock_disponible
-    FROM productos 
-    WHERE id = NEW.producto_id;
+    -- Obtener estado de la venta
+    SELECT estado INTO venta_estado
+    FROM ventas 
+    WHERE id = NEW.venta_id;
     
-    -- Validar stock
-    IF stock_disponible < NEW.cantidad THEN
-        RAISE EXCEPTION 'Stock insuficiente para el producto ID % (Stock disponible: %, Cantidad solicitada: %)', 
-            NEW.producto_id, stock_disponible, NEW.cantidad;
+    -- Solo validar stock para ventas activas
+    IF venta_estado IN ('pendiente', 'completada') THEN
+        -- Obtener stock disponible
+        SELECT stock_actual INTO stock_disponible
+        FROM productos 
+        WHERE id = NEW.producto_id;
+        
+        -- Validar stock (solo validación, sin descontar)
+        IF stock_disponible < NEW.cantidad THEN
+            RAISE EXCEPTION 'Stock insuficiente para el producto ID % (Stock disponible: %, Cantidad solicitada: %)', 
+                NEW.producto_id, stock_disponible, NEW.cantidad;
+        END IF;
     END IF;
     
     RETURN NEW;
@@ -481,6 +445,143 @@ CREATE TRIGGER validar_stock_detalle_venta
     BEFORE INSERT ON detalle_ventas
     FOR EACH ROW
     EXECUTE FUNCTION validar_stock_venta();
+
+-- 2. NUEVA FUNCIÓN: Actualizar stock solo cuando la venta se complete
+CREATE OR REPLACE FUNCTION actualizar_stock_venta_completada()
+RETURNS TRIGGER AS $$
+DECLARE
+    detalle_record RECORD;
+    v_stock_anterior INTEGER;
+    v_stock_nuevo INTEGER;
+    v_producto_nombre VARCHAR;
+    v_numero_venta VARCHAR;
+BEGIN
+    -- Solo procesar si el estado cambió a 'completada' y antes NO estaba 'completada'
+    IF NEW.estado = 'completada' AND OLD.estado != 'completada' THEN
+        -- Obtener número de venta
+        SELECT numero_venta INTO v_numero_venta FROM ventas WHERE id = NEW.id;
+        
+        -- Recorrer todos los detalles de la venta
+        FOR detalle_record IN 
+            SELECT dv.producto_id, dv.cantidad, p.nombre as producto_nombre, p.stock_actual
+            FROM detalle_ventas dv
+            JOIN productos p ON dv.producto_id = p.id
+            WHERE dv.venta_id = NEW.id
+        LOOP
+            -- Guardar valores
+            v_stock_anterior := detalle_record.stock_actual;
+            v_stock_nuevo := detalle_record.stock_actual - detalle_record.cantidad;
+            v_producto_nombre := detalle_record.producto_nombre;
+            
+            -- Validar que haya suficiente stock antes de descontar
+            IF v_stock_anterior < detalle_record.cantidad THEN
+                RAISE EXCEPTION 'Stock insuficiente para completar la venta. Producto: % (Stock: %, Necesario: %)', 
+                    v_producto_nombre, v_stock_anterior, detalle_record.cantidad;
+            END IF;
+            
+            -- Actualizar stock del producto
+            UPDATE productos 
+            SET stock_actual = v_stock_nuevo,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = detalle_record.producto_id;
+            
+            -- Registrar en historial de stock
+            INSERT INTO historial_stock 
+                (producto_id, cantidad_anterior, cantidad_nueva, diferencia, 
+                 tipo_movimiento, referencia_id, referencia_tabla, observaciones)
+            VALUES (
+                detalle_record.producto_id,
+                v_stock_anterior,
+                v_stock_nuevo,
+                -detalle_record.cantidad,
+                'venta',
+                NEW.id,
+                'ventas',
+                'Venta #' || v_numero_venta || ' COMPLETADA - Producto: ' || v_producto_nombre
+            );
+        END LOOP;
+        
+        -- Mensaje de confirmación
+        RAISE NOTICE 'Stock actualizado para venta #%', v_numero_venta;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Trigger para actualizar stock solo cuando se completa la venta
+CREATE TRIGGER actualizar_stock_venta_completada_trigger
+    AFTER UPDATE OF estado ON ventas
+    FOR EACH ROW
+    EXECUTE FUNCTION actualizar_stock_venta_completada();
+
+-- 3. FUNCIÓN para reversar stock si una venta completada se cancela
+CREATE OR REPLACE FUNCTION reversar_stock_venta_cancelada()
+RETURNS TRIGGER AS $$
+DECLARE
+    detalle_record RECORD;
+    v_stock_anterior INTEGER;
+    v_stock_nuevo INTEGER;
+    v_producto_nombre VARCHAR;
+    v_numero_venta VARCHAR;
+BEGIN
+    -- Solo procesar si el estado cambió desde 'completada' a otro estado
+    IF OLD.estado = 'completada' AND NEW.estado != 'completada' THEN
+        -- Obtener número de venta
+        SELECT numero_venta INTO v_numero_venta FROM ventas WHERE id = OLD.id;
+        
+        -- Recorrer todos los detalles de la venta
+        FOR detalle_record IN 
+            SELECT dv.producto_id, dv.cantidad, p.nombre as producto_nombre, p.stock_actual
+            FROM detalle_ventas dv
+            JOIN productos p ON dv.producto_id = p.id
+            WHERE dv.venta_id = OLD.id
+        LOOP
+            -- Guardar valores
+            v_stock_anterior := detalle_record.stock_actual;
+            v_stock_nuevo := detalle_record.stock_actual + detalle_record.cantidad;
+            v_producto_nombre := detalle_record.producto_nombre;
+            
+            -- Reversar stock del producto (devolver al inventario)
+            UPDATE productos 
+            SET stock_actual = v_stock_nuevo,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = detalle_record.producto_id;
+            
+            -- Registrar en historial de stock (reversión)
+            INSERT INTO historial_stock 
+                (producto_id, cantidad_anterior, cantidad_nueva, diferencia, 
+                 tipo_movimiento, referencia_id, referencia_tabla, observaciones)
+            VALUES (
+                detalle_record.producto_id,
+                v_stock_anterior,
+                v_stock_nuevo,
+                detalle_record.cantidad,
+                'ajuste_manual',
+                OLD.id,
+                'ventas',
+                'REVERSIÓN - Venta #' || v_numero_venta || ' CANCELADA - Producto: ' || v_producto_nombre
+            );
+        END LOOP;
+        
+        -- Mensaje de confirmación
+        RAISE NOTICE 'Stock revertido para venta #%', v_numero_venta;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Trigger para reversar stock si se cancela una venta completada
+CREATE TRIGGER reversar_stock_venta_cancelada_trigger
+    AFTER UPDATE OF estado ON ventas
+    FOR EACH ROW
+    WHEN (OLD.estado = 'completada' AND NEW.estado != 'completada')
+    EXECUTE FUNCTION reversar_stock_venta_cancelada();
+
+-- =========================================================================
+-- FUNCIONES ORIGINALES (SIN MODIFICAR)
+-- =========================================================================
 
 -- CORRECCIÓN CRÍTICA: Función para actualizar totales de venta (SOLUCIÓN PARA PRECIOS FIJOS)
 CREATE OR REPLACE FUNCTION actualizar_totales_venta()
@@ -824,8 +925,8 @@ BEGIN
     RAISE NOTICE '📊 ESTADÍSTICAS DE LA INSTALACIÓN:';
     RAISE NOTICE '   Tablas creadas: %', total_tablas;
     RAISE NOTICE '   Vistas creadas: 9';
-    RAISE NOTICE '   Funciones creadas: 6';
-    RAISE NOTICE '   Triggers creados: 8';
+    RAISE NOTICE '   Funciones creadas: 8';
+    RAISE NOTICE '   Triggers creados: 10';
     RAISE NOTICE '   Procedimientos: 2';
     RAISE NOTICE '   Registros insertados: %', total_registros;
     RAISE NOTICE '';
@@ -864,10 +965,16 @@ BEGIN
     RAISE NOTICE '   ✅ Reportes integrados';
     RAISE NOTICE '   ✅ Búsqueda avanzada de productos';
     RAISE NOTICE '';
-    RAISE NOTICE '🔧 CORRECCIÓN APLICADA:';
+    RAISE NOTICE '🔧 CORRECCIONES APLICADAS:';
     RAISE NOTICE '   ✅ Trigger actualizar_totales_venta() CORREGIDO';
     RAISE NOTICE '   ✅ Ahora usa subtotal_bs directamente para precios fijos';
     RAISE NOTICE '   ✅ Producto con precio fijo 100.00 BS = SIEMPRE 100.00 BS';
+    RAISE NOTICE '';
+    RAISE NOTICE '🔄 NUEVO SISTEMA DE STOCK:';
+    RAISE NOTICE '   ✅ SOLO se descuenta stock cuando venta se marca como "completada"';
+    RAISE NOTICE '   ✅ NO hay doble descuento al crear venta';
+    RAISE NOTICE '   ✅ Stock se revierte automáticamente si venta se cancela';
+    RAISE NOTICE '   ✅ Validación de stock al crear venta (sin descontar)';
     RAISE NOTICE '';
     RAISE NOTICE '📋 COMANDOS ÚTILES:';
     RAISE NOTICE '   -- Alertas de inventario';

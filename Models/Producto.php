@@ -288,61 +288,60 @@ class Producto
         return false;
     }
 
-    public function actualizarStock($producto_id, $nuevo_stock, $tipo_movimiento = 'ajuste', $observaciones = '')
-    {
-        $producto = $this->obtenerPorId($producto_id);
-        if (!$producto) {
-            return [
-                "success" => false,
-                "message" => "Producto no encontrado"
-            ];
-        }
-
-        $diferencia = $nuevo_stock - $producto['stock_actual'];
-
-        $query = "UPDATE " . $this->table . " SET stock_actual = :stock_actual WHERE id = :id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":stock_actual", $nuevo_stock);
-        $stmt->bindParam(":id", $producto_id);
-
-        if ($stmt->execute()) {
-
-            $historial_query = "INSERT INTO historial_stock 
-                            (producto_id, cantidad_anterior, cantidad_nueva, diferencia, 
-                                tipo_movimiento, observaciones, usuario_id) 
-                            VALUES 
-                            (:producto_id, :cantidad_anterior, :cantidad_nueva, :diferencia,
-                                :tipo_movimiento, :observaciones, :usuario_id)";
-
-            $historial_stmt = $this->conn->prepare($historial_query);
-
-            // Asignar a variables primero para evitar problemas de referencia
-            $cantidad_anterior = $producto['stock_actual'];
-            $cantidad_nueva = $nuevo_stock;
-            $observaciones_final = $observaciones ?: 'Actualización de stock';
-            $usuario_id = isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : 1;
-
-            $historial_stmt->bindParam(":producto_id", $producto_id);
-            $historial_stmt->bindParam(":cantidad_anterior", $cantidad_anterior);
-            $historial_stmt->bindParam(":cantidad_nueva", $cantidad_nueva);
-            $historial_stmt->bindParam(":diferencia", $diferencia);
-            $historial_stmt->bindParam(":tipo_movimiento", $tipo_movimiento);
-            $historial_stmt->bindParam(":observaciones", $observaciones_final);
-            $historial_stmt->bindParam(":usuario_id", $usuario_id);
-
-            $historial_stmt->execute();
-
-            return [
-                "success" => true,
-                "message" => "Stock actualizado exitosamente"
-            ];
-        }
-
+   public function actualizarStock($producto_id, $nuevo_stock, $tipo_movimiento = 'ajuste', $observaciones = '')
+{
+    $producto = $this->obtenerPorId($producto_id);
+    if (!$producto) {
         return [
             "success" => false,
-            "message" => "Error al actualizar stock: " . $stmt->errorInfo()[2]
+            "message" => "Producto no encontrado"
         ];
     }
+
+    $diferencia = $nuevo_stock - $producto['stock_actual'];
+
+    $query = "UPDATE " . $this->table . " SET stock_actual = :stock_actual WHERE id = :id";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(":stock_actual", $nuevo_stock);
+    $stmt->bindParam(":id", $producto_id);
+
+    if ($stmt->execute()) {
+        // Registrar en historial de stock
+        $historial_query = "INSERT INTO historial_stock 
+                        (producto_id, cantidad_anterior, cantidad_nueva, diferencia, 
+                            tipo_movimiento, observaciones, usuario_id) 
+                        VALUES 
+                        (:producto_id, :cantidad_anterior, :cantidad_nueva, :diferencia,
+                            :tipo_movimiento, :observaciones, :usuario_id)";
+
+        $historial_stmt = $this->conn->prepare($historial_query);
+
+        $cantidad_anterior = $producto['stock_actual'];
+        $cantidad_nueva = $nuevo_stock;
+        $observaciones_final = $observaciones ?: 'Actualización de stock';
+        $usuario_id = isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : 1;
+
+        $historial_stmt->bindParam(":producto_id", $producto_id);
+        $historial_stmt->bindParam(":cantidad_anterior", $cantidad_anterior);
+        $historial_stmt->bindParam(":cantidad_nueva", $cantidad_nueva);
+        $historial_stmt->bindParam(":diferencia", $diferencia);
+        $historial_stmt->bindParam(":tipo_movimiento", $tipo_movimiento);
+        $historial_stmt->bindParam(":observaciones", $observaciones_final);
+        $historial_stmt->bindParam(":usuario_id", $usuario_id);
+
+        $historial_stmt->execute();
+
+        return [
+            "success" => true,
+            "message" => "Stock actualizado exitosamente"
+        ];
+    }
+
+    return [
+        "success" => false,
+        "message" => "Error al actualizar stock: " . $stmt->errorInfo()[2]
+    ];
+}
 
     public function eliminar($id)
     {

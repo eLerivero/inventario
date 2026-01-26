@@ -94,3 +94,76 @@
 [2026-01-09 16:38:37] [DEBUG] Todas las categorías obtenidas {"total":4}
 [2026-01-09 16:42:22] [DEBUG] Todas las categorías obtenidas {"total":4}
 [2026-01-09 16:42:27] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:07:41] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 09:07:43] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2026-01-26 09:07:43] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2026-01-26 09:07:43] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 09:07:43] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 09:08:02] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
+[2026-01-26 09:08:07] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2026-01-26 09:08:07] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2026-01-26 09:08:07] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 09:08:07] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 09:08:07] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 09:08:07] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 13:08:09] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:08:11] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:08:38] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:08:40] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:08:41] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:09:21] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:09:23] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:10:13] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:10:54] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:20:41] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:21:07] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:21:16] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:35:38] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:35:39] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:35:43] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 09:35:48] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2026-01-26 09:35:48] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2026-01-26 09:35:48] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 09:35:48] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 09:35:50] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
+[2026-01-26 13:35:56] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:35:58] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:36:11] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:36:14] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:36:16] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:36:38] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:36:40] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:36:48] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:37:24] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:37:29] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 13:37:41] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:28:53] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:29:21] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:29:47] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:37:42] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:38:12] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:38:29] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:38:33] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:39:13] [ERROR] Error al obtener todas las categorías {"error":"SQLSTATE[42P01]: Undefined table: 7 ERROR:  no existe la relaci\u00f3n \u00abcategorias\u00bb\nLINE 1: SELECT * FROM categorias ORDER BY nombre\n                      ^"}
+[2026-01-26 10:39:35] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2026-01-26 10:39:35] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2026-01-26 10:39:35] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 10:39:35] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 10:39:38] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
+[2026-01-26 10:39:46] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2026-01-26 10:39:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2026-01-26 10:39:46] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 10:39:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 10:39:46] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 10:39:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
+[2026-01-26 14:39:49] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:39:51] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:40:06] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:40:09] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:40:12] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:40:35] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:40:37] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:41:34] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:41:50] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:42:39] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-26 14:43:13] [DEBUG] Todas las categorías obtenidas {"total":4}
