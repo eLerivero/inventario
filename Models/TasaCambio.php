@@ -19,12 +19,14 @@ class TasaCambio
         $this->conn = $db;
     }
 
-    public function obtenerTasaActual()
+   public function obtenerTasaActual()
     {
-        $query = "SELECT * FROM " . $this->table . " 
-                  WHERE activa = TRUE 
-                  ORDER BY fecha_actualizacion DESC 
-                  LIMIT 1";
+        $query = "SELECT tc.*, u.username as usuario_nombre, u.nombre as usuario_nombre_completo 
+                FROM " . $this->table . " tc
+                LEFT JOIN usuarios u ON tc.usuario_id = u.id
+                WHERE tc.activa = TRUE 
+                ORDER BY tc.fecha_actualizacion DESC 
+                LIMIT 1";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
@@ -35,7 +37,7 @@ class TasaCambio
         return false;
     }
 
-    public function crear($tasa, $usuario = 1)
+   public function crear($tasa, $usuario_id)
     {
         // Primero desactivar todas las tasas anteriores
         $query_desactivar = "UPDATE " . $this->table . " SET activa = FALSE WHERE activa = TRUE";
@@ -46,12 +48,12 @@ class TasaCambio
         $query = "INSERT INTO " . $this->table . " 
                   (moneda_origen, moneda_destino, tasa_cambio, usuario_id) 
                   VALUES 
-                  ('USD', 'VES', :tasa, :usuario)
+                  ('USD', 'VES', :tasa, :usuario_id)
                   RETURNING *";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":tasa", $tasa);
-        $stmt->bindParam(":usuario", $usuario);
+        $stmt->bindParam(":usuario_id", $usuario_id);
 
         if ($stmt->execute()) {
             return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -61,8 +63,10 @@ class TasaCambio
 
     public function obtenerHistorial($limite = 30)
     {
-        $query = "SELECT * FROM " . $this->table . " 
-                  ORDER BY fecha_actualizacion DESC 
+        $query = "SELECT tc.*, u.username as usuario_nombre, u.nombre as usuario_nombre_completo 
+                  FROM " . $this->table . " tc
+                  LEFT JOIN usuarios u ON tc.usuario_id = u.id
+                  ORDER BY tc.fecha_actualizacion DESC 
                   LIMIT :limite";
 
         $stmt = $this->conn->prepare($query);
@@ -74,11 +78,14 @@ class TasaCambio
 
     public function leer()
     {
-        $query = "SELECT * FROM " . $this->table . " 
-                  ORDER BY fecha_actualizacion DESC";
+        $query = "SELECT tc.*, u.username as usuario_nombre, u.nombre as usuario_nombre_completo 
+                  FROM " . $this->table . " tc
+                  LEFT JOIN usuarios u ON tc.usuario_id = u.id
+                  ORDER BY tc.fecha_actualizacion DESC";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
     }
+
 }

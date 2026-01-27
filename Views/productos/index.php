@@ -4,6 +4,14 @@ require_once '../../Controllers/CategoriaController.php';
 require_once '../../Controllers/TasaCambioController.php';
 require_once '../../Helpers/TasaCambioHelper.php';
 require_once '../../Config/Database.php';
+require_once __DIR__ . '/../../Utils/Auth.php';
+
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+// Verificar acceso específico a productos (solo admin)
+Auth::requireAccessToProductos();
 
 $database = new Database();
 $db = $database->getConnection();

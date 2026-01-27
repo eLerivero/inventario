@@ -39,7 +39,7 @@ try {
             <small class="text-white-50 sidebar-text">v<?php echo SITE_VERSION; ?></small>
 
             <!-- Mostrar tasa actual en el sidebar -->
-            <?php if ($tasaActual['success']): ?>
+            <?php if ($tasaActual['success'] && Auth::isAdmin()): ?>
                 <div class="mt-2 p-2 bg-primary bg-opacity-25 rounded">
                     <small class="text-white">
                         <i class="fas fa-exchange-alt me-1"></i>
@@ -61,8 +61,8 @@ try {
                 </a>
             </li>
             
+            <!-- Menú de Administración (solo para admin) -->
             <?php if (Auth::isAdmin()): ?>
-            <!-- Menú de Administración -->
             <li class="nav-item mt-3">
                 <small class="text-white-50 sidebar-text px-3">ADMINISTRACIÓN</small>
             </li>
@@ -72,39 +72,55 @@ try {
                     <span class="sidebar-text">Usuarios</span>
                 </a>
             </li>
-
             <?php endif; ?>
             
             <!-- Menú Principal -->
             <li class="nav-item mt-3">
                 <small class="text-white-50 sidebar-text px-3">INVENTARIO</small>
             </li>
+            
+            <!-- Productos (solo para admin) -->
+            <?php if (Auth::canAccessProductos()): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'productos') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>productos/index.php">
                     <i class="fas fa-box"></i>
                     <span class="sidebar-text">Productos</span>
                 </a>
             </li>
+            <?php endif; ?>
+            
+            <!-- Categorías (solo para admin) -->
+            <?php if (Auth::canAccessCategorias()): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'categorias') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>categorias/index.php">
                     <i class="fas fa-tags"></i>
                     <span class="sidebar-text">Categorías</span>
                 </a>
             </li>
+            <?php endif; ?>
+            
+            <!-- Clientes (admin y usuario) -->
+            <?php if (Auth::canAccessClientes()): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'clientes') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>clientes/index.php">
                     <i class="fas fa-users"></i>
                     <span class="sidebar-text">Clientes</span>
                 </a>
             </li>
+            <?php endif; ?>
+            
+            <!-- Ventas (admin y usuario) -->
+            <?php if (Auth::canAccessVentas()): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'ventas') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>ventas/index.php">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="sidebar-text">Ventas</span>
                 </a>
             </li>
+            <?php endif; ?>
 
-            <?php if (Auth::isAdmin()): ?>
+            <!-- Tasas de Cambio (solo para admin) -->
+            <?php if (Auth::canAccessTasasCambio()): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'tasas-cambio') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>tasas-cambio/index.php">
                     <i class="fas fa-exchange-alt"></i>
@@ -113,18 +129,25 @@ try {
             </li>
             <?php endif; ?>
 
+            <!-- Tipos de Pago (solo para admin) -->
+            <?php if (Auth::canAccessTiposPago()): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'tipos-pago') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>tipos-pago/index.php">
                     <i class="fas fa-credit-card"></i>
                     <span class="sidebar-text">Tipos de Pago</span>
                 </a>
             </li>
+            <?php endif; ?>
+
+            <!-- Historial Stock (solo para admin) -->
+            <?php if (Auth::canAccessHistorialStock()): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'historial-stock') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>historial-stock/index.php">
                     <i class="fas fa-history"></i>
                     <span class="sidebar-text">Historial Stock</span>
                 </a>
             </li>
+            <?php endif; ?>
         </ul>
 
         <div class="mt-5 p-3 border-top border-secondary">
@@ -133,7 +156,10 @@ try {
                 <span class="sidebar-text"><?php echo htmlspecialchars($current_user['username'] ?? 'Usuario'); ?></span>
                 <br>
                 <small class="text-white-50 sidebar-text">
-                    <?php echo htmlspecialchars($current_user['rol'] ?? 'usuario'); ?>
+                    <?php 
+                    $rol_text = htmlspecialchars($current_user['rol'] ?? 'usuario');
+                    echo ($rol_text === 'admin') ? 'Administrador' : 'Usuario';
+                    ?>
                 </small>
             </div>
             <a href="<?php echo $relative_path; ?>auth/logout.php" class="btn btn-outline-light btn-sm w-100" onclick="return confirm('¿Estás seguro de que deseas cerrar sesión?')">

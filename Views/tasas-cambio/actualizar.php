@@ -1,4 +1,13 @@
 <?php
+// INICIAR SESIÓN
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// OBTENER USUARIO ACTUAL
+require_once __DIR__ . '/../../Utils/Auth.php';
+$current_user = Auth::user();
+
 require_once '../../Controllers/TasaCambioController.php';
 require_once '../../Config/Database.php';
 
@@ -16,9 +25,11 @@ $tipoMensaje = '';
 if ($_POST && isset($_POST['nueva_tasa'])) {
     try {
         $nuevaTasa = floatval($_POST['nueva_tasa']);
-        $usuario = $_POST['usuario'] ?? 'Sistema';
+        
+        // Usar el usuario de la sesión
+        $usuario_id = $current_user ? $current_user['id'] : 1;
 
-        $resultado = $tasaController->actualizarTasa($nuevaTasa, $usuario);
+        $resultado = $tasaController->actualizarTasa($nuevaTasa, $usuario_id);
 
         if ($resultado['success']) {
             $mensaje = $resultado['message'];
@@ -53,6 +64,21 @@ require_once '../layouts/header.php';
         </div>
     </div>
 
+    <!-- Información del Usuario -->
+    <div class="alert alert-info mb-4">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-user-circle fa-2x me-3"></i>
+            <div>
+                <h5 class="mb-1">Usuario Actual</h5>
+                <p class="mb-0">
+                    <strong><?php echo htmlspecialchars($current_user['nombre'] ?? 'Usuario'); ?></strong>
+                    (<?php echo htmlspecialchars($current_user['username'] ?? 'N/A'); ?>)
+                    - Esta acción será registrada con tu usuario.
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- Tasa Actual -->
     <?php if ($tasaActual['success']): ?>
         <div class="card mb-4">
@@ -73,7 +99,7 @@ require_once '../layouts/header.php';
                         </p>
                         <p class="mb-0">
                             <i class="fas fa-user me-1"></i>
-                            <strong>Por:</strong> <?php echo htmlspecialchars($tasaActual['data']['usuario_id']); ?>
+                            <strong>Por:</strong> <?php echo htmlspecialchars($tasaActual['data']['usuario_nombre_completo'] ?? $tasaActual['data']['usuario_nombre'] ?? 'Sistema'); ?>
                         </p>
                     </div>
                     <div class="col-md-4 text-md-end">
@@ -135,17 +161,15 @@ require_once '../layouts/header.php';
                         </div>
 
                         <div class="mb-4">
-                            <label for="usuario" class="form-label">
+                            <label class="form-label">
                                 <i class="fas fa-user me-1"></i>Responsable
                             </label>
                             <input type="text"
                                 class="form-control"
-                                id="usuario"
-                                name="usuario"
-                                value="1"
+                                value="<?php echo htmlspecialchars($current_user['nombre'] ?? 'Usuario'); ?>"
                                 readonly>
                             <div class="form-text">
-                                Usuario que realiza la actualización
+                                Esta acción será registrada con tu usuario.
                             </div>
                         </div>
 
@@ -205,6 +229,10 @@ require_once '../layouts/header.php';
                                     <div>
                                         <small><?php echo date('d/m/Y H:i', strtotime($item['fecha_actualizacion'])); ?></small>
                                         <div class="fw-bold"><?php echo number_format($item['tasa_cambio'], 2); ?> Bs</div>
+                                        <small class="text-muted">
+                                            <i class="fas fa-user me-1"></i>
+                                            <?php echo htmlspecialchars($item['usuario_nombre_completo'] ?? $item['usuario_nombre'] ?? 'Sistema'); ?>
+                                        </small>
                                     </div>
                                     <?php if ($item['activa']): ?>
                                         <span class="badge bg-success">Activa</span>

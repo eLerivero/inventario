@@ -10,6 +10,8 @@ require_once __DIR__ . '/../../Utils/Auth.php';
 
 Auth::requireAdmin();
 
+Auth::canAccessUsuarios();
+
 $page_title = "Gestión de Usuarios";
 require_once '../layouts/header.php';
 

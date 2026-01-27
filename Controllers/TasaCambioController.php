@@ -41,7 +41,11 @@ class TasaCambioController
     public function obtenerTasaPorId($id)
     {
         try {
-            $query = "SELECT * FROM tasas_cambio WHERE id = :id";
+            $query = "SELECT tc.*, u.username as usuario_nombre, u.nombre as usuario_nombre_completo 
+                      FROM tasas_cambio tc
+                      LEFT JOIN usuarios u ON tc.usuario_id = u.id
+                      WHERE tc.id = :id";
+            
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(":id", $id);
             $stmt->execute();
@@ -65,9 +69,16 @@ class TasaCambioController
         }
     }
 
-    public function actualizarTasa($tasa, $usuario = 1)
+    public function actualizarTasa($tasa, $usuario_id = null)
     {
         try {
+            // Obtener usuario de la sesión si no se proporciona
+            if ($usuario_id === null) {
+                require_once __DIR__ . '/../Utils/Auth.php';
+                $auth_user = Auth::user();
+                $usuario_id = $auth_user ? $auth_user['id'] : 1;
+            }
+
             $this->db->beginTransaction();
 
             // Validar tasa
@@ -76,7 +87,7 @@ class TasaCambioController
             }
 
             // Desactivar todas las tasas anteriores y crear nueva
-            $resultado = $this->tasaCambio->crear($tasa, $usuario);
+            $resultado = $this->tasaCambio->crear($tasa, $usuario_id);
 
             if (!$resultado) {
                 throw new Exception("Error al crear nueva tasa de cambio");
@@ -104,6 +115,11 @@ class TasaCambioController
     public function crearTasa($data)
     {
         try {
+            // Obtener usuario de la sesión
+            require_once __DIR__ . '/../Utils/Auth.php';
+            $auth_user = Auth::user();
+            $usuario_id = $auth_user ? $auth_user['id'] : 1;
+
             $this->db->beginTransaction();
 
             // Validar datos
@@ -115,7 +131,6 @@ class TasaCambioController
             $moneda_origen = $data['moneda_origen'] ?? 'USD';
             $moneda_destino = $data['moneda_destino'] ?? 'VES';
             $tasa_cambio = $data['tasa_cambio'];
-            $usuario_id = $data['usuario_id'] ?? 1;
             $activa = isset($data['activa']) && $data['activa'] ? 1 : 0;
 
             // Si se marca como activa, desactivar todas las anteriores
@@ -168,6 +183,11 @@ class TasaCambioController
     public function editarTasa($id, $data)
     {
         try {
+            // Obtener usuario de la sesión
+            require_once __DIR__ . '/../Utils/Auth.php';
+            $auth_user = Auth::user();
+            $usuario_id = $auth_user ? $auth_user['id'] : 1;
+
             $this->db->beginTransaction();
 
             // Verificar si la tasa existe
@@ -183,7 +203,6 @@ class TasaCambioController
 
             // Extraer valores en variables separadas para bindParam
             $tasa_cambio = $data['tasa_cambio'];
-            $usuario_id = $data['usuario_id'] ?? 1;
             $activa = isset($data['activa']) && $data['activa'] ? 1 : 0;
 
             // Si se marca como activa, desactivar todas las anteriores
@@ -276,21 +295,21 @@ class TasaCambioController
         }
     }
 
-private function actualizarPreciosProductos($nuevaTasa)
-{
-    // Solo actualiza productos que NO tienen precio fijo en bs
-    $query = "UPDATE productos 
-              SET precio_bs = ROUND(precio * :tasa, 2),
-                  precio_costo_bs = ROUND(precio_costo * :tasa, 2),
-                  updated_at = CURRENT_TIMESTAMP
-              WHERE usar_precio_fijo_bs = FALSE 
-                 OR precio_bs IS NULL 
-                 OR precio_bs = 0";
+    private function actualizarPreciosProductos($nuevaTasa)
+    {
+        // Solo actualiza productos que NO tienen precio fijo en bs
+        $query = "UPDATE productos 
+                  SET precio_bs = ROUND(precio * :tasa, 2),
+                      precio_costo_bs = ROUND(precio_costo * :tasa, 2),
+                      updated_at = CURRENT_TIMESTAMP
+                  WHERE usar_precio_fijo_bs = FALSE 
+                     OR precio_bs IS NULL 
+                     OR precio_bs = 0";
 
-    $stmt = $this->db->prepare($query);
-    $stmt->bindParam(":tasa", $nuevaTasa);
-    return $stmt->execute();
-}
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(":tasa", $nuevaTasa);
+        return $stmt->execute();
+    }
 
     public function listarHistorial($limite = 50)
     {
@@ -326,3 +345,4 @@ private function actualizarPreciosProductos($nuevaTasa)
         }
     }
 }
+?>

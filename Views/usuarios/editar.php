@@ -50,33 +50,51 @@ $formData = [
 
 // Procesar formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $formData = array_map('trim', $_POST);
-    $formData['activo'] = isset($_POST['activo']) ? 1 : 0;
-    
-    // Validar datos
-    $errors = $controller->validate($formData, true);
-    
-    // Validar username único (excepto para este usuario)
-    if (empty($errors['username']) && $controller->usernameExists($formData['username'], $id)) {
-        $errors['username'] = 'El nombre de usuario ya está en uso';
-    }
-    
-    // Validar email único (excepto para este usuario)
-    if (empty($errors['email']) && $controller->emailExists($formData['email'], $id)) {
-        $errors['email'] = 'El email ya está registrado';
-    }
-    
-    // Si no hay errores, actualizar usuario
-    if (empty($errors)) {
-        $result = $controller->update($id, $formData);
+    try {
+        $formData = [
+            'username' => trim($_POST['username'] ?? $usuario['username']),
+            'nombre' => trim($_POST['nombre'] ?? ''),
+            'email' => trim($_POST['email'] ?? ''),
+            'rol' => trim($_POST['rol'] ?? 'usuario'),
+            'activo' => isset($_POST['activo']) ? 1 : 0
+        ];
         
-        if ($result['success']) {
-            $_SESSION['message'] = $result['message'];
-            header("Location: index.php");
-            exit();
-        } else {
-            $errors['general'] = $result['message'];
+        // Validar datos
+        $errors = $controller->validate($formData, true);
+        
+        // Validar username único (excepto para este usuario)
+        if (empty($errors['username']) && $controller->usernameExists($formData['username'], $id)) {
+            $errors['username'] = 'El nombre de usuario ya está en uso';
         }
+        
+        // Validar email único (excepto para este usuario)
+        if (empty($errors['email']) && $controller->emailExists($formData['email'], $id)) {
+            $errors['email'] = 'El email ya está registrado';
+        }
+        
+        // Si no hay errores, actualizar usuario
+        if (empty($errors)) {
+            $result = $controller->update($id, $formData);
+            
+            if ($result['success']) {
+                $_SESSION['message'] = $result['message'];
+                
+                // Redirección con JavaScript como respaldo
+                echo '<script>
+                    setTimeout(function() {
+                        window.location.href = "index.php";
+                    }, 1000);
+                </script>';
+                
+                // Redirección PHP
+                header("Location: index.php");
+                exit();
+            } else {
+                $errors['general'] = $result['message'];
+            }
+        }
+    } catch (Exception $e) {
+        $errors['general'] = "Error inesperado: " . $e->getMessage();
     }
 }
 ?>
@@ -111,6 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </h6>
                     <div class="row">
                         <div class="col-md-6">
+                            <p><strong>ID:</strong> <?php echo $usuario['id']; ?></p>
                             <p><strong>Último Login:</strong> 
                                 <?php echo $usuario['ultimo_login'] ? date('d/m/Y H:i', strtotime($usuario['ultimo_login'])) : 'Nunca'; ?>
                             </p>
@@ -145,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="">
+                    <form method="POST" action="" id="formEditarUsuario">
                         <div class="row">
                             <!-- Username -->
                             <div class="col-md-6 mb-3">
@@ -159,9 +178,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                        value="<?php echo htmlspecialchars($formData['username']); ?>"
                                        required
                                        minlength="3"
-                                       maxlength="50">
+                                       maxlength="50"
+                                       pattern="[a-zA-Z0-9_]+"
+                                       title="Solo letras, números y guiones bajos">
                                 <?php if (isset($errors['username'])): ?>
-                                    <div class="invalid-feedback"><?php echo $errors['username']; ?></div>
+                                    <div class="invalid-feedback d-block"><?php echo $errors['username']; ?></div>
                                 <?php endif; ?>
                             </div>
 
@@ -179,7 +200,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                        minlength="2"
                                        maxlength="100">
                                 <?php if (isset($errors['nombre'])): ?>
-                                    <div class="invalid-feedback"><?php echo $errors['nombre']; ?></div>
+                                    <div class="invalid-feedback d-block"><?php echo $errors['nombre']; ?></div>
                                 <?php endif; ?>
                             </div>
 
@@ -195,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                        value="<?php echo htmlspecialchars($formData['email']); ?>"
                                        required>
                                 <?php if (isset($errors['email'])): ?>
-                                    <div class="invalid-feedback"><?php echo $errors['email']; ?></div>
+                                    <div class="invalid-feedback d-block"><?php echo $errors['email']; ?></div>
                                 <?php endif; ?>
                             </div>
 
@@ -208,11 +229,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         id="rol" 
                                         name="rol" 
                                         required>
-                                    <option value="usuario" <?php echo $formData['rol'] === 'usuario' ? 'selected' : ''; ?>>Usuario Regular</option>
+                                    <option value="usuario" <?php echo $formData['rol'] === 'usuario' ? 'selected' : ''; ?>>Usuario</option>
                                     <option value="admin" <?php echo $formData['rol'] === 'admin' ? 'selected' : ''; ?>>Administrador</option>
                                 </select>
                                 <?php if (isset($errors['rol'])): ?>
-                                    <div class="invalid-feedback"><?php echo $errors['rol']; ?></div>
+                                    <div class="invalid-feedback d-block"><?php echo $errors['rol']; ?></div>
                                 <?php endif; ?>
                             </div>
 
@@ -255,7 +276,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
 
                         <div class="mt-4">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="btnSubmit">
                                 <i class="fas fa-save me-2"></i>Guardar Cambios
                             </button>
                             <a href="cambiar-password.php?id=<?php echo $id; ?>" class="btn btn-outline-info">
@@ -272,4 +293,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
-<!-- <?php require_once '../layouts/footer.php'; ?> -->
+<script>
+    // Validación del formulario antes de enviar
+    document.getElementById('formEditarUsuario').addEventListener('submit', function(e) {
+        const username = document.getElementById('username').value;
+        
+        // Validar formato de username
+        const usernamePattern = /^[a-zA-Z0-9_]+$/;
+        if (!usernamePattern.test(username)) {
+            e.preventDefault();
+            alert('El nombre de usuario solo puede contener letras, números y guiones bajos.');
+            document.getElementById('username').focus();
+            return false;
+        }
+        
+        // Mostrar loading
+        const submitBtn = document.getElementById('btnSubmit');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+        
+        return true;
+    });
+</script>
+<!-- 
+<?php require_once '../layouts/footer.php'; ?> -->

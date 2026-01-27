@@ -1,4 +1,13 @@
 <?php
+// INICIAR SESIÓN
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// OBTENER USUARIO ACTUAL
+require_once __DIR__ . '/../../Utils/Auth.php';
+$current_user = Auth::user();
+
 require_once '../../Controllers/TasaCambioController.php';
 require_once '../../Config/Database.php';
 
@@ -19,7 +28,6 @@ if ($_POST) {
             'moneda_origen' => 'USD',
             'moneda_destino' => 'VES',
             'tasa_cambio' => floatval($_POST['tasa_cambio'] ?? 0),
-            'usuario_id' => $_POST['usuario_id'] ?? 1,
             'activa' => isset($_POST['activa']) ? 1 : 0
         ];
 
@@ -55,6 +63,20 @@ require_once '../layouts/header.php';
         </div>
     </div>
 
+    <!-- Información del Usuario -->
+    <div class="alert alert-info mb-4">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-user-circle fa-2x me-3"></i>
+            <div>
+                <h5 class="mb-1">Usuario Actual</h5>
+                <p class="mb-0">
+                    <strong><?php echo htmlspecialchars($current_user['nombre'] ?? 'Usuario'); ?></strong>
+                    - Esta acción será registrada con tu usuario.
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- Tasa Actual de Referencia -->
     <?php if ($tasaActual['success']): ?>
         <div class="alert alert-info mb-4">
@@ -65,7 +87,8 @@ require_once '../layouts/header.php';
                     <p class="mb-0">
                         <strong>1 USD = <?php echo number_format($tasaActual['data']['tasa_cambio'], 2); ?> Bs</strong>
                         <small class="text-muted ms-3">
-                            (Actualizada: <?php echo date('d/m/Y H:i', strtotime($tasaActual['data']['fecha_actualizacion'])); ?>)
+                            (Actualizada: <?php echo date('d/m/Y H:i', strtotime($tasaActual['data']['fecha_actualizacion'])); ?>
+                            por <?php echo htmlspecialchars($tasaActual['data']['usuario_nombre_completo'] ?? $tasaActual['data']['usuario_nombre'] ?? 'Sistema'); ?>)
                         </small>
                     </p>
                 </div>
@@ -139,19 +162,6 @@ require_once '../layouts/header.php';
                             <div class="form-text">Ingrese la tasa de cambio actual (Ej: 36.50)</div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="usuario_id" class="form-label">
-                                <i class="fas fa-user me-1"></i>Usuario
-                            </label>
-                            <input type="text"
-                                class="form-control"
-                                id="usuario_id"
-                                name="usuario_id"
-                                value="<?php echo htmlspecialchars($_POST['usuario_id'] ?? 1); ?>"
-                                maxlength="100"
-                                placeholder="Nombre del usuario">
-                        </div>
-
                         <div class="mb-4">
                             <div class="form-check form-switch">
                                 <input class="form-check-input"
@@ -208,6 +218,12 @@ require_once '../layouts/header.php';
                     tasaInput.parentNode.appendChild(errorDiv);
                 }
 
+                return false;
+            }
+
+            // Confirmar creación
+            if (!confirm('¿Estás seguro de crear esta tasa de cambio?')) {
+                e.preventDefault();
                 return false;
             }
 

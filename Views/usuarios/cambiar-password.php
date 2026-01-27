@@ -19,13 +19,11 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $id = (int)$_GET['id'];
 $page_title = "Cambiar Contraseña";
-require_once '../layouts/header.php';
 
-// Incluir controladores
+// Obtener usuario actual para comparación
 require_once __DIR__ . '/../../Config/Database.php';
 require_once __DIR__ . '/../../Controllers/UsuarioController.php';
 
-// Conectar a la base de datos
 $database = new Database();
 $db = $database->getConnection();
 $controller = new UsuarioController($db);
@@ -40,34 +38,54 @@ if (!$usuario) {
 
 // Variables
 $errors = [];
+$success_message = '';
 
 // Procesar formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $password = trim($_POST['password'] ?? '');
-    $confirm_password = trim($_POST['confirm_password'] ?? '');
-    
-    // Validar contraseña
-    if (empty($password) || strlen($password) < 6) {
-        $errors['password'] = 'La contraseña debe tener al menos 6 caracteres';
-    }
-    
-    if ($password !== $confirm_password) {
-        $errors['confirm_password'] = 'Las contraseñas no coinciden';
-    }
-    
-    // Si no hay errores, cambiar contraseña
-    if (empty($errors)) {
-        $result = $controller->cambiarPassword($id, $password);
+    try {
+        $password = trim($_POST['password'] ?? '');
+        $confirm_password = trim($_POST['confirm_password'] ?? '');
         
-        if ($result['success']) {
-            $_SESSION['message'] = $result['message'];
-            header("Location: index.php");
-            exit();
-        } else {
-            $errors['general'] = $result['message'];
+        // Validar contraseña
+        if (empty($password) || strlen($password) < 6) {
+            $errors['password'] = 'La contraseña debe tener al menos 6 caracteres';
         }
+        
+        if ($password !== $confirm_password) {
+            $errors['confirm_password'] = 'Las contraseñas no coinciden';
+        }
+        
+        // Si no hay errores, cambiar contraseña
+        if (empty($errors)) {
+            $result = $controller->cambiarPassword($id, $password);
+            
+            if ($result['success']) {
+                $_SESSION['message'] = $result['message'];
+                
+                // Redirección con JavaScript como respaldo
+                echo '<script>
+                    setTimeout(function() {
+                        window.location.href = "index.php";
+                    }, 1500);
+                </script>';
+                
+                // Mostrar mensaje de éxito
+                $success_message = $result['message'];
+                
+                // Redirección PHP principal
+                header("Location: index.php");
+                exit();
+            } else {
+                $errors['general'] = $result['message'];
+            }
+        }
+    } catch (Exception $e) {
+        $errors['general'] = "Error inesperado: " . $e->getMessage();
     }
 }
+
+// Cargar header después de procesar el formulario
+require_once '../layouts/header.php';
 ?>
 
 <div class="container-fluid">
@@ -91,6 +109,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </a>
                 </div>
             </div>
+
+            <!-- Mensaje de éxito (si se cambió la contraseña) -->
+            <?php if ($success_message): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-2"></i><?php echo htmlspecialchars($success_message); ?>
+                    <div class="mt-2">
+                        <small>Serás redirigido automáticamente al listado de usuarios...</small>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <!-- Información del usuario -->
             <div class="card mb-4">
@@ -118,12 +146,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <!-- Mensajes de error -->
             <?php if (!empty($errors['general'])): ?>
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-circle me-2"></i><?php echo $errors['general']; ?>
+                    <i class="fas fa-exclamation-circle me-2"></i><?php echo htmlspecialchars($errors['general']); ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
 
-            <!-- Formulario -->
+            <!-- Formulario (solo mostrar si no hay éxito) -->
+            <?php if (!$success_message): ?>
             <div class="card">
                 <div class="card-header bg-white">
                     <h5 class="card-title mb-0">
@@ -132,7 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="">
+                    <form method="POST" action="" id="formCambiarPassword">
                         <div class="mb-4">
                             <div class="alert alert-warning">
                                 <h6 class="alert-heading">
@@ -158,13 +187,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                            name="password" 
                                            required
                                            minlength="6"
-                                           autocomplete="new-password">
+                                           autocomplete="new-password"
+                                           value="">
                                     <button class="btn btn-outline-secondary" type="button" id="togglePassword">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </div>
                                 <?php if (isset($errors['password'])): ?>
-                                    <div class="invalid-feedback"><?php echo $errors['password']; ?></div>
+                                    <div class="invalid-feedback d-block"><?php echo htmlspecialchars($errors['password']); ?></div>
                                 <?php else: ?>
                                     <div class="form-text">Mínimo 6 caracteres. Se recomienda usar una combinación segura.</div>
                                 <?php endif; ?>
@@ -182,13 +212,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                            name="confirm_password" 
                                            required
                                            minlength="6"
-                                           autocomplete="new-password">
+                                           autocomplete="new-password"
+                                           value="">
                                     <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </div>
                                 <?php if (isset($errors['confirm_password'])): ?>
-                                    <div class="invalid-feedback"><?php echo $errors['confirm_password']; ?></div>
+                                    <div class="invalid-feedback d-block"><?php echo htmlspecialchars($errors['confirm_password']); ?></div>
                                 <?php endif; ?>
                                 <div class="form-text" id="passwordMatchMessage"></div>
                             </div>
@@ -221,7 +252,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
 
                         <div class="mt-4">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="btnSubmit">
                                 <i class="fas fa-save me-2"></i>Cambiar Contraseña
                             </button>
                             <a href="index.php" class="btn btn-outline-secondary">
@@ -231,13 +262,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </form>
                 </div>
             </div>
+            <?php else: ?>
+                <!-- Mostrar mensaje de éxito y botón para volver -->
+                <div class="card">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-check-circle text-success fa-3x mb-3"></i>
+                        <h4 class="text-success">¡Contraseña cambiada exitosamente!</h4>
+                        <p class="text-muted">El usuario <?php echo htmlspecialchars($usuario['username']); ?> ahora tiene una nueva contraseña.</p>
+                        <div class="mt-4">
+                            <a href="index.php" class="btn btn-primary">
+                                <i class="fas fa-arrow-left me-2"></i>Volver al Listado de Usuarios
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </div>
 
 <script>
     // Mostrar/ocultar contraseña
-    document.getElementById('togglePassword').addEventListener('click', function() {
+    document.getElementById('togglePassword')?.addEventListener('click', function() {
         const passwordInput = document.getElementById('password');
         const icon = this.querySelector('i');
         
@@ -252,7 +298,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     });
 
-    document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+    document.getElementById('toggleConfirmPassword')?.addEventListener('click', function() {
         const confirmInput = document.getElementById('confirm_password');
         const icon = this.querySelector('i');
         
@@ -269,9 +315,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validar que las contraseñas coincidan
     function validatePasswords() {
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirm_password').value;
+        const password = document.getElementById('password')?.value || '';
+        const confirmPassword = document.getElementById('confirm_password')?.value || '';
         const message = document.getElementById('passwordMatchMessage');
+        
+        if (!message) return;
         
         if (confirmPassword === '') {
             message.textContent = '';
@@ -285,11 +333,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    document.getElementById('confirm_password').addEventListener('input', validatePasswords);
-    document.getElementById('password').addEventListener('input', validatePasswords);
+    document.getElementById('confirm_password')?.addEventListener('input', validatePasswords);
+    document.getElementById('password')?.addEventListener('input', validatePasswords);
 
     // Generador de contraseñas
-    document.getElementById('generatePassword').addEventListener('click', function() {
+    document.getElementById('generatePassword')?.addEventListener('click', function() {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
         let password = '';
         
@@ -300,7 +348,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.getElementById('generatedPassword').value = password;
     });
 
-    document.getElementById('useGeneratedPassword').addEventListener('click', function() {
+    document.getElementById('useGeneratedPassword')?.addEventListener('click', function() {
         const generatedPassword = document.getElementById('generatedPassword').value;
         if (generatedPassword) {
             document.getElementById('password').value = generatedPassword;
@@ -310,20 +358,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     });
 
     // Validación del formulario
-    document.querySelector('form').addEventListener('submit', function(e) {
+    document.getElementById('formCambiarPassword')?.addEventListener('submit', function(e) {
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirm_password').value;
+        const btnSubmit = document.getElementById('btnSubmit');
         
+        // Validar contraseñas
         if (password !== confirmPassword) {
             e.preventDefault();
             alert('Las contraseñas no coinciden. Por favor, verifica.');
             document.getElementById('confirm_password').focus();
+            return false;
         }
         
         if (password.length < 6) {
             e.preventDefault();
             alert('La contraseña debe tener al menos 6 caracteres.');
             document.getElementById('password').focus();
+            return false;
+        }
+        
+        // Confirmar acción
+        if (!confirm('¿Estás seguro de que deseas cambiar la contraseña de este usuario?')) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Mostrar loading
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Cambiando...';
+        }
+        
+        return true;
+    });
+
+    // Auto-enfocar en el campo de contraseña
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('password');
+        if (passwordInput && !passwordInput.value) {
+            passwordInput.focus();
         }
     });
 </script>

@@ -4,7 +4,7 @@
 class Usuario
 {
     private $conn;
-    private $table_name = "usuarios";
+    private $table = "usuarios";
 
     public $id;
     public $username;
@@ -22,143 +22,223 @@ class Usuario
         $this->conn = $db;
     }
 
-    // Buscar usuario por username
-    public function buscarPorUsername($username)
-    {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE username = :username AND activo = true LIMIT 1";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":username", $username);
-        $stmt->execute();
-
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    // Buscar usuario por email
-    public function buscarPorEmail($email)
-    {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE email = :email AND activo = true LIMIT 1";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":email", $email);
-        $stmt->execute();
-
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    // Verificar contraseña
-    public function verificarPassword($password, $hash)
-    {
-        return password_verify($password, $hash);
-    }
-
-    // Actualizar último login
-    public function actualizarUltimoLogin($id)
-    {
-        $query = "UPDATE " . $this->table_name . " SET ultimo_login = CURRENT_TIMESTAMP WHERE id = :id";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $id);
-        
-        return $stmt->execute();
-    }
-
     // Crear nuevo usuario
     public function crear()
     {
-        $query = "INSERT INTO " . $this->table_name . " 
-                  (username, password_hash, nombre, email, rol) 
-                  VALUES (:username, :password_hash, :nombre, :email, :rol)";
-        
-        $stmt = $this->conn->prepare($query);
-        
-        $this->password_hash = password_hash($this->password_hash, PASSWORD_BCRYPT);
-        
-        $stmt->bindParam(":username", $this->username);
-        $stmt->bindParam(":password_hash", $this->password_hash);
-        $stmt->bindParam(":nombre", $this->nombre);
-        $stmt->bindParam(":email", $this->email);
-        $stmt->bindParam(":rol", $this->rol);
-        
-        return $stmt->execute();
+        try {
+            $query = "INSERT INTO " . $this->table . " 
+                      (username, password_hash, nombre, email, rol) 
+                      VALUES 
+                      (:username, :password_hash, :nombre, :email, :rol)
+                      RETURNING id, username, nombre, email, rol, activo, created_at";
+
+            $stmt = $this->conn->prepare($query);
+
+            // Limpiar y validar datos
+            $this->username = htmlspecialchars(strip_tags($this->username));
+            $this->nombre = htmlspecialchars(strip_tags($this->nombre));
+            $this->email = htmlspecialchars(strip_tags($this->email));
+            $this->rol = htmlspecialchars(strip_tags($this->rol));
+
+            // Hash de contraseña si existe
+            if (!empty($this->password_hash)) {
+                $hashedPassword = password_hash($this->password_hash, PASSWORD_BCRYPT);
+            } else {
+                throw new Exception("La contraseña es requerida");
+            }
+
+            // Vincular parámetros
+            $stmt->bindParam(":username", $this->username);
+            $stmt->bindParam(":password_hash", $hashedPassword);
+            $stmt->bindParam(":nombre", $this->nombre);
+            $stmt->bindParam(":email", $this->email);
+            $stmt->bindParam(":rol", $this->rol);
+
+            if ($stmt->execute()) {
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                $this->id = $result['id'];
+                return $result;
+            }
+
+            return false;
+        } catch (Exception $e) {
+            error_log("Error en Usuario::crear(): " . $e->getMessage());
+            return false;
+        }
     }
 
-    // Obtener todos los usuarios
+    // Leer todos los usuarios
     public function leer()
     {
-        $query = "SELECT * FROM " . $this->table_name . " ORDER BY created_at DESC";
+        $query = "SELECT * FROM " . $this->table . " 
+                  WHERE activo = TRUE 
+                  ORDER BY id DESC";
+
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        
         return $stmt;
     }
 
-    // Obtener usuario por ID
+    // Leer un usuario por ID
     public function leerUno()
     {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? LIMIT 1";
+        $query = "SELECT * FROM " . $this->table . " 
+                  WHERE id = :id 
+                  LIMIT 1";
+
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $this->id);
+        $stmt->bindParam(":id", $this->id);
         $stmt->execute();
-        
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($row) {
-            $this->username = $row['username'];
-            $this->nombre = $row['nombre'];
-            $this->email = $row['email'];
-            $this->rol = $row['rol'];
-            $this->activo = $row['activo'];
-            $this->ultimo_login = $row['ultimo_login'];
-            $this->created_at = $row['created_at'];
+
+        if ($stmt->rowCount() > 0) {
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // No retornar el hash de la contraseña por seguridad
+            unset($row['password_hash']);
+            
+            return $row;
         }
-        
-        return $row;
+
+        return false;
     }
 
     // Actualizar usuario
     public function actualizar()
     {
-        $query = "UPDATE " . $this->table_name . " 
-                  SET nombre = :nombre, email = :email, rol = :rol, activo = :activo, updated_at = CURRENT_TIMESTAMP 
+        $query = "UPDATE " . $this->table . " 
+                  SET nombre = :nombre,
+                      email = :email,
+                      rol = :rol,
+                      activo = :activo,
+                      updated_at = CURRENT_TIMESTAMP
                   WHERE id = :id";
-        
+
         $stmt = $this->conn->prepare($query);
-        
+
+        // Limpiar datos
+        $this->nombre = htmlspecialchars(strip_tags($this->nombre));
+        $this->email = htmlspecialchars(strip_tags($this->email));
+        $this->rol = htmlspecialchars(strip_tags($this->rol));
+
+        // Vincular parámetros
         $stmt->bindParam(":nombre", $this->nombre);
         $stmt->bindParam(":email", $this->email);
         $stmt->bindParam(":rol", $this->rol);
         $stmt->bindParam(":activo", $this->activo);
         $stmt->bindParam(":id", $this->id);
-        
+
         return $stmt->execute();
     }
 
     // Cambiar contraseña
-    public function cambiarPassword($nuevaPassword)
+    public function cambiarPassword($nueva_password)
     {
-        $query = "UPDATE " . $this->table_name . " 
-                  SET password_hash = :password_hash, updated_at = CURRENT_TIMESTAMP 
+        try {
+            $hashedPassword = password_hash($nueva_password, PASSWORD_BCRYPT);
+
+            $query = "UPDATE " . $this->table . " 
+                      SET password_hash = :password_hash,
+                          updated_at = CURRENT_TIMESTAMP
+                      WHERE id = :id";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":password_hash", $hashedPassword);
+            $stmt->bindParam(":id", $this->id);
+
+            return $stmt->execute();
+        } catch (Exception $e) {
+            error_log("Error en Usuario::cambiarPassword(): " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // "Eliminar" (desactivar) usuario
+    public function eliminar()
+    {
+        $query = "UPDATE " . $this->table . " 
+                  SET activo = FALSE,
+                      updated_at = CURRENT_TIMESTAMP
                   WHERE id = :id";
-        
+
         $stmt = $this->conn->prepare($query);
-        
-        $nuevaPasswordHash = password_hash($nuevaPassword, PASSWORD_BCRYPT);
-        
-        $stmt->bindParam(":password_hash", $nuevaPasswordHash);
         $stmt->bindParam(":id", $this->id);
-        
+
         return $stmt->execute();
     }
 
-    // Eliminar usuario (desactivar)
-    public function eliminar()
+    // Buscar usuario por username (para login)
+    public function buscarPorUsername($username)
     {
-        $query = "UPDATE " . $this->table_name . " SET activo = false WHERE id = :id";
+        $query = "SELECT id, username, password_hash, nombre, email, rol, activo 
+                  FROM " . $this->table . " 
+                  WHERE username = :username 
+                  AND activo = TRUE
+                  LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":username", $username);
+        $stmt->execute();
+
+        if ($stmt->rowCount() > 0) {
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+
+        return false;
+    }
+
+    // Actualizar último login
+    public function actualizarUltimoLogin()
+    {
+        $query = "UPDATE " . $this->table . " 
+                  SET ultimo_login = CURRENT_TIMESTAMP
+                  WHERE id = :id";
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $this->id);
-        
+
         return $stmt->execute();
+    }
+
+    // Verificar si username existe
+    public function existeUsername($username, $excluir_id = null)
+    {
+        $query = "SELECT id FROM " . $this->table . " 
+                  WHERE username = :username";
+
+        if ($excluir_id) {
+            $query .= " AND id != :excluir_id";
+        }
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":username", $username);
+
+        if ($excluir_id) {
+            $stmt->bindParam(":excluir_id", $excluir_id);
+        }
+
+        $stmt->execute();
+        return $stmt->rowCount() > 0;
+    }
+
+    // Verificar si email existe
+    public function existeEmail($email, $excluir_id = null)
+    {
+        $query = "SELECT id FROM " . $this->table . " 
+                  WHERE email = :email";
+
+        if ($excluir_id) {
+            $query .= " AND id != :excluir_id";
+        }
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":email", $email);
+
+        if ($excluir_id) {
+            $stmt->bindParam(":excluir_id", $excluir_id);
+        }
+
+        $stmt->execute();
+        return $stmt->rowCount() > 0;
     }
 }
 ?>

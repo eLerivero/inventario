@@ -233,5 +233,151 @@ class Auth
             echo "</div>";
         }
     }
+
+    // En Utils/Auth.php, añade estas funciones:
+
+// Verificar si el usuario tiene acceso a ventas
+public static function canAccessVentas()
+{
+    if (!self::check()) {
+        return false;
+    }
+    
+    $user_rol = $_SESSION['user_rol'] ?? '';
+    $rol = strtolower(trim($user_rol));
+    
+    // 'admin' y 'usuario' pueden acceder a ventas
+    return in_array($rol, ['admin', 'usuario']);
+}
+
+// Verificar si el usuario tiene acceso a clientes
+public static function canAccessClientes()
+{
+    if (!self::check()) {
+        return false;
+    }
+    
+    $user_rol = $_SESSION['user_rol'] ?? '';
+    $rol = strtolower(trim($user_rol));
+    
+    // 'admin' y 'usuario' pueden acceder a clientes
+    return in_array($rol, ['admin', 'usuario']);
+}
+
+// Verificar si el usuario tiene acceso a productos
+public static function canAccessProductos()
+{
+    if (!self::check()) {
+        return false;
+    }
+    
+    $user_rol = $_SESSION['user_rol'] ?? '';
+    $rol = strtolower(trim($user_rol));
+    
+    // Solo 'admin' puede acceder a productos
+    return $rol === 'admin';
+}
+
+// Verificar si el usuario tiene acceso a categorías
+public static function canAccessCategorias()
+{
+    if (!self::check()) {
+        return false;
+    }
+    
+    $user_rol = $_SESSION['user_rol'] ?? '';
+    $rol = strtolower(trim($user_rol));
+    
+    // Solo 'admin' puede acceder a categorías
+    return $rol === 'admin';
+}
+
+// Verificar si el usuario tiene acceso a tasas de cambio
+public static function canAccessTasasCambio()
+{
+    if (!self::check()) {
+        return false;
+    }
+    
+    $user_rol = $_SESSION['user_rol'] ?? '';
+    $rol = strtolower(trim($user_rol));
+    
+    // Solo 'admin' puede acceder a tasas de cambio
+    return $rol === 'admin';
+}
+
+// Verificar si el usuario tiene acceso a tipos de pago
+public static function canAccessTiposPago()
+{
+    if (!self::check()) {
+        return false;
+    }
+    
+    $user_rol = $_SESSION['user_rol'] ?? '';
+    $rol = strtolower(trim($user_rol));
+    
+    // Solo 'admin' puede acceder a tipos de pago
+    return $rol === 'admin';
+}
+
+// Verificar si el usuario tiene acceso a historial de stock
+public static function canAccessHistorialStock()
+{
+    if (!self::check()) {
+        return false;
+    }
+    
+    $user_rol = $_SESSION['user_rol'] ?? '';
+    $rol = strtolower(trim($user_rol));
+    
+    // Solo 'admin' puede acceder a historial de stock
+    return $rol === 'admin';
+}
+
+// Verificar si el usuario tiene acceso a usuarios
+public static function canAccessUsuarios()
+{
+    if (!self::check()) {
+        return false;
+    }
+    
+    $user_rol = $_SESSION['user_rol'] ?? '';
+    $rol = strtolower(trim($user_rol));
+    
+    // Solo 'admin' puede acceder a usuarios
+    return $rol === 'admin';
+}
+
+// Requerir acceso a ventas
+public static function requireAccessToVentas()
+{
+    if (!self::canAccessVentas()) {
+        $_SESSION['error'] = 'No tienes permisos para acceder al módulo de ventas';
+        header("Location: " . self::getDashboardUrl());
+        exit();
+    }
+}
+
+// Requerir acceso a clientes
+public static function requireAccessToClientes()
+{
+    if (!self::canAccessClientes()) {
+        $_SESSION['error'] = 'No tienes permisos para acceder al módulo de clientes';
+        header("Location: " . self::getDashboardUrl());
+        exit();
+    }
+}
+
+// Requerir acceso a productos
+public static function requireAccessToProductos()
+{
+    if (!self::canAccessProductos()) {
+        $_SESSION['error'] = 'No tienes permisos para acceder al módulo de productos';
+        header("Location: " . self::getDashboardUrl());
+        exit();
+    }
+}
+
+
 }
 ?>

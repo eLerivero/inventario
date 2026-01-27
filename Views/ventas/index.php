@@ -4,14 +4,20 @@ require_once __DIR__ . '/../../Config/Database.php';
 require_once __DIR__ . '/../../Controllers/VentaController.php';
 require_once __DIR__ . '/../../Utils/Ayuda.php';
 require_once __DIR__ . '/../../Helpers/TasaCambioHelper.php';
+require_once __DIR__ . '/../../Utils/Auth.php';
 
 // Iniciar sesión si no está iniciada
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Verificar acceso específico a ventas
+Auth::requireAccessToVentas();
+
 $database = new Database();
 $db = $database->getConnection();
+
+
 
 $controller = new VentaController($db);
 

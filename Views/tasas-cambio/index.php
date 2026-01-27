@@ -81,7 +81,7 @@ require_once '../layouts/header.php';
                             Actualizada: <?php echo date('d/m/Y H:i', strtotime($tasaActual['data']['fecha_actualizacion'])); ?>
                             |
                             <i class="fas fa-user me-1"></i>
-                            Por: <?php echo htmlspecialchars($tasaActual['data']['usuario_actualizacion']); ?>
+                            Por: <?php echo htmlspecialchars($tasaActual['data']['usuario_nombre_completo']); ?>
                         </p>
                     </div>
                     <div class="col-md-4 text-md-end">
@@ -275,7 +275,7 @@ require_once '../layouts/header.php';
                                         </small>
                                     </td>
                                     <td>
-                                        <?php echo htmlspecialchars($tasa['usuario_actualizacion']); ?>
+                                        <?php echo htmlspecialchars($tasa['usuario_nombre_completo'] ?? $tasa['usuario_nombre'] ?? 'Sistema'); ?>
                                     </td>
                                     <td>
                                         <?php echo date('d/m/Y', strtotime($tasa['created_at'])); ?>

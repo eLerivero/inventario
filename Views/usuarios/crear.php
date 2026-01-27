@@ -36,32 +36,61 @@ $formData = [
 
 // Procesar formulario
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $formData = array_map('trim', $_POST);
-    
-    // Validar datos
-    $errors = $controller->validate($formData, false);
-    
-    // Validar username único
-    if (empty($errors['username']) && $controller->usernameExists($formData['username'])) {
-        $errors['username'] = 'El nombre de usuario ya está en uso';
-    }
-    
-    // Validar email único
-    if (empty($errors['email']) && $controller->emailExists($formData['email'])) {
-        $errors['email'] = 'El email ya está registrado';
-    }
-    
-    // Si no hay errores, crear usuario
-    if (empty($errors)) {
-        $result = $controller->store($formData);
+    try {
+        // Obtener y limpiar datos
+        $formData = [
+            'username' => trim($_POST['username'] ?? ''),
+            'nombre' => trim($_POST['nombre'] ?? ''),
+            'email' => trim($_POST['email'] ?? ''),
+            'rol' => trim($_POST['rol'] ?? 'usuario'),
+            'password' => $_POST['password'] ?? '',
+            'confirm_password' => $_POST['confirm_password'] ?? ''
+        ];
         
-        if ($result['success']) {
-            $_SESSION['message'] = $result['message'];
-            header("Location: index.php");
-            exit();
-        } else {
-            $errors['general'] = $result['message'];
+        // Validar datos
+        $errors = $controller->validate($formData, false);
+        
+        // Validar que las contraseñas coincidan
+        if (empty($errors['password']) && $formData['password'] !== $formData['confirm_password']) {
+            $errors['confirm_password'] = 'Las contraseñas no coinciden';
         }
+        
+        // Validar username único
+        if (empty($errors['username']) && $controller->usernameExists($formData['username'])) {
+            $errors['username'] = 'El nombre de usuario ya está en uso';
+        }
+        
+        // Validar email único
+        if (empty($errors['email']) && $controller->emailExists($formData['email'])) {
+            $errors['email'] = 'El email ya está registrado';
+        }
+        
+        // Si no hay errores, crear usuario
+        if (empty($errors)) {
+            // Remover confirm_password antes de enviar al controlador
+            unset($formData['confirm_password']);
+            
+            $result = $controller->store($formData);
+            
+            if ($result['success']) {
+                $_SESSION['message'] = $result['message'];
+                
+                // Redirección con JavaScript como respaldo
+                echo '<script>
+                    setTimeout(function() {
+                        window.location.href = "index.php";
+                    }, 1000);
+                </script>';
+                
+                // Redirección PHP
+                header("Location: index.php");
+                exit();
+            } else {
+                $errors['general'] = $result['message'];
+            }
+        }
+    } catch (Exception $e) {
+        $errors['general'] = "Error inesperado: " . $e->getMessage();
     }
 }
 ?>
@@ -88,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
 
-            <!-- Mensajes de error -->
+            <!-- Mensajes de error general -->
             <?php if (!empty($errors['general'])): ?>
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <i class="fas fa-exclamation-circle me-2"></i><?php echo $errors['general']; ?>
@@ -105,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="">
+                    <form method="POST" action="" id="formCrearUsuario">
                         <div class="row">
                             <!-- Username -->
                             <div class="col-md-6 mb-3">
@@ -119,9 +148,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                        value="<?php echo htmlspecialchars($formData['username']); ?>"
                                        required
                                        minlength="3"
-                                       maxlength="50">
+                                       maxlength="50"
+                                       pattern="[a-zA-Z0-9_]+"
+                                       title="Solo letras, números y guiones bajos">
                                 <?php if (isset($errors['username'])): ?>
-                                    <div class="invalid-feedback"><?php echo $errors['username']; ?></div>
+                                    <div class="invalid-feedback d-block"><?php echo $errors['username']; ?></div>
                                 <?php else: ?>
                                     <div class="form-text">Mínimo 3 caracteres. Solo letras, números y guiones bajos.</div>
                                 <?php endif; ?>
@@ -141,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                        minlength="2"
                                        maxlength="100">
                                 <?php if (isset($errors['nombre'])): ?>
-                                    <div class="invalid-feedback"><?php echo $errors['nombre']; ?></div>
+                                    <div class="invalid-feedback d-block"><?php echo $errors['nombre']; ?></div>
                                 <?php endif; ?>
                             </div>
 
@@ -157,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                        value="<?php echo htmlspecialchars($formData['email']); ?>"
                                        required>
                                 <?php if (isset($errors['email'])): ?>
-                                    <div class="invalid-feedback"><?php echo $errors['email']; ?></div>
+                                    <div class="invalid-feedback d-block"><?php echo $errors['email']; ?></div>
                                 <?php else: ?>
                                     <div class="form-text">Se usará para notificaciones y recuperación de contraseña.</div>
                                 <?php endif; ?>
@@ -172,11 +203,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         id="rol" 
                                         name="rol" 
                                         required>
-                                    <option value="usuario" <?php echo $formData['rol'] === 'usuario' ? 'selected' : ''; ?>>Usuario Regular</option>
+                                    <option value="usuario" <?php echo $formData['rol'] === 'usuario' ? 'selected' : ''; ?>>Usuario</option>
                                     <option value="admin" <?php echo $formData['rol'] === 'admin' ? 'selected' : ''; ?>>Administrador</option>
                                 </select>
                                 <?php if (isset($errors['rol'])): ?>
-                                    <div class="invalid-feedback"><?php echo $errors['rol']; ?></div>
+                                    <div class="invalid-feedback d-block"><?php echo $errors['rol']; ?></div>
                                 <?php else: ?>
                                     <div class="form-text">Los administradores tienen acceso completo al sistema.</div>
                                 <?php endif; ?>
@@ -200,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </button>
                                 </div>
                                 <?php if (isset($errors['password'])): ?>
-                                    <div class="invalid-feedback"><?php echo $errors['password']; ?></div>
+                                    <div class="invalid-feedback d-block"><?php echo $errors['password']; ?></div>
                                 <?php else: ?>
                                     <div class="form-text">Mínimo 6 caracteres. Se recomienda usar una combinación de letras, números y símbolos.</div>
                                 <?php endif; ?>
@@ -213,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </label>
                                 <div class="input-group">
                                     <input type="password" 
-                                           class="form-control" 
+                                           class="form-control <?php echo isset($errors['confirm_password']) ? 'is-invalid' : ''; ?>" 
                                            id="confirm_password" 
                                            name="confirm_password" 
                                            required
@@ -222,30 +253,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </div>
+                                <?php if (isset($errors['confirm_password'])): ?>
+                                    <div class="invalid-feedback d-block"><?php echo $errors['confirm_password']; ?></div>
+                                <?php endif; ?>
                                 <div class="form-text" id="passwordMatchMessage"></div>
                             </div>
                         </div>
 
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <div class="card bg-light">
-                                    <div class="card-body">
-                                        <h6 class="card-title">
-                                            <i class="fas fa-info-circle me-2"></i>Información Importante
-                                        </h6>
-                                        <ul class="mb-0">
-                                            <li>El usuario recibirá un email de bienvenida (si configuras el sistema de emails)</li>
-                                            <li>Se recomienda que el usuario cambie su contraseña después del primer login</li>
-                                            <li>Los usuarios inactivos no podrán acceder al sistema</li>
-                                            <li>Puedes cambiar cualquier configuración después de crear el usuario</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="mt-4">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="btnSubmit">
                                 <i class="fas fa-save me-2"></i>Crear Usuario
                             </button>
                             <a href="index.php" class="btn btn-outline-secondary">
@@ -291,7 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     });
 
-    // Validar que las contraseñas coincidan
+    // Validar que las contraseñas coincidan en tiempo real
     document.getElementById('confirm_password').addEventListener('input', function() {
         const password = document.getElementById('password').value;
         const confirmPassword = this.value;
@@ -310,21 +326,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     });
 
     // Validación del formulario antes de enviar
-    document.querySelector('form').addEventListener('submit', function(e) {
+    document.getElementById('formCrearUsuario').addEventListener('submit', function(e) {
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirm_password').value;
+        const username = document.getElementById('username').value;
         
+        // Validar contraseñas
         if (password !== confirmPassword) {
             e.preventDefault();
             alert('Las contraseñas no coinciden. Por favor, verifica.');
             document.getElementById('confirm_password').focus();
+            return false;
         }
         
         if (password.length < 6) {
             e.preventDefault();
             alert('La contraseña debe tener al menos 6 caracteres.');
             document.getElementById('password').focus();
+            return false;
         }
+        
+        // Validar formato de username
+        const usernamePattern = /^[a-zA-Z0-9_]+$/;
+        if (!usernamePattern.test(username)) {
+            e.preventDefault();
+            alert('El nombre de usuario solo puede contener letras, números y guiones bajos.');
+            document.getElementById('username').focus();
+            return false;
+        }
+        
+        // Mostrar loading
+        const submitBtn = document.getElementById('btnSubmit');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creando...';
+        
+        return true;
     });
 </script>
 
