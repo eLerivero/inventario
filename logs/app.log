@@ -1,209 +1,64 @@
-[2026-01-06 17:41:26] [ERROR] Error al obtener todas las categorías {"error":"SQLSTATE[42P01]: Undefined table: 7 ERROR:  no existe la relaci\u00f3n \u00abcategorias\u00bb\nLINE 1: SELECT * FROM categorias ORDER BY nombre\n                      ^"}
-[2026-01-06 17:42:15] [ERROR] Error al obtener todas las categorías {"error":"SQLSTATE[42P01]: Undefined table: 7 ERROR:  no existe la relaci\u00f3n \u00abcategorias\u00bb\nLINE 1: SELECT * FROM categorias ORDER BY nombre\n                      ^"}
-[2026-01-06 17:42:59] [ERROR] Error al obtener todas las categorías {"error":"SQLSTATE[42P01]: Undefined table: 7 ERROR:  no existe la relaci\u00f3n \u00abcategorias\u00bb\nLINE 1: SELECT * FROM categorias ORDER BY nombre\n                      ^"}
-[2026-01-06 17:43:33] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-06 17:43:39] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-06 17:44:41] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-06 17:44:44] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-06 17:44:47] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-06 17:45:27] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-06 17:45:29] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-06 13:45:31] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-06 13:45:31] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-06 13:45:31] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-06 13:45:31] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-06 13:45:33] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
-[2026-01-06 13:45:46] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-06 13:45:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-06 13:45:46] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-06 13:45:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-06 13:45:46] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-06 13:45:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-06 17:46:17] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 12:28:13] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 10:13:37] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-09 10:13:37] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-09 10:13:37] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 10:13:37] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 10:13:45] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
-[2026-01-09 14:13:51] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 14:13:53] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 14:14:15] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 14:14:17] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 14:14:20] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 14:14:56] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 14:14:59] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 15:46:28] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 15:53:03] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 11:53:08] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-09 11:53:08] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-09 11:53:08] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 11:53:08] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 11:53:15] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
-[2026-01-09 11:53:22] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-09 11:53:22] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-09 11:53:22] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 11:53:22] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 11:53:22] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 11:53:22] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 15:53:24] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 15:53:26] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 15:53:48] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 15:53:51] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 15:54:00] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 15:54:24] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 15:54:26] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 16:08:39] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 16:16:38] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 16:16:57] [INFO] Categorías listadas {"total":4}
-[2026-01-09 16:17:00] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 12:17:03] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-09 12:17:03] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-09 12:17:03] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 12:17:03] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 12:17:18] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
-[2026-01-09 12:17:25] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-09 12:17:25] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-09 12:17:25] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 12:17:25] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 12:17:25] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 12:17:25] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 16:17:28] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 16:17:31] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 16:21:27] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 16:21:30] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 16:21:38] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 16:22:30] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 16:22:32] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 16:35:39] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 16:35:40] [INFO] Categorías listadas {"total":4}
-[2026-01-09 12:35:59] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-09 12:35:59] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-09 12:35:59] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 12:35:59] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 12:35:59] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 12:35:59] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 12:36:12] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-09 12:36:12] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-09 12:36:12] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 12:36:12] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 12:36:12] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 12:36:12] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 12:36:12] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 12:36:12] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-09 16:38:37] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 16:42:22] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-09 16:42:27] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:07:41] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 09:07:43] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-26 09:07:43] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-26 09:07:43] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 09:07:43] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 09:08:02] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
-[2026-01-26 09:08:07] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-26 09:08:07] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-26 09:08:07] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 09:08:07] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 09:08:07] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 09:08:07] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 13:08:09] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:08:11] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:08:38] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:08:40] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:08:41] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:09:21] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:09:23] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:10:13] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:10:54] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:20:41] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:21:07] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:21:16] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:35:38] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:35:39] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:35:43] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 09:35:48] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-26 09:35:48] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-26 09:35:48] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 09:35:48] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 09:35:50] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
-[2026-01-26 13:35:56] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:35:58] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:36:11] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:36:14] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:36:16] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:36:38] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:36:40] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:36:48] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:37:24] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:37:29] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 13:37:41] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:28:53] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:29:21] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:29:47] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:37:42] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:38:12] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:38:29] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:38:33] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:39:13] [ERROR] Error al obtener todas las categorías {"error":"SQLSTATE[42P01]: Undefined table: 7 ERROR:  no existe la relaci\u00f3n \u00abcategorias\u00bb\nLINE 1: SELECT * FROM categorias ORDER BY nombre\n                      ^"}
-[2026-01-26 10:39:35] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-26 10:39:35] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-26 10:39:35] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 10:39:35] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 10:39:38] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
-[2026-01-26 10:39:46] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-26 10:39:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-26 10:39:46] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 10:39:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 10:39:46] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 10:39:46] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 14:39:49] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:39:51] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:40:06] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:40:09] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:40:12] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:40:35] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:40:37] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:41:34] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:41:50] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:42:39] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 14:43:13] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 10:56:41] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-26 10:56:41] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-26 10:56:41] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 10:56:41] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 10:56:41] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 10:56:41] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-26 14:59:51] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:00:13] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:01:24] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:01:52] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:02:05] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:02:21] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:02:25] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:03:06] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:03:30] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:08:45] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:14:08] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:14:41] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:14:57] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:19:17] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:20:47] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:22:04] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:22:20] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:22:48] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:23:04] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:23:06] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:23:16] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:24:49] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:24:54] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:29:20] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:38:12] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:38:43] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:39:08] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:39:10] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:39:28] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:39:33] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:46:51] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:47:11] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:47:34] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-26 15:47:36] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-27 11:24:39] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:39] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:39] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:39] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:39] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:39] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:39] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:39] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:39] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:39] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:40] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:40] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:40] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:40] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:40] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:40] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:40] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:40] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:40] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:40] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:41] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:41] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:41] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:41] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:41] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:41] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:41] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:41] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:42] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:42] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:42] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:42] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:42] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:42] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:42] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:42] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:42] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:42] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:42] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 11:24:42] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-27 15:30:29] Intento de login - Usuario: admin
+[2026-01-27 15:30:29] Intentando autenticar usuario: admin
+[2026-01-27 15:30:29] AuthController: AuthController inicializado
+[2026-01-27 15:30:29] Username recibido: admin
+[2026-01-27 15:30:29] Password recibido: $eL...
+[2026-01-27 15:30:29] AuthController: Iniciando login para: admin
+[2026-01-27 15:30:29] AuthController: Username recibido: admin
+[2026-01-27 15:30:29] AuthController: Password recibido (primeros 3 chars): $eL...
+[2026-01-27 15:30:29] AuthController: Password completo: $eLe2032**
+[2026-01-27 15:30:29] AuthController: Buscando usuario por username: admin
+[2026-01-27 15:30:29] AuthController: Usuario encontrado: {"id":1,"username":"admin","activo":true,"hash_length":60}
+[2026-01-27 15:30:29] AuthController: Hash en BD: $2y$10$MXJCrVEmFltYncNSyPRereZc4GiIjsloxEkYSGKBVd7vn/TltnuJ.
+[2026-01-27 15:30:29] AuthController: Password a verificar: $eLe2032**
+[2026-01-27 15:30:29] AuthController: Verificando contraseña...
+[2026-01-27 15:30:29] AuthController: === PRUEBA DE VERIFICACIÓN ===
+[2026-01-27 15:30:29] AuthController: password_verify resultado: TRUE
+[2026-01-27 15:30:29] AuthController: ✓ Contraseña verificada correctamente
+[2026-01-27 15:30:29] AuthController: Actualizando último login para usuario ID: 1
+[2026-01-27 15:30:29] AuthController: Login exitoso para: admin
+[2026-01-27 15:30:29] Resultado del login: {"success":true,"user":{"id":1,"username":"admin","nombre":"Administrador","email":"admin@inventario.com","rol":"admin"}}
+[2026-01-27 15:30:29] Login exitoso para usuario: admin
+[2026-01-27 11:32:10] [ERROR] Excepción no capturada: Xdebug has detected a possible infinite loop, and aborted your script with a stack depth of '256' frames {"file":"C:\\wamp64\\www\\inventario\\Utils\\Auth.php","line":64,"trace":"#0 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#1 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#2 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#3 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#4 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#5 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#6 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#7 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#8 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#9 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#10 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#11 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#12 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#13 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#14 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#15 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#16 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#17 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#18 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#19 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#20 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#21 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#22 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#23 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#24 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#25 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#26 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#27 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#28 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#29 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#30 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#31 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#32 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#33 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#34 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#35 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#36 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#37 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#38 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#39 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#40 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#41 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#42 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#43 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#44 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#45 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#46 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#47 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#48 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#49 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#50 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#51 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#52 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#53 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#54 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#55 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#56 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#57 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#58 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#59 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#60 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#61 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#62 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#63 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#64 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#65 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#66 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#67 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#68 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#69 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#70 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#71 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#72 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#73 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#74 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#75 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#76 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#77 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#78 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#79 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#80 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#81 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#82 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#83 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#84 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#85 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#86 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#87 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#88 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#89 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#90 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#91 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#92 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#93 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#94 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#95 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#96 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#97 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#98 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#99 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#100 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#101 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#102 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#103 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#104 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#105 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#106 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#107 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#108 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#109 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#110 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#111 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#112 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#113 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#114 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#115 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#116 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#117 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#118 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#119 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#120 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#121 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#122 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#123 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#124 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#125 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#126 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#127 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#128 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#129 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#130 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#131 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#132 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#133 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#134 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#135 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#136 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#137 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#138 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#139 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#140 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#141 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#142 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#143 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#144 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#145 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#146 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#147 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#148 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#149 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#150 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#151 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#152 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#153 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#154 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#155 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#156 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#157 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#158 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#159 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#160 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#161 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#162 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#163 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#164 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#165 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#166 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#167 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#168 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#169 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#170 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#171 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#172 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#173 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#174 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#175 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#176 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#177 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#178 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#179 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#180 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#181 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#182 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#183 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#184 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#185 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#186 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#187 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#188 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#189 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#190 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#191 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#192 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#193 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#194 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#195 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#196 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#197 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#198 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#199 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#200 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#201 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#202 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#203 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#204 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#205 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#206 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#207 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#208 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#209 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#210 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#211 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#212 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#213 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#214 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#215 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#216 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#217 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#218 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#219 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#220 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#221 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#222 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#223 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#224 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#225 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#226 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#227 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#228 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#229 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#230 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#231 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#232 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#233 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#234 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#235 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#236 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#237 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#238 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#239 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#240 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#241 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#242 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#243 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#244 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#245 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#246 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#247 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#248 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#249 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#250 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#251 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#252 C:\\wamp64\\www\\inventario\\Utils\\Auth.php(64): Auth::isAdmin()\n#253 C:\\wamp64\\www\\inventario\\Views\\layouts\\sidebar.php(64): Auth::isAdmin()\n#254 C:\\wamp64\\www\\inventario\\Views\\layouts\\header.php(110): include('C:\\\\wamp64\\\\www\\\\i...')\n#255 C:\\wamp64\\www\\inventario\\Views\\dashboard\\index.php(8): require_once('C:\\\\wamp64\\\\www\\\\i...')\n#256 {main}"}
+[2026-01-27 11:43:26] [ERROR] WARNING: Cannot modify header information - headers already sent by (output started at C:\wamp64\www\inventario\Views\layouts\sidebar.php:115) en C:\wamp64\www\inventario\Views\usuarios\crear.php línea 60 
+[2026-01-27 11:45:22] [ERROR] WARNING: Cannot modify header information - headers already sent by (output started at C:\wamp64\www\inventario\Views\layouts\sidebar.php:115) en C:\wamp64\www\inventario\Views\usuarios\cambiar-password.php línea 64 

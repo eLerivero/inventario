@@ -226,8 +226,8 @@ function mostrarPaginaInstalacion($errores = [])
 
                 <!-- Botón de Inicio -->
                 <div class="text-center">
-                    <a href="Views/dashboard/index.php" class="btn-success text-white px-10 py-3 rounded-lg font-semibold shadow-sm inline-block">
-                        <i class="fas fa-play mr-2"></i>Iniciar Sistema
+                    <a href="Views/auth/login.php" class="btn-success text-white px-10 py-3 rounded-lg font-semibold shadow-sm inline-block">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
                     </a>
                 </div>
             <?php endif; ?>
@@ -305,23 +305,54 @@ try {
         throw new Exception("No se pudo conectar a la base de datos");
     }
 
-    // Verificar si las tablas existen
+    // Verificar si las tablas principales existen
     $query = "SELECT COUNT(*) as total FROM information_schema.tables 
               WHERE table_schema = 'public' 
-              AND table_name IN ('productos', 'categorias', 'ventas', 'clientes')";
+              AND table_name IN ('productos', 'categorias', 'ventas', 'clientes', 'usuarios')";
     $stmt = $db->prepare($query);
     $stmt->execute();
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($result['total'] < 4) {
+    if ($result['total'] < 5) {
         throw new Exception("La base de datos no está completamente configurada. Ejecuta el script SQL de instalación.");
     }
+    
+    // Verificar si existe al menos un usuario activo
+    $query = "SELECT COUNT(*) as total FROM usuarios WHERE activo = true";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($result['total'] == 0) {
+        // Crear usuario administrador por defecto si no existe
+        require_once __DIR__ . '/Utils/Auth.php';
+        require_once __DIR__ . '/Models/Usuario.php';
+        
+        $usuarioModel = new Usuario($db);
+        $usuarioModel->username = 'administrador';
+        $usuarioModel->password_hash = 'admin123'; // Se hasheará en el método crear
+        $usuarioModel->nombre = 'Administrador';
+        $usuarioModel->email = 'admin@sistema.com';
+        $usuarioModel->rol = 'admin';
+        
+        if ($usuarioModel->crear()) {
+            error_log("Usuario administrador creado automáticamente.");
+        }
+    }
+    
 } catch (Exception $e) {
     $errores[] = "Error de base de datos: " . $e->getMessage();
     mostrarPaginaInstalacion($errores);
 }
 
-// Si todo está bien, redirigir al dashboard
-header("Location: Views/dashboard/index.php");
+// Si todo está bien y ya hay un usuario logueado, redirigir al dashboard
+session_start();
+if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
+    header("Location: Views/dashboard/index.php");
+    exit();
+}
+
+// Si no está logueado, redirigir al login
+header("Location: Views/auth/login.php");
 exit();
 ?>

@@ -1,0 +1,30 @@
+# C:\wamp64\www\inventario\.htaccess - VERSIÓN SIMPLIFICADA Y FUNCIONAL
+
+# Activar rewrite engine
+RewriteEngine On
+
+# Redirigir todas las rutas no existentes al index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Proteger archivos y directorios sensibles
+RewriteRule ^(config/|logs/|\.git/|Models/|Controllers/|Utils/) - [F,L,NC]
+
+# Proteger archivos específicos por extensión
+RewriteRule \.(sql|bak|inc|env|key)$ - [F,NC]
+
+# Ocultar listado de directorios
+Options -Indexes
+
+# Proteger archivos de configuración PHP
+<FilesMatch "\.(config|inc|env)\.php$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Configuración básica de seguridad
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>

@@ -1,49 +1,123 @@
 <?php
 // Configuración de la aplicación
-define('APP_NAME', 'Sistema de Inventario');
-define('APP_VERSION', '1.0.0');
-define('APP_ENV', 'development');
+
+// Solo definir si no están ya definidas
+if (!defined('APP_NAME')) {
+    define('APP_NAME', 'Sistema de Inventario');
+}
+
+if (!defined('APP_VERSION')) {
+    define('APP_VERSION', '1.0.0');
+}
+
+if (!defined('APP_ENV')) {
+    define('APP_ENV', 'development');
+}
 
 // Configuración de base de datos PostgreSQL
-define('DB_HOST', 'localhost');
-define('DB_PORT', '5432');
-define('DB_NAME', 'sistema_inventario');
-define('DB_USER', 'postgres');
-define('DB_PASS', 'password');
+if (!defined('DB_HOST')) {
+    define('DB_HOST', 'localhost');
+}
 
-// Configuración de la aplicación
-define('SITE_URL', 'http://localhost/inventario');
-define('BASE_PATH', dirname(__DIR__));
-define('UPLOAD_DIR', BASE_PATH . '/uploads/');
-define('MAX_FILE_SIZE', 5242880); // 5MB
+if (!defined('DB_PORT')) {
+    define('DB_PORT', '5432');
+}
+
+if (!defined('DB_NAME')) {
+    define('DB_NAME', 'sistema_inventario');
+}
+
+if (!defined('DB_USER')) {
+    define('DB_USER', 'postgres');
+}
+
+if (!defined('DB_PASS')) {
+    define('DB_PASS', 'password');
+}
+
+// Configuración de URLs y rutas
+if (!defined('BASE_PATH')) {
+    define('BASE_PATH', dirname(__DIR__));
+}
+
+// Rutas de directorios
+if (!defined('UPLOAD_DIR')) {
+    define('UPLOAD_DIR', BASE_PATH . '/uploads/');
+}
+
+if (!defined('MAX_FILE_SIZE')) {
+    define('MAX_FILE_SIZE', 5242880); // 5MB
+}
 
 // Configuración de moneda
-define('CURRENCY', '$');
-define('CURRENCY_SYMBOL', '$');
-define('DECIMAL_SEPARATOR', '.');
-define('THOUSANDS_SEPARATOR', ',');
+if (!defined('CURRENCY')) {
+    define('CURRENCY', '$');
+}
+
+if (!defined('CURRENCY_SYMBOL')) {
+    define('CURRENCY_SYMBOL', '$');
+}
+
+if (!defined('DECIMAL_SEPARATOR')) {
+    define('DECIMAL_SEPARATOR', '.');
+}
+
+if (!defined('THOUSANDS_SEPARATOR')) {
+    define('THOUSANDS_SEPARATOR', ',');
+}
 
 // Configuración de fecha y hora - ACTUALIZADO A CARACAS/VENEZUELA
-define('DATE_FORMAT', 'd/m/Y');
-define('TIME_FORMAT', 'H:i:s');
-define('DATETIME_FORMAT', 'd/m/Y H:i:s');
+if (!defined('DATE_FORMAT')) {
+    define('DATE_FORMAT', 'd/m/Y');
+}
+
+if (!defined('TIME_FORMAT')) {
+    define('TIME_FORMAT', 'H:i:s');
+}
+
+if (!defined('DATETIME_FORMAT')) {
+    define('DATETIME_FORMAT', 'd/m/Y H:i:s');
+}
 
 // Configuración de seguridad
-define('SESSION_TIMEOUT', 3600); // 1 hora en segundos
-define('CSRF_TOKEN_EXPIRY', 3600); // 1 hora
+if (!defined('SESSION_TIMEOUT')) {
+    define('SESSION_TIMEOUT', 3600); // 1 hora en segundos
+}
+
+if (!defined('CSRF_TOKEN_EXPIRY')) {
+    define('CSRF_TOKEN_EXPIRY', 3600); // 1 hora
+}
 
 // Configuración de inventario
-define('DEFAULT_STOCK_MINIMUM', 5);
-define('LOW_STOCK_ALERT', true);
-define('AUTO_GENERATE_SKU', true);
+if (!defined('DEFAULT_STOCK_MINIMUM')) {
+    define('DEFAULT_STOCK_MINIMUM', 5);
+}
+
+if (!defined('LOW_STOCK_ALERT')) {
+    define('LOW_STOCK_ALERT', true);
+}
+
+if (!defined('AUTO_GENERATE_SKU')) {
+    define('AUTO_GENERATE_SKU', true);
+}
 
 // Configuración de ventas
-define('DEFAULT_TAX_RATE', 0.00);
-define('ALLOW_BACKORDERS', false);
-define('AUTO_UPDATE_STOCK', true);
+if (!defined('DEFAULT_TAX_RATE')) {
+    define('DEFAULT_TAX_RATE', 0.00);
+}
+
+if (!defined('ALLOW_BACKORDERS')) {
+    define('ALLOW_BACKORDERS', false);
+}
+
+if (!defined('AUTO_UPDATE_STOCK')) {
+    define('AUTO_UPDATE_STOCK', true);
+}
 
 // Niveles de log
-define('LOG_LEVEL', 'DEBUG'); // DEBUG, INFO, WARNING, ERROR
+if (!defined('LOG_LEVEL')) {
+    define('LOG_LEVEL', 'DEBUG'); // DEBUG, INFO, WARNING, ERROR
+}
 
 // Mostrar errores según el entorno
 if (APP_ENV === 'development') {
@@ -133,6 +207,11 @@ function validateCSRFToken($token)
 // Función para manejo básico de errores
 function handleError($errno, $errstr, $errfile, $errline)
 {
+    // No mostrar errores de constantes ya definidas
+    if (strpos($errstr, 'Constant') !== false && strpos($errstr, 'already defined') !== false) {
+        return true; // Silenciar estos errores
+    }
+    
     if (!(error_reporting() & $errno)) {
         return false;
     }
@@ -142,7 +221,6 @@ function handleError($errno, $errstr, $errfile, $errline)
         E_WARNING => 'WARNING',
         E_PARSE => 'PARSE',
         E_NOTICE => 'NOTICE',
-        //       E_STRICT => 'STRICT',
         E_DEPRECATED => 'DEPRECATED'
     ];
 
@@ -189,3 +267,4 @@ function handleException($exception)
 }
 
 set_exception_handler('handleException');
+?>

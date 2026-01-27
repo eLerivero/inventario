@@ -1,22 +1,51 @@
 <?php
+// Views/layouts/header.php
+
+// Iniciar sesión si no está iniciada
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Usar rutas absolutas para evitar problemas de inclusión
 $configPath = __DIR__ . '/../../Config/Config.php';
 $constantsPath = __DIR__ . '/../../Config/Constants.php';
 $authPath = __DIR__ . '/../../Utils/Auth.php';
 
-if (!file_exists($configPath) || !file_exists($constantsPath) || !file_exists($authPath)) {
-    die("Error: No se pueden encontrar los archivos requeridos.");
+if (!file_exists($configPath)) {
+    die("Error: No se puede encontrar el archivo de configuración en: $configPath");
 }
 
 require_once $configPath;
-require_once $constantsPath;
-require_once $authPath;
 
-// Iniciar autenticación
-Auth::checkAuth();
+// Cargar constantes si existe el archivo
+if (file_exists($constantsPath)) {
+    require_once $constantsPath;
+}
 
-// Determinar la ruta base para assets - CORREGIDO
-$base_url = SITE_URL;
+// Cargar Auth si existe el archivo
+if (file_exists($authPath)) {
+    require_once $authPath;
+} else {
+    die("Error: No se puede encontrar el archivo de autenticación en: $authPath");
+}
+
+// Verificar autenticación
+if (!Auth::check()) {
+    // Guardar la URL actual para redirigir después del login
+    $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
+    
+    // Usar rutas relativas para evitar problemas con BASE_URL
+    $login_url = '/inventario/Views/auth/login.php';
+    
+    // Redirigir al login
+    header("Location: $login_url");
+    exit();
+}
+
+// Obtener usuario actual
+$current_user = Auth::user();
+
+// Determinar la ruta base para assets
 $current_path = $_SERVER['PHP_SELF'];
 
 // Calcular la ruta relativa correcta para assets
@@ -35,9 +64,19 @@ if ($inventario_index !== false) {
     $relative_path = './';
 }
 
-// Definir rutas de assets - CORREGIDO
+// Definir rutas de assets
 $css_path = $relative_path . 'Public/css/';
 $js_path = $relative_path . 'Public/js/';
+
+// Definir título de página si no está definido
+if (!isset($page_title)) {
+    $page_title = 'Sistema de Inventario';
+}
+
+// Definir SITE_NAME si no está definido
+if (!defined('SITE_NAME')) {
+    define('SITE_NAME', 'Sistema de Inventario');
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -45,7 +84,7 @@ $js_path = $relative_path . 'Public/js/';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo isset($page_title) ? $page_title . ' - ' : ''; ?><?php echo SITE_NAME; ?></title>
+    <title><?php echo htmlspecialchars($page_title); ?> - <?php echo SITE_NAME; ?></title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -80,12 +119,18 @@ $js_path = $relative_path . 'Public/js/';
             <!-- Header Container -->
             <div class="header-container">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
-                    <h1 class="h2"><?php echo isset($page_title) ? $page_title : 'Dashboard'; ?></h1>
+                    <h1 class="h2"><?php echo htmlspecialchars($page_title); ?></h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <div class="btn-group me-2">
                             <button type="button" class="btn btn-sm btn-outline-secondary" id="sidebarToggle">
                                 <i class="fas fa-bars"></i>
                             </button>
+                        </div>
+                        <div class="btn-group me-2">
+                            <span class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-user me-1"></i>
+                                <?php echo htmlspecialchars($current_user['nombre'] ?? 'Usuario'); ?>
+                            </span>
                         </div>
                     </div>
                 </div>

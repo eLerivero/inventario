@@ -1,27 +1,31 @@
 <?php
-// Incluir configuración y autenticación
-require_once '../../Config/Config.php';
-require_once '../../Utils/Auth.php';
+// Views/layouts/sidebar.php
 
-// Verificar autenticación
-Auth::checkAuth();
+// Verificar que el usuario esté autenticado
+if (!isset($current_user)) {
+    die("Error: Usuario no autenticado");
+}
 
 $current_page = basename($_SERVER['PHP_SELF']);
-$user = Auth::getUser();
 
-// Determinar la ruta base CORREGIDA - desde Views/layouts
-$base_path = __DIR__ . '/../'; // Retrocede a Views/
-$relative_path = '../'; // Desde cualquier página en Views/ va a la raíz
+// Determinar la ruta base CORREGIDA
+$relative_path = '../'; // Desde layouts va a Views/
 
-// Obtener tasa actual para mostrar
+// Intentar obtener tasa actual para mostrar
+$tasaActual = ['success' => false];
 try {
-    require_once '../../Controllers/TasaCambioController.php';
-    $database = new Database();
-    $db = $database->getConnection();
-    $tasaController = new TasaCambioController($db);
-    $tasaActual = $tasaController->obtenerTasaActual();
+    $tasaControllerPath = __DIR__ . '/../../Controllers/TasaCambioController.php';
+    if (file_exists($tasaControllerPath)) {
+        require_once $tasaControllerPath;
+        require_once __DIR__ . '/../../Config/Database.php';
+        
+        $database = new Database();
+        $db = $database->getConnection();
+        $tasaController = new TasaCambioController($db);
+        $tasaActual = $tasaController->obtenerTasaActual();
+    }
 } catch (Exception $e) {
-    $tasaActual = ['success' => false];
+    // Silenciar error, no es crítico para el sidebar
 }
 ?>
 <!-- Sidebar -->
@@ -56,6 +60,25 @@ try {
                     <span class="sidebar-text">Dashboard</span>
                 </a>
             </li>
+            
+            <?php if (Auth::isAdmin()): ?>
+            <!-- Menú de Administración -->
+            <li class="nav-item mt-3">
+                <small class="text-white-50 sidebar-text px-3">ADMINISTRACIÓN</small>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'usuarios') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>usuarios/index.php">
+                    <i class="fas fa-users-cog"></i>
+                    <span class="sidebar-text">Usuarios</span>
+                </a>
+            </li>
+
+            <?php endif; ?>
+            
+            <!-- Menú Principal -->
+            <li class="nav-item mt-3">
+                <small class="text-white-50 sidebar-text px-3">INVENTARIO</small>
+            </li>
             <li class="nav-item">
                 <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'productos') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>productos/index.php">
                     <i class="fas fa-box"></i>
@@ -81,12 +104,14 @@ try {
                 </a>
             </li>
 
+            <?php if (Auth::isAdmin()): ?>
             <li class="nav-item">
                 <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'tasas-cambio') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>tasas-cambio/index.php">
                     <i class="fas fa-exchange-alt"></i>
                     <span class="sidebar-text">Tasas de Cambio</span>
                 </a>
             </li>
+            <?php endif; ?>
 
             <li class="nav-item">
                 <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'tipos-pago') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>tipos-pago/index.php">
@@ -105,13 +130,13 @@ try {
         <div class="mt-5 p-3 border-top border-secondary">
             <div class="text-white small mb-2">
                 <i class="fas fa-user me-2"></i>
-                <span class="sidebar-text"><?php echo htmlspecialchars($user['username'] ?? 'Usuario'); ?></span>
+                <span class="sidebar-text"><?php echo htmlspecialchars($current_user['username'] ?? 'Usuario'); ?></span>
                 <br>
                 <small class="text-white-50 sidebar-text">
-                    <?php echo htmlspecialchars($user['rol'] ?? 'usuario'); ?>
+                    <?php echo htmlspecialchars($current_user['rol'] ?? 'usuario'); ?>
                 </small>
             </div>
-            <a href="<?php echo $relative_path; ?>../Utils/Auth.php?action=logout" class="btn btn-outline-light btn-sm w-100" onclick="return confirm('¿Estás seguro de que deseas cerrar sesión?')">
+            <a href="<?php echo $relative_path; ?>auth/logout.php" class="btn btn-outline-light btn-sm w-100" onclick="return confirm('¿Estás seguro de que deseas cerrar sesión?')">
                 <i class="fas fa-sign-out-alt me-1"></i> <span class="sidebar-text">Cerrar Sesión</span>
             </a>
         </div>

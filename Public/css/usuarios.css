@@ -1,0 +1,134 @@
+/* Public/css/usuarios.css */
+
+/* Estilos específicos para el módulo de usuarios */
+
+/* Tarjetas de estadísticas */
+.stat-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card.success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.stat-card.warning {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+}
+
+.stat-card.danger {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+}
+
+.stat-card.info {
+    background: linear-gradient(135deg, #17a2b8 0%, #20c9c9 100%);
+}
+
+/* Badges personalizados */
+.badge-admin {
+    background-color: #dc3545;
+    color: white;
+}
+
+.badge-user {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.badge-active {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-inactive {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* Tabla de usuarios */
+#usuariosTable_wrapper {
+    padding: 0;
+}
+
+#usuariosTable thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    color: #495057;
+}
+
+#usuariosTable tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Formularios */
+.form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.form-switch .form-check-input {
+    width: 3em;
+    height: 1.5em;
+}
+
+/* Alertas personalizadas */
+.alert-user-info {
+    border-left: 4px solid #17a2b8;
+    background-color: rgba(23, 162, 184, 0.1);
+}
+
+.alert-user-warning {
+    border-left: 4px solid #ffc107;
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+/* Botones de acción */
+.btn-action-group {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-action-group .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Tarjeta de generador de contraseñas */
+.password-generator {
+    border: 2px dashed #dee2e6;
+    background-color: #f8f9fa;
+}
+
+.password-generator:hover {
+    border-color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .btn-action-group {
+        flex-direction: column;
+        gap: 3px;
+    }
+    
+    .btn-action-group .btn {
+        width: 100%;
+        margin-bottom: 2px;
+    }
+    
+    #usuariosTable {
+        font-size: 0.875rem;
+    }
+    
+    #usuariosTable th,
+    #usuariosTable td {
+        padding: 0.5rem;
+    }
+}
