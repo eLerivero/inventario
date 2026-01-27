@@ -296,7 +296,7 @@ CREATE INDEX idx_tasas_fecha ON tasas_cambio(fecha_actualizacion);
 
 -- Insertar usuario administrador por defecto (password:    )
 INSERT INTO usuarios (username, password_hash, nombre, email, rol, activo) 
-VALUES ('admin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 
+VALUES ('admin', '$2y$10$xuyfNI4CNFy1YZ7ECE/jp.NV87gbUuFwBnezJZM2wfdck5pQ1Ufd.', 
         'Administrador', 'admin@inventario.com', 'admin', TRUE);
 
 -- Insertar tipos de pago por defecto

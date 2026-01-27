@@ -261,7 +261,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="mt-6 pt-4 border-t border-gray-200">
                     <p class="text-muted text-center">
                         <strong>Credenciales de prueba:</strong><br>
-                        <small>Usuario: admin | Contraseña: admin123</small>
+                        <small>Usuario: admin | Contraseña: @dmin123.</small>
                     </p>
                 </div>
             </div>
