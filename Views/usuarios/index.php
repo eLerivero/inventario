@@ -5,12 +5,14 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// REQUERIR ADMINISTRADOR
+// REQUERIR ACCESO A USUARIOS (SOLO ADMIN)
 require_once __DIR__ . '/../../Utils/Auth.php';
 
-Auth::requireAdmin();
+// Primero verificar que esté autenticado
+Auth::requireAuth();
 
-Auth::canAccessUsuarios();
+// Luego verificar que tenga acceso específico a usuarios (solo admin)
+Auth::requireAccessToUsuarios();
 
 $page_title = "Gestión de Usuarios";
 require_once '../layouts/header.php';

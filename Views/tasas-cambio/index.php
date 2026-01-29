@@ -1,4 +1,15 @@
 <?php
+// INICIAR SESIÓN PRIMERO
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// REQUERIR ACCESO A TASAS DE CAMBIO (SOLO ADMIN)
+require_once __DIR__ . '/../../Utils/Auth.php';
+Auth::requireAuth();
+Auth::requireAccessToUsuarios();
+
+// Incluir controladores
 require_once '../../Controllers/TasaCambioController.php';
 require_once '../../Config/Database.php';
 

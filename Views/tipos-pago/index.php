@@ -3,6 +3,15 @@ require_once '../../Config/Database.php';
 require_once '../../Controllers/TipoPagoController.php';
 require_once '../../Utils/Ayuda.php';
 
+require_once __DIR__ . '/../../Utils/Auth.php';
+
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+Auth::requireAccessToTiposPagos();
+
 $database = new Database();
 $db = $database->getConnection();
 

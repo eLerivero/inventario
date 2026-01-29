@@ -1,199 +1,46 @@
-[2026-01-27 13:04:14] [ERROR] WARNING: Cannot modify header information - headers already sent by (output started at C:\wamp64\www\inventario\Views\layouts\sidebar.php:115) en C:\wamp64\www\inventario\Views\usuarios\crear.php línea 60 
-[2026-01-27 13:04:24] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
-[2026-01-27 17:04:30] Intento de login - Usuario: update
-[2026-01-27 17:04:30] Intentando autenticar usuario: update
-[2026-01-27 17:04:30] AuthController: AuthController inicializado
-[2026-01-27 17:04:30] Username recibido: update
-[2026-01-27 17:04:30] Password recibido: @dm...
-[2026-01-27 17:04:30] AuthController: Iniciando login para: update
-[2026-01-27 17:04:30] AuthController: Username recibido: update
-[2026-01-27 17:04:30] AuthController: Password recibido (primeros 3 chars): @dm...
-[2026-01-27 17:04:30] AuthController: Password completo: @dmin123.
-[2026-01-27 17:04:30] AuthController: Buscando usuario por username: update
-[2026-01-27 17:04:30] AuthController: Usuario encontrado: {"id":6,"username":"update","activo":true,"hash_length":60}
-[2026-01-27 17:04:30] AuthController: Hash en BD: $2y$10$BOJVv/2Ddtk0CoCzG2UN3O8A0wGi2/jDk5EFIrg5uFPwtLrDK3pYq
-[2026-01-27 17:04:30] AuthController: Password a verificar: @dmin123.
-[2026-01-27 17:04:30] AuthController: Verificando contraseña...
-[2026-01-27 17:04:30] AuthController: === PRUEBA DE VERIFICACIÓN ===
-[2026-01-27 17:04:30] AuthController: password_verify resultado: TRUE
-[2026-01-27 17:04:30] AuthController: ✓ Contraseña verificada correctamente
-[2026-01-27 17:04:30] AuthController: Actualizando último login para usuario ID: 6
-[2026-01-27 17:04:30] AuthController: Login exitoso para: update
-[2026-01-27 17:04:30] Resultado del login: {"success":true,"user":{"id":6,"username":"update","nombre":"Updated","email":"update@gmail.com","rol":"usuario"}}
-[2026-01-27 17:04:30] Login exitoso para usuario: update
-[2026-01-27 13:04:51] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\clientes\editar.php línea 199 
-[2026-01-27 17:14:06] Intento de login - Usuario: update
-[2026-01-27 17:14:06] Intentando autenticar usuario: update
-[2026-01-27 17:14:06] AuthController: AuthController inicializado
-[2026-01-27 17:14:06] Username recibido: update
-[2026-01-27 17:14:06] Password recibido: @dm...
-[2026-01-27 17:14:06] AuthController: Iniciando login para: update
-[2026-01-27 17:14:06] AuthController: Username recibido: update
-[2026-01-27 17:14:06] AuthController: Password recibido (primeros 3 chars): @dm...
-[2026-01-27 17:14:06] AuthController: Password completo: @dmin123.
-[2026-01-27 17:14:06] AuthController: Buscando usuario por username: update
-[2026-01-27 17:14:06] AuthController: Usuario encontrado: {"id":6,"username":"update","activo":true,"hash_length":60}
-[2026-01-27 17:14:06] AuthController: Hash en BD: $2y$10$BOJVv/2Ddtk0CoCzG2UN3O8A0wGi2/jDk5EFIrg5uFPwtLrDK3pYq
-[2026-01-27 17:14:06] AuthController: Password a verificar: @dmin123.
-[2026-01-27 17:14:06] AuthController: Verificando contraseña...
-[2026-01-27 17:14:06] AuthController: === PRUEBA DE VERIFICACIÓN ===
-[2026-01-27 17:14:06] AuthController: password_verify resultado: TRUE
-[2026-01-27 17:14:06] AuthController: ✓ Contraseña verificada correctamente
-[2026-01-27 17:14:06] AuthController: Actualizando último login para usuario ID: 6
-[2026-01-27 17:14:06] AuthController: Login exitoso para: update
-[2026-01-27 17:14:06] Resultado del login: {"success":true,"user":{"id":6,"username":"update","nombre":"Updated","email":"update@gmail.com","rol":"usuario"}}
-[2026-01-27 17:14:06] Login exitoso para usuario: update
-[2026-01-27 17:14:48] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-27 17:16:57] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-27 17:17:33] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-27 17:18:21] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-27 17:18:21] [INFO] Categorías listadas {"total":4}
-[2026-01-27 17:20:26] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-27 17:23:35] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-27 17:23:37] [INFO] Categorías listadas {"total":4}
-[2026-01-27 17:23:50] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-27 17:24:01] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-27 17:24:17] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-27 17:24:19] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-27 13:24:27] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:24:27] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:24:27] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:24:27] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:24:29] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\actualizar.php línea 76 
-[2026-01-27 13:24:40] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:24:40] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:24:40] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:24:40] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:24:40] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:24:40] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:24:52] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:24:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:24:52] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:24:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:24:52] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:24:52] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:27:22] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:27:22] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:27:22] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:27:22] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:27:22] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:27:22] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:34:24] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:34:24] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:34:24] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:34:24] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:34:24] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:34:24] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:35:15] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:35:15] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:35:15] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:35:15] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:35:15] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:35:15] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:35:15] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:35:15] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:35:53] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:35:53] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:35:53] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:35:53] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:35:53] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:35:53] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:35:53] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:35:53] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:36:38] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:36:38] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:36:38] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:36:38] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:36:38] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:36:38] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:36:38] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:36:38] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:36:38] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:36:38] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:37:28] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:37:28] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:37:28] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:37:28] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:37:28] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:37:28] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:37:28] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:37:28] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:37:28] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:37:28] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 278 
-[2026-01-27 13:38:53] [ERROR] WARNING: Undefined array key "usuario_actualizacion" en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 13:38:53] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
-[2026-01-27 17:39:59] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-27 17:40:02] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-27 17:40:28] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-27 17:42:20] [DEBUG] Todas las categorías obtenidas {"total":4}
-[2026-01-27 13:43:25] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
-[2026-01-27 13:44:18] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
-[2026-01-27 17:45:31] Intento de login - Usuario: admin
-[2026-01-27 17:45:31] Intentando autenticar usuario: admin
-[2026-01-27 17:45:31] AuthController: AuthController inicializado
-[2026-01-27 17:45:31] Username recibido: admin
-[2026-01-27 17:45:31] Password recibido: @dm...
-[2026-01-27 17:45:31] AuthController: Iniciando login para: admin
-[2026-01-27 17:45:31] AuthController: Username recibido: admin
-[2026-01-27 17:45:31] AuthController: Password recibido (primeros 3 chars): @dm...
-[2026-01-27 17:45:31] AuthController: Password completo: @dmin123.
-[2026-01-27 17:45:31] AuthController: Buscando usuario por username: admin
-[2026-01-27 17:45:31] AuthController: Usuario encontrado: {"id":1,"username":"admin","activo":true,"hash_length":60}
-[2026-01-27 17:45:31] AuthController: Hash en BD: $2y$10$xuyfNI4CNFy1YZ7ECE/jp.NV87gbUuFwBnezJZM2wfdck5pQ1Ufd.
-[2026-01-27 17:45:31] AuthController: Password a verificar: @dmin123.
-[2026-01-27 17:45:31] AuthController: Verificando contraseña...
-[2026-01-27 17:45:31] AuthController: === PRUEBA DE VERIFICACIÓN ===
-[2026-01-27 17:45:31] AuthController: password_verify resultado: TRUE
-[2026-01-27 17:45:31] AuthController: ✓ Contraseña verificada correctamente
-[2026-01-27 17:45:31] AuthController: Actualizando último login para usuario ID: 1
-[2026-01-27 17:45:31] AuthController: Login exitoso para: admin
-[2026-01-27 17:45:31] Resultado del login: {"success":true,"user":{"id":1,"username":"admin","nombre":"Administrador","email":"admin@inventario.com","rol":"admin"}}
-[2026-01-27 17:45:31] Login exitoso para usuario: admin
-[2026-01-27 17:46:19] Intento de login - Usuario: admin
-[2026-01-27 17:46:19] Intentando autenticar usuario: admin
-[2026-01-27 17:46:19] AuthController: AuthController inicializado
-[2026-01-27 17:46:19] Username recibido: admin
-[2026-01-27 17:46:19] Password recibido: @dm...
-[2026-01-27 17:46:19] AuthController: Iniciando login para: admin
-[2026-01-27 17:46:19] AuthController: Username recibido: admin
-[2026-01-27 17:46:19] AuthController: Password recibido (primeros 3 chars): @dm...
-[2026-01-27 17:46:19] AuthController: Password completo: @dmin123.
-[2026-01-27 17:46:19] AuthController: Buscando usuario por username: admin
-[2026-01-27 17:46:19] AuthController: Usuario encontrado: {"id":1,"username":"admin","activo":true,"hash_length":60}
-[2026-01-27 17:46:19] AuthController: Hash en BD: $2y$10$xuyfNI4CNFy1YZ7ECE/jp.NV87gbUuFwBnezJZM2wfdck5pQ1Ufd.
-[2026-01-27 17:46:19] AuthController: Password a verificar: @dmin123.
-[2026-01-27 17:46:19] AuthController: Verificando contraseña...
-[2026-01-27 17:46:19] AuthController: === PRUEBA DE VERIFICACIÓN ===
-[2026-01-27 17:46:19] AuthController: password_verify resultado: TRUE
-[2026-01-27 17:46:19] AuthController: ✓ Contraseña verificada correctamente
-[2026-01-27 17:46:19] AuthController: Actualizando último login para usuario ID: 1
-[2026-01-27 17:46:19] AuthController: Login exitoso para: admin
-[2026-01-27 17:46:19] Resultado del login: {"success":true,"user":{"id":1,"username":"admin","nombre":"Administrador","email":"admin@inventario.com","rol":"admin"}}
-[2026-01-27 17:46:19] Login exitoso para usuario: admin
-[2026-01-27 13:46:44] [ERROR] WARNING: Cannot modify header information - headers already sent by (output started at C:\wamp64\www\inventario\Views\layouts\sidebar.php:115) en C:\wamp64\www\inventario\Views\usuarios\crear.php línea 60 
-[2026-01-27 17:53:08] Intento de login - Usuario: admin
-[2026-01-27 17:53:08] Intentando autenticar usuario: admin
-[2026-01-27 17:53:08] AuthController: AuthController inicializado
-[2026-01-27 17:53:08] Username recibido: admin
-[2026-01-27 17:53:08] Password recibido: @dm...
-[2026-01-27 17:53:08] AuthController: Iniciando login para: admin
-[2026-01-27 17:53:08] AuthController: Username recibido: admin
-[2026-01-27 17:53:08] AuthController: Password recibido (primeros 3 chars): @dm...
-[2026-01-27 17:53:08] AuthController: Password completo: @dmin123.
-[2026-01-27 17:53:08] AuthController: Buscando usuario por username: admin
-[2026-01-27 17:53:08] AuthController: Usuario encontrado: {"id":1,"username":"admin","activo":true,"hash_length":60}
-[2026-01-27 17:53:08] AuthController: Hash en BD: $2y$10$xuyfNI4CNFy1YZ7ECE/jp.NV87gbUuFwBnezJZM2wfdck5pQ1Ufd.
-[2026-01-27 17:53:08] AuthController: Password a verificar: @dmin123.
-[2026-01-27 17:53:08] AuthController: Verificando contraseña...
-[2026-01-27 17:53:08] AuthController: === PRUEBA DE VERIFICACIÓN ===
-[2026-01-27 17:53:08] AuthController: password_verify resultado: TRUE
-[2026-01-27 17:53:08] AuthController: ✓ Contraseña verificada correctamente
-[2026-01-27 17:53:08] AuthController: Actualizando último login para usuario ID: 1
-[2026-01-27 17:53:08] AuthController: Login exitoso para: admin
-[2026-01-27 17:53:08] Resultado del login: {"success":true,"user":{"id":1,"username":"admin","nombre":"Administrador","email":"admin@inventario.com","rol":"admin"}}
-[2026-01-27 17:53:08] Login exitoso para usuario: admin
-[2026-01-27 13:53:16] [ERROR] WARNING: Cannot modify header information - headers already sent by (output started at C:\wamp64\www\inventario\Views\layouts\sidebar.php:115) en C:\wamp64\www\inventario\Views\usuarios\cambiar-password.php línea 64 
-[2026-01-27 13:57:23] [ERROR] WARNING: Cannot modify header information - headers already sent by (output started at C:\wamp64\www\inventario\Views\layouts\sidebar.php:115) en C:\wamp64\www\inventario\Views\usuarios\crear.php línea 86 
-[2026-01-27 13:59:17] [ERROR] WARNING: Cannot modify header information - headers already sent by (output started at C:\wamp64\www\inventario\Views\layouts\sidebar.php:115) en C:\wamp64\www\inventario\Views\usuarios\editar.php línea 90 
-[2026-01-27 13:59:37] [ERROR] WARNING: Cannot modify header information - headers already sent by (output started at C:\wamp64\www\inventario\Views\layouts\sidebar.php:115) en C:\wamp64\www\inventario\Views\usuarios\editar.php línea 90 
-[2026-01-27 14:01:18] [ERROR] WARNING: Cannot modify header information - headers already sent by (output started at C:\wamp64\www\inventario\Views\layouts\sidebar.php:115) en C:\wamp64\www\inventario\Views\usuarios\cambiar-password.php línea 64 
+[2026-01-29 13:42:38] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2026-01-29 13:42:43] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 84 
+[2026-01-29 13:47:30] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-01-29 13:48:30] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-01-29 13:48:33] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-01-29 13:48:33] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-01-29 13:48:39] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-01-29 13:49:12] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-01-29 17:50:25] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 17:50:31] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 17:50:37] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 13:50:41] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-01-29 13:50:45] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-01-29 13:57:45] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-01-29 17:57:48] [INFO] Categorías listadas {"total":4}
+[2026-01-29 17:57:49] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 17:57:52] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 13:57:53] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-01-29 17:57:56] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 17:58:34] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 17:58:39] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 17:59:35] [INFO] Categorías listadas {"total":4}
+[2026-01-29 17:59:37] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 17:59:39] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 17:59:54] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 17:59:56] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 17:59:58] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 18:00:03] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 18:00:23] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 18:00:24] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 18:00:50] [INFO] Categorías listadas {"total":4}
+[2026-01-29 18:00:56] [INFO] Categorías listadas {"total":4}
+[2026-01-29 18:02:56] [INFO] Categorías listadas {"total":4}
+[2026-01-29 18:02:57] [INFO] Categorías listadas {"total":4}
+[2026-01-29 18:03:37] [INFO] Categorías listadas {"total":4}
+[2026-01-29 18:03:39] [INFO] Categoría obtenida {"id":"1"}
+[2026-01-29 18:03:47] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 18:05:23] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 18:06:03] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 18:06:03] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 18:06:05] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 18:06:29] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 18:06:30] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 18:06:48] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 14:07:21] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-01-29 18:07:34] [DEBUG] Todas las categorías obtenidas {"total":4}

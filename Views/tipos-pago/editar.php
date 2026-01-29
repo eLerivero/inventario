@@ -8,6 +8,17 @@ require_once '../../Controllers/TasaCambioController.php';
 require_once '../../Helpers/TasaCambioHelper.php';
 require_once '../../Config/Database.php';
 
+require_once __DIR__ . '/../../Utils/Auth.php';
+
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+Auth::requireAccessToTiposPagos();
+
+
+
 $database = new Database();
 $db = $database->getConnection();
 $productoController = new ProductoController($db);

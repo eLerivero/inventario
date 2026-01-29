@@ -4,6 +4,10 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require_once __DIR__ . '/../../Utils/Auth.php';
+Auth::requireAuth();
+Auth::requireAccessToUsuarios();
+
 // OBTENER USUARIO ACTUAL
 require_once __DIR__ . '/../../Utils/Auth.php';
 $current_user = Auth::user();

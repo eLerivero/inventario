@@ -6,6 +6,15 @@ require_once '../../Controllers/HistorialStock.php';
 require_once '../../Controllers/ProductoController.php';
 require_once '../../Config/Database.php';
 
+require_once __DIR__ . '/../../Utils/Auth.php';
+
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+Auth::requireAccessToHistorialStock();
+
 $database = new Database();
 $db = $database->getConnection();
 $historialController = new HistorialStockController($db);

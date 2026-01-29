@@ -205,7 +205,7 @@ class Auth
         $depth = substr_count($current_script, '/') - 1;
         
         if ($depth > 0) {
-            return str_repeat('../', $depth) . 'dashboard/index.php';
+            return str_repeat('../', $depth) . 'inventario/Views/dashboard/index.php';
         }
         
         return 'dashboard/index.php';
@@ -335,17 +335,27 @@ public static function canAccessHistorialStock()
 }
 
 // Verificar si el usuario tiene acceso a usuarios
-public static function canAccessUsuarios()
-{
-    if (!self::check()) {
-        return false;
+    public static function canAccessUsuarios()
+    {
+        if (!self::check()) {
+            return false;
+        }
+        
+        $user_rol = $_SESSION['user_rol'] ?? '';
+        $rol = strtolower(trim($user_rol));
+        
+        // Solo 'admin' puede acceder a usuarios
+        return $rol === 'admin';
     }
-    
-    $user_rol = $_SESSION['user_rol'] ?? '';
-    $rol = strtolower(trim($user_rol));
-    
-    // Solo 'admin' puede acceder a usuarios
-    return $rol === 'admin';
+
+// Requerir acceso a usuarios
+public static function requireAccessToUsuarios()
+{
+    if (!self::canAccessUsuarios()) {
+        $_SESSION['error'] = 'No tienes permisos para acceder al módulo de usuarios';
+        header("Location: " . self::getDashboardUrl());
+        exit();
+    }
 }
 
 // Requerir acceso a ventas
@@ -373,6 +383,33 @@ public static function requireAccessToProductos()
 {
     if (!self::canAccessProductos()) {
         $_SESSION['error'] = 'No tienes permisos para acceder al módulo de productos';
+        header("Location: " . self::getDashboardUrl());
+        exit();
+    }
+}
+
+public static function requireAccessToCategorias()
+{
+    if (!self::canAccessCategorias()) {
+        $_SESSION['error'] = 'No tienes permisos para acceder al módulo de categorias';
+        header("Location: " . self::getDashboardUrl());
+        exit();
+    }
+}
+
+public static function requireAccessToTiposPagos()
+{
+    if (!self::canAccessTiposPago()) {
+        $_SESSION['error'] = 'No tienes permisos para acceder al módulo de tipo de pagos';
+        header("Location: " . self::getDashboardUrl());
+        exit();
+    }
+}
+
+public static function requireAccessToHistorialStock()
+{
+    if (!self::canAccessHistorialStock()) {
+        $_SESSION['error'] = 'No tienes permisos para acceder al módulo de tipo de historial de stock';
         header("Location: " . self::getDashboardUrl());
         exit();
     }

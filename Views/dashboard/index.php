@@ -11,6 +11,7 @@ require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../../Config/Database.php';
 require_once __DIR__ . '/../../Controllers/DashboardController.php';
 require_once __DIR__ . '/../../Utils/Ayuda.php';
+require_once __DIR__ . '/../../Utils/Auth.php';
 
 // Obtener estadísticas del dashboard
 try {
@@ -269,35 +270,48 @@ try {
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
+
+                        <?php if (Auth::canAccessProductos()): ?>
                         <div class="col-md-3 col-6">
                             <a href="../productos/crear.php" class="btn btn-outline-primary w-100 h-100 py-3">
                                 <i class="fas fa-plus-circle fa-2x mb-2"></i><br>
                                 Nuevo Producto
                             </a>
                         </div>
+                        <?php endif; ?>
+
+                        <?php if (Auth::canAccessVentas()): ?>
                         <div class="col-md-3 col-6">
                             <a href="../ventas/crear.php" class="btn btn-outline-success w-100 h-100 py-3">
                                 <i class="fas fa-cash-register fa-2x mb-2"></i><br>
                                 Nueva Venta
                             </a>
                         </div>
+                        <?php endif; ?>
+                        
+                        <?php if (Auth::canAccessClientes()): ?>
                         <div class="col-md-3 col-6">
                             <a href="../clientes/crear.php" class="btn btn-outline-info w-100 h-100 py-3">
                                 <i class="fas fa-user-plus fa-2x mb-2"></i><br>
                                 Nuevo Cliente
                             </a>
                         </div>
+                        <?php endif; ?>
+
+                        <?php if (Auth::canAccessCategorias()): ?>
                         <div class="col-md-3 col-6">
                             <a href="../categorias/crear.php" class="btn btn-outline-warning w-100 h-100 py-3">
                                 <i class="fas fa-tag fa-2x mb-2"></i><br>
                                 Nueva Categoría
                             </a>
                         </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
 </div>
 
 <?php
