@@ -71,6 +71,15 @@ try {
                     <i class="fas fa-users-cog"></i>
                     <span class="sidebar-text">Usuarios</span>
                 </a>
+                <!-- Cierre de Caja (solo para admin) -->
+                <?php if (Auth::canAccessCierreCaja()): ?>
+                <li class="nav-item">
+                    <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'cierres-caja') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>cierres-caja/index.php">
+                        <i class="fas fa-lock me-2"></i>
+                        <span class="sidebar-text">Cierre de Caja</span>
+                    </a>
+                </li>
+                <?php endif; ?>
             </li>
             <?php endif; ?>
             

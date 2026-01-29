@@ -44,3 +44,129 @@
 [2026-01-29 18:06:48] [DEBUG] Todas las categorías obtenidas {"total":4}
 [2026-01-29 14:07:21] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
 [2026-01-29 18:07:34] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 18:11:07] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 18:11:11] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 18:13:21] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 14:41:17] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:17] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:17] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:17] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:17] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:17] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:17] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:17] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:17] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:17] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:17] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:17] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:17] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:18] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:18] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:18] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:18] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:18] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:18] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:18] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:19] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:19] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:19] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:19] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:19] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:19] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:19] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:19] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:19] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:19] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:20] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:20] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:20] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:20] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:20] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:20] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:20] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:20] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:20] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 14:41:20] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:04] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:04] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:04] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:04] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:04] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:04] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:05] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:05] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:05] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:05] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:05] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:05] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:05] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:05] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:05] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:05] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:05] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:06] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:06] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:06] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:07] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:07] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:07] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:07] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:07] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:07] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:08] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:08] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:08] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:08] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:08] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:08] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:08] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:08] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:08] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:08] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:08] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:08] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:08] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 15:00:08] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active en C:\wamp64\www\inventario\index.php línea 349 
+[2026-01-29 19:06:28] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 15:06:31] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-01-29 19:07:04] Intento de login - Usuario: ventas
+[2026-01-29 19:07:04] Intentando autenticar usuario: ventas
+[2026-01-29 19:07:04] AuthController: AuthController inicializado
+[2026-01-29 19:07:04] Username recibido: ventas
+[2026-01-29 19:07:04] Password recibido: 123...
+[2026-01-29 19:07:04] AuthController: Iniciando login para: ventas
+[2026-01-29 19:07:04] AuthController: Username recibido: ventas
+[2026-01-29 19:07:04] AuthController: Password recibido (primeros 3 chars): 123...
+[2026-01-29 19:07:04] AuthController: Password completo: 12345678
+[2026-01-29 19:07:04] AuthController: Buscando usuario por username: ventas
+[2026-01-29 19:07:04] AuthController: Usuario no encontrado por username, buscando por email
+[2026-01-29 15:07:31] [ERROR] WARNING: Cannot modify header information - headers already sent by (output started at C:\wamp64\www\inventario\Views\layouts\sidebar.php:114) en C:\wamp64\www\inventario\Views\usuarios\crear.php línea 86 
+[2026-01-29 19:07:39] Intento de login - Usuario: ventas
+[2026-01-29 19:07:39] Intentando autenticar usuario: ventas
+[2026-01-29 19:07:39] AuthController: AuthController inicializado
+[2026-01-29 19:07:39] Username recibido: ventas
+[2026-01-29 19:07:39] Password recibido: 123...
+[2026-01-29 19:07:39] AuthController: Iniciando login para: ventas
+[2026-01-29 19:07:39] AuthController: Username recibido: ventas
+[2026-01-29 19:07:39] AuthController: Password recibido (primeros 3 chars): 123...
+[2026-01-29 19:07:39] AuthController: Password completo: 12345678
+[2026-01-29 19:07:39] AuthController: Buscando usuario por username: ventas
+[2026-01-29 19:07:39] AuthController: Usuario encontrado: {"id":2,"username":"ventas","activo":true,"hash_length":60}
+[2026-01-29 19:07:39] AuthController: Hash en BD: $2y$10$wPHqUxAZLGJ97f0u7x9pXuq0H1MyVmcFTnqP9bpldm74AYaOOOVyK
+[2026-01-29 19:07:39] AuthController: Password a verificar: 12345678
+[2026-01-29 19:07:39] AuthController: Verificando contraseña...
+[2026-01-29 19:07:39] AuthController: === PRUEBA DE VERIFICACIÓN ===
+[2026-01-29 19:07:39] AuthController: password_verify resultado: TRUE
+[2026-01-29 19:07:39] AuthController: ✓ Contraseña verificada correctamente
+[2026-01-29 19:07:39] AuthController: Actualizando último login para usuario ID: 2
+[2026-01-29 19:07:39] AuthController: Login exitoso para: ventas
+[2026-01-29 19:07:39] Resultado del login: {"success":true,"user":{"id":2,"username":"ventas","nombre":"Ventas Usuario","email":"TECNOLOGIAINEA@INEA.GOB.VE","rol":"usuario"}}
+[2026-01-29 19:07:39] Login exitoso para usuario: ventas
+[2026-01-29 19:07:59] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 19:08:01] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 19:08:23] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 19:08:25] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 19:08:29] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 19:08:44] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 19:08:46] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-01-29 19:10:05] [DEBUG] Todas las categorías obtenidas {"total":4}

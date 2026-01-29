@@ -786,6 +786,154 @@ BEGIN
 END;
 $$;
 
+-- =========================================================================
+-- SISTEMA DE CIERRE DE CAJA
+-- =========================================================================
+
+-- Tabla para cierres de caja
+CREATE TABLE IF NOT EXISTS cierres_caja (
+    id SERIAL PRIMARY KEY,
+    fecha DATE NOT NULL,
+    usuario_id INTEGER NOT NULL,
+    total_ventas INTEGER DEFAULT 0,
+    total_unidades INTEGER DEFAULT 0,
+    total_usd DECIMAL(10,2) DEFAULT 0,
+    total_bs DECIMAL(10,2) DEFAULT 0,
+    
+    -- Totales por tipo de pago en USD
+    efectivo_usd DECIMAL(10,2) DEFAULT 0,
+    efectivo_bs_usd DECIMAL(10,2) DEFAULT 0,
+    transferencia_usd DECIMAL(10,2) DEFAULT 0,
+    pago_movil_usd DECIMAL(10,2) DEFAULT 0,
+    tarjeta_debito_usd DECIMAL(10,2) DEFAULT 0,
+    tarjeta_credito_usd DECIMAL(10,2) DEFAULT 0,
+    divisa_usd DECIMAL(10,2) DEFAULT 0,
+    credito_usd DECIMAL(10,2) DEFAULT 0,
+    
+    -- Totales por tipo de pago en BS
+    efectivo_bs DECIMAL(10,2) DEFAULT 0,
+    efectivo_bs_bs DECIMAL(10,2) DEFAULT 0,
+    transferencia_bs DECIMAL(10,2) DEFAULT 0,
+    pago_movil_bs DECIMAL(10,2) DEFAULT 0,
+    tarjeta_debito_bs DECIMAL(10,2) DEFAULT 0,
+    tarjeta_credito_bs DECIMAL(10,2) DEFAULT 0,
+    divisa_bs DECIMAL(10,2) DEFAULT 0,
+    credito_bs DECIMAL(10,2) DEFAULT 0,
+    
+    -- Resumen por categoría (se almacena como JSON)
+    resumen_categorias JSONB,
+    
+    -- Resumen por producto (se almacena como JSON)
+    resumen_productos JSONB,
+    
+    -- Resumen por cliente (se almacena como JSON)
+    resumen_clientes JSONB,
+    
+    -- Detalle de todas las ventas del día (IDs de ventas)
+    ventas_ids INTEGER[],
+    
+    observaciones TEXT,
+    estado VARCHAR(20) DEFAULT 'completado',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_cierre_usuario 
+        FOREIGN KEY (usuario_id) 
+        REFERENCES usuarios(id) 
+        ON DELETE RESTRICT,
+    
+    CONSTRAINT unique_fecha_cierre 
+        UNIQUE (fecha)
+);
+
+-- Trigger para updated_at
+CREATE TRIGGER update_cierres_caja_updated_at 
+    BEFORE UPDATE ON cierres_caja 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Índices para cierres_caja
+CREATE INDEX idx_cierres_caja_fecha ON cierres_caja(fecha);
+CREATE INDEX idx_cierres_caja_usuario ON cierres_caja(usuario_id);
+CREATE INDEX idx_cierres_caja_estado ON cierres_caja(estado);
+
+-- Vista para reportes de cierre de caja
+CREATE OR REPLACE VIEW vista_cierres_caja_completa AS
+SELECT 
+    cc.*,
+    u.nombre as usuario_nombre,
+    u.username as usuario_username,
+    -- Totales combinados
+    (cc.efectivo_usd + cc.efectivo_bs_usd + cc.transferencia_usd + cc.pago_movil_usd + 
+     cc.tarjeta_debito_usd + cc.tarjeta_credito_usd + cc.divisa_usd + cc.credito_usd) as total_general_usd,
+    (cc.efectivo_bs + cc.efectivo_bs_bs + cc.transferencia_bs + cc.pago_movil_bs + 
+     cc.tarjeta_debito_bs + cc.tarjeta_credito_bs + cc.divisa_bs + cc.credito_bs) as total_general_bs
+FROM cierres_caja cc
+JOIN usuarios u ON cc.usuario_id = u.id;
+
+-- Vista para ventas del día (sin cierre)
+CREATE OR REPLACE VIEW vista_ventas_dia_actual AS
+SELECT 
+    v.*,
+    c.nombre as cliente_nombre,
+    c.numero_documento as cliente_documento,
+    u.nombre as vendedor_nombre,
+    tp.nombre as tipo_pago_nombre,
+    COUNT(dv.id) as total_items,
+    SUM(dv.cantidad) as total_unidades,
+    STRING_AGG(p.nombre, ', ') as productos
+FROM ventas v
+LEFT JOIN clientes c ON v.cliente_id = c.id
+LEFT JOIN usuarios u ON v.usuario_id = u.id
+LEFT JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
+LEFT JOIN detalle_ventas dv ON v.id = dv.venta_id
+LEFT JOIN productos p ON dv.producto_id = p.id
+WHERE v.estado = 'completada' 
+AND DATE(v.fecha_hora) = CURRENT_DATE
+GROUP BY v.id, c.nombre, c.numero_documento, u.nombre, tp.nombre
+ORDER BY v.fecha_hora DESC;
+
+-- Función para generar reporte detallado del día
+CREATE OR REPLACE FUNCTION sp_generar_reporte_diario(
+    p_fecha DATE DEFAULT CURRENT_DATE
+)
+RETURNS TABLE(
+    categoria_nombre VARCHAR(100),
+    producto_nombre VARCHAR(255),
+    cantidad_vendida INTEGER,
+    precio_unitario_bs DECIMAL(10,2),
+    subtotal_bs DECIMAL(10,2),
+    precio_unitario_usd DECIMAL(10,2),
+    subtotal_usd DECIMAL(10,2),
+    tipo_pago VARCHAR(50),
+    cliente_nombre VARCHAR(200)
+) 
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        COALESCE(cat.nombre, 'Sin categoría') as categoria_nombre,
+        p.nombre as producto_nombre,
+        SUM(dv.cantidad) as cantidad_vendida,
+        AVG(dv.precio_unitario_bs) as precio_unitario_bs,
+        SUM(dv.subtotal_bs) as subtotal_bs,
+        AVG(dv.precio_unitario) as precio_unitario_usd,
+        SUM(dv.subtotal) as subtotal_usd,
+        tp.nombre as tipo_pago,
+        cl.nombre as cliente_nombre
+    FROM detalle_ventas dv
+    JOIN ventas v ON dv.venta_id = v.id
+    JOIN productos p ON dv.producto_id = p.id
+    LEFT JOIN categorias cat ON p.categoria_id = cat.id
+    JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
+    JOIN clientes cl ON v.cliente_id = cl.id
+    WHERE v.estado = 'completada'
+    AND DATE(v.fecha_hora) = p_fecha
+    GROUP BY cat.nombre, p.nombre, tp.nombre, cl.nombre
+    ORDER BY cat.nombre, SUM(dv.subtotal_bs) DESC;
+END;
+$$;
+
 -- Procedimiento para generar alertas de inventario
 CREATE OR REPLACE PROCEDURE sp_generar_alertas_inventario()
 LANGUAGE plpgsql

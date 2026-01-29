@@ -191,11 +191,13 @@ try {
                         </div>
                     <?php endif; ?>
                 </div>
+                <?php if (Auth::canAccessProductos()): ?>           
                 <div class="card-footer bg-white">
                     <a href="../productos/index.php" class="btn btn-sm btn-outline-primary">
                         Ver todos los productos
                     </a>
                 </div>
+            <?php endif; ?>
             </div>
         </div>
     </div>
