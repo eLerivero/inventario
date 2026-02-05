@@ -22,7 +22,7 @@ class VentaController
         $this->tasaCambio = new TasaCambio($db);
     }
 
-    public function listar()
+    public function listarold()
     {
         try {
             $stmt = $this->venta->leer();
@@ -46,6 +46,52 @@ class VentaController
             ];
         }
     }
+
+    public function listar($solo_activas = true)
+{
+    try {
+        // Si solo_activas es true, mostrar solo ventas no cerradas en caja
+        if ($solo_activas) {
+            $query = "SELECT v.*, c.nombre as cliente_nombre, tp.nombre as tipo_pago_nombre
+                      FROM ventas v
+                      LEFT JOIN clientes c ON v.cliente_id = c.id
+                      LEFT JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
+                      WHERE v.cerrada_en_caja = FALSE  -- ← NUEVO FILTRO
+                      ORDER BY v.created_at DESC";
+            
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $ventas = $stmt->fetchAll();
+        } else {
+            // Código original para mostrar todas las ventas
+            $stmt = $this->venta->leer();
+            $ventas = $stmt->fetchAll();
+        }
+
+        // Formatear cada venta para mostrar precios
+        foreach ($ventas as &$venta) {
+            $venta['total_formateado_usd'] = TasaCambioHelper::formatearUSD($venta['total']);
+            $venta['total_formateado_bs'] = TasaCambioHelper::formatearBS($venta['total_bs']);
+            $venta['tasa_formateada'] = TasaCambioHelper::formatearBS($venta['tasa_cambio'], false);
+            
+            // Añadir indicador de si está cerrada en caja
+            $venta['cerrada_en_caja_texto'] = isset($venta['cerrada_en_caja']) && $venta['cerrada_en_caja'] 
+                ? 'Cerrada' 
+                : 'Activa';
+        }
+
+        return [
+            "success" => true,
+            "data" => $ventas,
+            "filtro_activas" => $solo_activas
+        ];
+    } catch (Exception $e) {
+        return [
+            "success" => false,
+            "message" => "Error al obtener las ventas: " . $e->getMessage()
+        ];
+    }
+}
 
     public function obtener($id)
     {
@@ -558,6 +604,46 @@ class VentaController
             ];
         }
     }
+
+    // Método para obtener ventas cerradas (para historial)
+public function obtenerVentasCerradas($limit = 100)
+{
+    try {
+        $query = "SELECT v.*, c.nombre as cliente_nombre, tp.nombre as tipo_pago_nombre,
+                         cc.fecha as fecha_cierre
+                  FROM ventas v
+                  LEFT JOIN clientes c ON v.cliente_id = c.id
+                  LEFT JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
+                  LEFT JOIN cierres_caja cc ON DATE(v.fecha_hora) = cc.fecha
+                  WHERE v.cerrada_en_caja = TRUE
+                  AND v.estado = 'completada'
+                  ORDER BY v.fecha_hora DESC
+                  LIMIT :limit";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindValue(":limit", $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        $ventas = $stmt->fetchAll();
+
+        // Formatear cada venta para mostrar precios
+        foreach ($ventas as &$venta) {
+            $venta['total_formateado_usd'] = TasaCambioHelper::formatearUSD($venta['total']);
+            $venta['total_formateado_bs'] = TasaCambioHelper::formatearBS($venta['total_bs']);
+            $venta['tasa_formateada'] = TasaCambioHelper::formatearBS($venta['tasa_cambio'], false);
+        }
+
+        return [
+            "success" => true,
+            "data" => $ventas,
+            "total" => count($ventas)
+        ];
+    } catch (Exception $e) {
+        return [
+            "success" => false,
+            "message" => "Error al obtener ventas cerradas: " . $e->getMessage()
+        ];
+    }
+}
 
 
 }

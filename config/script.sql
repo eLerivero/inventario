@@ -1,4 +1,4 @@
--- data.sql - SISTEMA DE INVENTARIO (CON CORRECCIÓN DE DOBLE DESCUENTO)
+-- data.sql - SISTEMA DE INVENTARIO (CON CORRECCIÓN DE DOBLE DESCUENTO Y REINICIO DIARIO)
 -- PostgreSQL
 
 -- Eliminar tablas existentes (en orden inverso por dependencias)
@@ -111,7 +111,10 @@ CREATE TABLE clientes (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Crear tabla de ventas
+-- =========================================================================
+-- MODIFICACIÓN CRÍTICA: Añadir campo cerrada_en_caja en la creación de la tabla
+-- =========================================================================
+-- Crear tabla de ventas CON el campo cerrada_en_caja desde el inicio
 CREATE TABLE ventas (
     id SERIAL PRIMARY KEY,
     numero_venta VARCHAR(50) UNIQUE NOT NULL,
@@ -128,7 +131,9 @@ CREATE TABLE ventas (
     metodo_pago VARCHAR(50),
     observaciones TEXT,
     fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- NUEVO CAMPO PARA REINICIO DIARIO
+    cerrada_en_caja BOOLEAN DEFAULT FALSE
 );
 
 -- Agregar claves foráneas a ventas después de crear la tabla
@@ -269,6 +274,8 @@ CREATE INDEX idx_ventas_tipo_pago ON ventas(tipo_pago_id);
 CREATE INDEX idx_ventas_estado ON ventas(estado);
 CREATE INDEX idx_ventas_fecha ON ventas(fecha_hora);
 CREATE INDEX idx_ventas_created ON ventas(created_at);
+-- NUEVO ÍNDICE PARA REINICIO DIARIO
+CREATE INDEX idx_ventas_cerrada_fecha ON ventas(cerrada_en_caja, fecha_hora);
 
 -- Índices para detalle_ventas
 CREATE INDEX idx_detalle_venta ON detalle_ventas(venta_id);
@@ -870,7 +877,7 @@ SELECT
 FROM cierres_caja cc
 JOIN usuarios u ON cc.usuario_id = u.id;
 
--- Vista para ventas del día (sin cierre)
+-- Vista para ventas del día (sin cierre) - ACTUALIZADA CON SISTEMA DE REINICIO
 CREATE OR REPLACE VIEW vista_ventas_dia_actual AS
 SELECT 
     v.*,
@@ -889,6 +896,7 @@ LEFT JOIN detalle_ventas dv ON v.id = dv.venta_id
 LEFT JOIN productos p ON dv.producto_id = p.id
 WHERE v.estado = 'completada' 
 AND DATE(v.fecha_hora) = CURRENT_DATE
+AND v.cerrada_en_caja = FALSE  -- ← NUEVO FILTRO: solo ventas activas del día
 GROUP BY v.id, c.nombre, c.numero_documento, u.nombre, tp.nombre
 ORDER BY v.fecha_hora DESC;
 
@@ -1044,7 +1052,226 @@ BEGIN
 END;
 $$;
 
--- MENSAJE FINAL
+-- =========================================================================
+-- SISTEMA DE REINICIO DE CONTADORES DIARIOS - FUNCIONES ESPECÍFICAS
+-- =========================================================================
+
+-- Función para marcar ventas como cerradas
+CREATE OR REPLACE FUNCTION marcar_ventas_cerradas(fecha_cierre DATE)
+RETURNS INTEGER AS $$
+DECLARE
+    ventas_marcadas INTEGER;
+BEGIN
+    UPDATE ventas 
+    SET cerrada_en_caja = TRUE 
+    WHERE DATE(fecha_hora) = fecha_cierre 
+    AND estado = 'completada'
+    AND cerrada_en_caja = FALSE;
+    
+    GET DIAGNOSTICS ventas_marcadas = ROW_COUNT;
+    
+    RETURN ventas_marcadas;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Función para obtener ventas activas del día
+CREATE OR REPLACE FUNCTION obtener_ventas_activas_dia(p_fecha DATE)
+RETURNS TABLE(
+    id INTEGER,
+    numero_venta VARCHAR,
+    fecha_hora TIMESTAMP,
+    cliente_nombre VARCHAR,
+    total DECIMAL,
+    total_bs DECIMAL,
+    tipo_pago_nombre VARCHAR,
+    estado VARCHAR,
+    cerrada_en_caja BOOLEAN
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        v.id,
+        v.numero_venta,
+        v.fecha_hora,
+        COALESCE(c.nombre, 'Cliente no identificado') as cliente_nombre,
+        v.total,
+        v.total_bs,
+        tp.nombre as tipo_pago_nombre,
+        v.estado,
+        v.cerrada_en_caja
+    FROM ventas v
+    LEFT JOIN clientes c ON v.cliente_id = c.id
+    LEFT JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
+    WHERE v.estado = 'completada'
+    AND DATE(v.fecha_hora) = p_fecha
+    AND v.cerrada_en_caja = FALSE
+    ORDER BY v.fecha_hora DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Vista para ventas cerradas (solo para reportes históricos)
+CREATE OR REPLACE VIEW vista_ventas_cerradas AS
+SELECT 
+    v.*,
+    c.nombre as cliente_nombre,
+    u.nombre as vendedor_nombre,
+    tp.nombre as tipo_pago_nombre
+FROM ventas v
+LEFT JOIN clientes c ON v.cliente_id = c.id
+LEFT JOIN usuarios u ON v.usuario_id = u.id
+LEFT JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
+WHERE v.cerrada_en_caja = TRUE
+ORDER BY v.fecha_hora DESC;
+
+-- Vista para dashboard que muestra ventas activas
+CREATE OR REPLACE VIEW vista_dashboard_ventas_activas AS
+SELECT 
+    COUNT(*) as ventas_hoy,
+    SUM(v.total) as total_usd_hoy,
+    SUM(v.total_bs) as total_bs_hoy,
+    EXTRACT(HOUR FROM v.fecha_hora) as hora,
+    tp.nombre as tipo_pago,
+    COUNT(DISTINCT v.cliente_id) as clientes_hoy
+FROM ventas v
+LEFT JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
+WHERE v.estado = 'completada'
+AND DATE(v.fecha_hora) = CURRENT_DATE
+AND v.cerrada_en_caja = FALSE
+GROUP BY EXTRACT(HOUR FROM v.fecha_hora), tp.nombre
+ORDER BY hora DESC;
+
+-- Función para verificar si hay ventas activas hoy
+CREATE OR REPLACE FUNCTION hay_ventas_activas_hoy()
+RETURNS BOOLEAN AS $$
+DECLARE
+    total_ventas INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO total_ventas
+    FROM ventas 
+    WHERE estado = 'completada'
+    AND DATE(fecha_hora) = CURRENT_DATE
+    AND cerrada_en_caja = FALSE;
+    
+    RETURN total_ventas > 0;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Función para obtener resumen rápido del día
+CREATE OR REPLACE FUNCTION obtener_resumen_rapido_hoy()
+RETURNS TABLE(
+    ventas_hoy INTEGER,
+    total_usd_hoy DECIMAL,
+    total_bs_hoy DECIMAL,
+    clientes_hoy INTEGER,
+    primera_venta TIMESTAMP,
+    ultima_venta TIMESTAMP
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        COUNT(*) as ventas_hoy,
+        SUM(total) as total_usd_hoy,
+        SUM(total_bs) as total_bs_hoy,
+        COUNT(DISTINCT cliente_id) as clientes_hoy,
+        MIN(fecha_hora) as primera_venta,
+        MAX(fecha_hora) as ultima_venta
+    FROM ventas 
+    WHERE estado = 'completada'
+    AND DATE(fecha_hora) = CURRENT_DATE
+    AND cerrada_en_caja = FALSE;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Función para obtener ventas por tipo de pago hoy
+CREATE OR REPLACE FUNCTION obtener_ventas_por_tipo_pago_hoy()
+RETURNS TABLE(
+    tipo_pago VARCHAR,
+    cantidad_ventas INTEGER,
+    total_usd DECIMAL,
+    total_bs DECIMAL
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        tp.nombre as tipo_pago,
+        COUNT(v.id) as cantidad_ventas,
+        SUM(v.total) as total_usd,
+        SUM(v.total_bs) as total_bs
+    FROM ventas v
+    JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
+    WHERE v.estado = 'completada'
+    AND DATE(v.fecha_hora) = CURRENT_DATE
+    AND v.cerrada_en_caja = FALSE
+    GROUP BY tp.nombre
+    ORDER BY SUM(v.total_bs) DESC;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Función para reiniciar ventas de un día (solo para administradores)
+CREATE OR REPLACE FUNCTION reiniciar_ventas_dia(p_fecha DATE)
+RETURNS INTEGER AS $$
+DECLARE
+    ventas_reiniciadas INTEGER;
+BEGIN
+    UPDATE ventas 
+    SET cerrada_en_caja = FALSE 
+    WHERE DATE(fecha_hora) = p_fecha 
+    AND estado = 'completada'
+    AND cerrada_en_caja = TRUE;
+    
+    GET DIAGNOSTICS ventas_reiniciadas = ROW_COUNT;
+    
+    -- Eliminar el cierre de caja si existe
+    DELETE FROM cierres_caja WHERE fecha = p_fecha;
+    
+    RETURN ventas_reiniciadas;
+END;
+$$ LANGUAGE plpgsql;
+
+-- =========================================================================
+-- ACTUALIZACIÓN DE VISTAS EXISTENTES PARA INCLUIR SISTEMA DE REINICIO
+-- =========================================================================
+
+-- Actualizar vista de ventas por mes para incluir solo ventas cerradas
+CREATE OR REPLACE VIEW vista_estadisticas_ventas_mensual AS
+SELECT 
+    EXTRACT(YEAR FROM fecha_hora) as anio,
+    EXTRACT(MONTH FROM fecha_hora) as mes,
+    TO_CHAR(fecha_hora, 'Month') as nombre_mes,
+    COUNT(*) as total_ventas,
+    SUM(total) as total_ingresos_usd,
+    SUM(total_bs) as total_ingresos_bs,
+    AVG(total) as promedio_venta_usd,
+    COUNT(DISTINCT cliente_id) as clientes_unicos
+FROM ventas
+WHERE estado = 'completada'
+AND cerrada_en_caja = TRUE  -- Solo ventas cerradas en caja
+GROUP BY EXTRACT(YEAR FROM fecha_hora), EXTRACT(MONTH FROM fecha_hora), TO_CHAR(fecha_hora, 'Month')
+ORDER BY anio DESC, mes DESC;
+
+-- Actualizar vista de top productos vendidos para incluir solo ventas cerradas
+CREATE OR REPLACE VIEW vista_top_productos_vendidos AS
+SELECT 
+    p.id,
+    p.codigo_sku,
+    p.nombre,
+    c.nombre as categoria_nombre,
+    SUM(dv.cantidad) as total_vendido,
+    SUM(dv.subtotal) as total_ingresos_usd,
+    SUM(dv.subtotal_bs) as total_ingresos_bs,
+    COUNT(DISTINCT dv.venta_id) as total_ventas
+FROM productos p
+LEFT JOIN detalle_ventas dv ON p.id = dv.producto_id
+LEFT JOIN ventas v ON dv.venta_id = v.id
+LEFT JOIN categorias c ON p.categoria_id = c.id
+WHERE v.estado = 'completada' 
+AND v.cerrada_en_caja = TRUE  -- Solo ventas cerradas en caja
+OR v.estado IS NULL
+GROUP BY p.id, p.codigo_sku, p.nombre, c.nombre
+ORDER BY total_vendido DESC, total_ingresos_usd DESC
+LIMIT 10;
+
+-- MENSAJE FINAL ACTUALIZADO
 DO $$
 DECLARE
     total_tablas INTEGER;
@@ -1072,9 +1299,9 @@ BEGIN
     RAISE NOTICE '';
     RAISE NOTICE '📊 ESTADÍSTICAS DE LA INSTALACIÓN:';
     RAISE NOTICE '   Tablas creadas: %', total_tablas;
-    RAISE NOTICE '   Vistas creadas: 9';
-    RAISE NOTICE '   Funciones creadas: 8';
-    RAISE NOTICE '   Triggers creados: 10';
+    RAISE NOTICE '   Vistas creadas: 12';
+    RAISE NOTICE '   Funciones creadas: 14';
+    RAISE NOTICE '   Triggers creados: 11';
     RAISE NOTICE '   Procedimientos: 2';
     RAISE NOTICE '   Registros insertados: %', total_registros;
     RAISE NOTICE '';
@@ -1124,6 +1351,15 @@ BEGIN
     RAISE NOTICE '   ✅ Stock se revierte automáticamente si venta se cancela';
     RAISE NOTICE '   ✅ Validación de stock al crear venta (sin descontar)';
     RAISE NOTICE '';
+    RAISE NOTICE '🔄 NUEVO SISTEMA DE REINICIO DIARIO:';
+    RAISE NOTICE '   ✅ Campo "cerrada_en_caja" en tabla ventas';
+    RAISE NOTICE '   ✅ Ventas se marcan como cerradas al realizar cierre de caja';
+    RAISE NOTICE '   ✅ Contadores diarios se reinician automáticamente';
+    RAISE NOTICE '   ✅ Reportes del día siguiente empiezan desde 0';
+    RAISE NOTICE '   ✅ Historial completo se mantiene para consultas';
+    RAISE NOTICE '   ✅ Vistas actualizadas para filtro por cerrada_en_caja';
+    RAISE NOTICE '   ✅ Funciones específicas para gestión de reinicio';
+    RAISE NOTICE '';
     RAISE NOTICE '📋 COMANDOS ÚTILES:';
     RAISE NOTICE '   -- Alertas de inventario';
     RAISE NOTICE '   CALL sp_generar_alertas_inventario();';
@@ -1136,9 +1372,21 @@ BEGIN
     RAISE NOTICE '';
     RAISE NOTICE '   -- Ver productos bajo stock';
     RAISE NOTICE '   SELECT * FROM vista_productos_bajo_stock;';
+    RAISE NOTice '';
+    RAISE NOTICE '   -- Ver ventas activas hoy';
+    RAISE NOTICE '   SELECT * FROM obtener_ventas_activas_dia(CURRENT_DATE);';
     RAISE NOTICE '';
-    RAISE NOTICE '   -- Ver ventas recientes';
-    RAISE NOTICE '   SELECT * FROM vista_ventas_completa ORDER BY fecha_hora DESC LIMIT 10;';
+    RAISE NOTICE '   -- Ver ventas cerradas';
+    RAISE NOTICE '   SELECT * FROM vista_ventas_cerradas;';
+    RAISE NOTICE '';
+    RAISE NOTICE '   -- Marcar ventas como cerradas (al hacer cierre)';
+    RAISE NOTICE '   SELECT marcar_ventas_cerradas(CURRENT_DATE);';
+    RAISE NOTICE '';
+    RAISE NOTICE '   -- Verificar si hay ventas activas';
+    RAISE NOTICE '   SELECT hay_ventas_activas_hoy();';
+    RAISE NOTICE '';
+    RAISE NOTICE '   -- Obtener resumen rápido del día';
+    RAISE NOTICE '   SELECT * FROM obtener_resumen_rapido_hoy();';
     RAISE NOTICE '';
     RAISE NOTICE '=========================================';
 END $$;

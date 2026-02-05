@@ -21,7 +21,26 @@ class Venta
         $this->conn = $db;
     }
 
-    public function leer()
+    public function leer($solo_activas = false)
+{
+    $query = "SELECT v.*, c.nombre as cliente_nombre, tp.nombre as tipo_pago_nombre
+              FROM " . $this->table . " v
+              LEFT JOIN clientes c ON v.cliente_id = c.id
+              LEFT JOIN tipos_pago tp ON v.tipo_pago_id = tp.id";
+    
+    // Añadir filtro si se solicitan solo ventas activas
+    if ($solo_activas) {
+        $query .= " WHERE v.cerrada_en_caja = FALSE";
+    }
+    
+    $query .= " ORDER BY v.created_at DESC";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute();
+    return $stmt;
+}
+
+    public function leerOld()
     {
         $query = "SELECT v.*, c.nombre as cliente_nombre, tp.nombre as tipo_pago_nombre
                   FROM " . $this->table . " v
