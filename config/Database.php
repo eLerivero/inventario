@@ -3,7 +3,7 @@ class Database
 {
     private $host = '127.0.0.1';
     private $port = '5432';
-    private $db_name = 'inventario2';
+    private $db_name = 'inventario';
     private $username = 'postgres';
     private $password = '12345678';
     public $conn;
