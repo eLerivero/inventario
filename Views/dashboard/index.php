@@ -316,7 +316,7 @@ try {
     
 </div>
 
-<?php
+<!-- <?php
 // Incluir footer
 require_once __DIR__ . '/../layouts/footer.php';
-?>
+?> -->

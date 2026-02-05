@@ -36,14 +36,27 @@ class CierreCajaController
                 ];
             }
 
-            // Obtener ventas del día
+            // Obtener ventas del día (SOLO NO CERRADAS)
             $ventas = $this->cierreCaja->obtenerVentasDelDia($fecha);
-            
+
             if (empty($ventas)) {
                 return [
-                    "success" => false,
+                    "success" => true,  // Cambiado a true porque no es error, solo no hay ventas
                     "message" => "No hay ventas completadas para el día de hoy",
-                    "data" => []
+                    "data" => [
+                        'fecha' => $fecha,
+                        'ventas' => [],
+                        'total_ventas' => 0,
+                        'total_unidades' => 0,
+                        'total_usd' => 0,
+                        'total_bs' => 0,
+                        'totales_por_tipo_usd' => [],
+                        'totales_por_tipo_bs' => [],
+                        'resumen_categorias' => [],
+                        'resumen_productos' => [],
+                        'resumen_clientes' => [],
+                        'ventas_ids' => []
+                    ]
                 ];
             }
 
@@ -59,17 +72,17 @@ class CierreCajaController
             $resumen_productos = [];
             $resumen_clientes = [];
             $ventas_ids = [];
-            
+
             // Inicializar totales
             $total_ventas = 0;
             $total_unidades = 0;
             $total_usd = 0;
             $total_bs = 0;
-            
+
             // Inicializar totales por tipo de pago
             $totales_por_tipo_usd = [];
             $totales_por_tipo_bs = [];
-            
+
             foreach ($tipos_pago as $tp) {
                 $nombre_normalizado = strtolower(str_replace(' ', '_', $tp['nombre']));
                 $totales_por_tipo_usd[$nombre_normalizado] = 0;
@@ -81,26 +94,26 @@ class CierreCajaController
                 $ventas_ids[] = $venta['id'];
                 $total_usd += $venta['total'];
                 $total_bs += $venta['total_bs'];
-                
+
                 // Acumular por tipo de pago
                 if (isset($venta['tipo_pago_id']) && isset($tipos_pago_map[$venta['tipo_pago_id']])) {
                     $tipo_pago_nombre = $tipos_pago_map[$venta['tipo_pago_id']];
                     $nombre_normalizado = strtolower(str_replace(' ', '_', $tipo_pago_nombre));
-                    
+
                     $totales_por_tipo_usd[$nombre_normalizado] += $venta['total'];
                     $totales_por_tipo_bs[$nombre_normalizado] += $venta['total_bs'];
                 }
-                
+
                 // Obtener detalles para resúmenes
                 $detalles = $this->venta->obtenerDetalles($venta['id']);
-                
+
                 foreach ($detalles as $detalle) {
                     $total_unidades += $detalle['cantidad'];
-                    
+
                     // Resumen por categoría
                     $categoria_id = $detalle['categoria_id'] ?? 0;
                     $categoria_nombre = $detalle['categoria_nombre'] ?? 'Sin categoría';
-                    
+
                     if (!isset($resumen_categorias[$categoria_nombre])) {
                         $resumen_categorias[$categoria_nombre] = [
                             'unidades' => 0,
@@ -111,11 +124,11 @@ class CierreCajaController
                     $resumen_categorias[$categoria_nombre]['unidades'] += $detalle['cantidad'];
                     $resumen_categorias[$categoria_nombre]['total_usd'] += $detalle['subtotal'];
                     $resumen_categorias[$categoria_nombre]['total_bs'] += $detalle['subtotal_bs'];
-                    
+
                     // Resumen por producto
                     $producto_id = $detalle['producto_id'];
                     $producto_nombre = $detalle['producto_nombre'];
-                    
+
                     if (!isset($resumen_productos[$producto_id])) {
                         $resumen_productos[$producto_id] = [
                             'nombre' => $producto_nombre,
@@ -130,11 +143,11 @@ class CierreCajaController
                     $resumen_productos[$producto_id]['total_usd'] += $detalle['subtotal'];
                     $resumen_productos[$producto_id]['total_bs'] += $detalle['subtotal_bs'];
                 }
-                
+
                 // Resumen por cliente
                 $cliente_id = $venta['cliente_id'];
                 $cliente_nombre = $venta['cliente_nombre'] ?? 'Cliente no identificado';
-                
+
                 if (!isset($resumen_clientes[$cliente_id])) {
                     $resumen_clientes[$cliente_id] = [
                         'nombre' => $cliente_nombre,
@@ -170,7 +183,6 @@ class CierreCajaController
                 "message" => "Datos del día obtenidos correctamente",
                 "data" => $datos
             ];
-
         } catch (Exception $e) {
             return [
                 "success" => false,
@@ -184,15 +196,16 @@ class CierreCajaController
         try {
             $this->db->beginTransaction();
 
-            // Obtener datos del día
-            $datos_dia = $this->obtenerDatosDia();
-            
+            $fecha = date('Y-m-d');
+
+            // Obtener datos del día (SOLO ventas no cerradas)
+            $datos_dia = $this->obtenerDatosDia($fecha);
+
             if (!$datos_dia['success']) {
                 throw new Exception($datos_dia['message']);
             }
 
             $data = $datos_dia['data'];
-            $fecha = $data['fecha'];
 
             // Preparar datos para el cierre
             $cierre_data = [
@@ -251,20 +264,25 @@ class CierreCajaController
 
             // Crear el cierre
             $cierre_id = $this->cierreCaja->crear($cierre_data);
-            
+
             if (!$cierre_id) {
                 throw new Exception("Error al crear el cierre de caja");
             }
+
+            // ¡PASO CRÍTICO! Marcar ventas como cerradas en caja
+            $ventas_cerradas = $this->marcarVentasComoCerradas($fecha);
+
+            error_log("Cierre de caja: Marcadas $ventas_cerradas ventas como cerradas para la fecha $fecha");
 
             $this->db->commit();
 
             return [
                 "success" => true,
-                "message" => "Cierre de caja creado exitosamente",
+                "message" => "Cierre de caja creado exitosamente. $ventas_cerradas ventas marcadas como cerradas.",
                 "cierre_id" => $cierre_id,
+                "ventas_cerradas" => $ventas_cerradas,
                 "data" => $cierre_data
             ];
-
         } catch (Exception $e) {
             $this->db->rollBack();
             return [
@@ -272,6 +290,23 @@ class CierreCajaController
                 "message" => "Error al crear cierre de caja: " . $e->getMessage()
             ];
         }
+    }
+
+    // NUEVO MÉTODO: Marcar ventas como cerradas
+    private function marcarVentasComoCerradas($fecha)
+    {
+        $query = "UPDATE ventas 
+                  SET cerrada_en_caja = TRUE 
+                  WHERE DATE(fecha_hora) = :fecha 
+                  AND estado = 'completada'
+                  AND cerrada_en_caja = FALSE
+                  RETURNING id";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bindParam(":fecha", $fecha);
+        $stmt->execute();
+
+        return $stmt->rowCount();
     }
 
     public function listarCierres($limit = 30)
@@ -289,7 +324,7 @@ class CierreCajaController
                     $cierre['total_bs']
                 );
                 $cierre['fecha_formateada'] = date('d/m/Y', strtotime($cierre['fecha']));
-                
+
                 // Calcular total general
                 $cierre['total_efectivo_usd'] = $cierre['efectivo_usd'] + $cierre['efectivo_bs_usd'];
                 $cierre['total_efectivo_bs'] = $cierre['efectivo_bs'] + $cierre['efectivo_bs_bs'];
@@ -311,7 +346,7 @@ class CierreCajaController
     {
         try {
             $cierre = $this->cierreCaja->obtenerPorId($id);
-            
+
             if (!$cierre) {
                 return [
                     "success" => false,
@@ -334,7 +369,6 @@ class CierreCajaController
                     'reporte' => $reporte
                 ]
             ];
-
         } catch (Exception $e) {
             return [
                 "success" => false,
@@ -352,13 +386,13 @@ class CierreCajaController
     {
         try {
             $datos_dia = $this->obtenerDatosDia();
-            
+
             if (!$datos_dia['success']) {
                 return $datos_dia;
             }
 
             $data = $datos_dia['data'];
-            
+
             // Formatear para mostrar
             $resumen = [
                 'fecha' => $data['fecha'],
@@ -385,12 +419,32 @@ class CierreCajaController
                 "success" => true,
                 "data" => $resumen
             ];
-
         } catch (Exception $e) {
             return [
                 "success" => false,
                 "message" => "Error al obtener resumen del día: " . $e->getMessage()
             ];
+        }
+    }
+
+    // NUEVO MÉTODO: Verificar si hay ventas activas hoy
+    public function hayVentasActivasHoy()
+    {
+        try {
+            $query = "SELECT COUNT(*) as total 
+                      FROM ventas 
+                      WHERE estado = 'completada'
+                      AND DATE(fecha_hora) = CURRENT_DATE
+                      AND cerrada_en_caja = FALSE";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return $resultado['total'] > 0;
+        } catch (Exception $e) {
+            error_log("Error al verificar ventas activas: " . $e->getMessage());
+            return false;
         }
     }
 }

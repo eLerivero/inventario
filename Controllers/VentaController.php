@@ -448,4 +448,116 @@ class VentaController
         ];
     }
 }
+
+
+    // Método para obtener ventas activas del día
+    public function obtenerVentasActivasHoy()
+    {
+        try {
+            $query = "SELECT v.*, c.nombre as cliente_nombre, tp.nombre as tipo_pago_nombre
+                  FROM ventas v
+                  LEFT JOIN clientes c ON v.cliente_id = c.id
+                  LEFT JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
+                  WHERE v.estado = 'completada'
+                  AND DATE(v.fecha_hora) = CURRENT_DATE
+                  AND v.cerrada_en_caja = FALSE
+                  ORDER BY v.fecha_hora DESC";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $ventas = $stmt->fetchAll();
+
+            // Formatear cada venta para mostrar precios
+            foreach ($ventas as &$venta) {
+                $venta['total_formateado_usd'] = TasaCambioHelper::formatearUSD($venta['total']);
+                $venta['total_formateado_bs'] = TasaCambioHelper::formatearBS($venta['total_bs']);
+                $venta['fecha_formateada'] = date('d/m/Y H:i', strtotime($venta['fecha_hora']));
+            }
+
+            return [
+                "success" => true,
+                "data" => $ventas,
+                "total_ventas" => count($ventas)
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener ventas activas: " . $e->getMessage()
+            ];
+        }
+    }
+
+    // Método para obtener resumen del día (para dashboard)
+    public function obtenerResumenHoy()
+    {
+        try {
+            $query = "SELECT 
+                    COUNT(*) as ventas_hoy,
+                    SUM(total) as total_usd_hoy,
+                    SUM(total_bs) as total_bs_hoy,
+                    COUNT(DISTINCT cliente_id) as clientes_hoy,
+                    MIN(fecha_hora) as primera_venta,
+                    MAX(fecha_hora) as ultima_venta
+                  FROM ventas 
+                  WHERE estado = 'completada'
+                  AND DATE(fecha_hora) = CURRENT_DATE
+                  AND cerrada_en_caja = FALSE";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $resumen = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Formatear valores
+            if ($resumen) {
+                $resumen['total_usd_hoy_formateado'] = TasaCambioHelper::formatearUSD($resumen['total_usd_hoy'] ?? 0);
+                $resumen['total_bs_hoy_formateado'] = TasaCambioHelper::formatearBS($resumen['total_bs_hoy'] ?? 0);
+
+                if ($resumen['primera_venta']) {
+                    $resumen['primera_venta_formateada'] = date('H:i', strtotime($resumen['primera_venta']));
+                }
+                if ($resumen['ultima_venta']) {
+                    $resumen['ultima_venta_formateada'] = date('H:i', strtotime($resumen['ultima_venta']));
+                }
+            }
+
+            return [
+                "success" => true,
+                "data" => $resumen
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener resumen del día: " . $e->getMessage()
+            ];
+        }
+    }
+
+    // NUEVO: Verificar si hay ventas activas
+    public function hayVentasActivas()
+    {
+        try {
+            $query = "SELECT COUNT(*) as total 
+                  FROM ventas 
+                  WHERE estado = 'completada'
+                  AND DATE(fecha_hora) = CURRENT_DATE
+                  AND cerrada_en_caja = FALSE";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            return [
+                "success" => true,
+                "hay_ventas" => ($resultado['total'] > 0),
+                "total_ventas" => $resultado['total']
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al verificar ventas activas: " . $e->getMessage()
+            ];
+        }
+    }
+
+
 }

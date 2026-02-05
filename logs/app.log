@@ -170,3 +170,34 @@
 [2026-01-29 19:08:44] [DEBUG] Todas las categorías obtenidas {"total":4}
 [2026-01-29 19:08:46] [DEBUG] Todas las categorías obtenidas {"total":4}
 [2026-01-29 19:10:05] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-02-04 09:53:42] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active (started from C:\wamp64\www\inventario\config\Config.php on line 146) en C:\wamp64\www\inventario\index.php línea 349 
+[2026-02-04 13:54:42] Intento de login - Usuario: admin
+[2026-02-04 13:54:42] Intentando autenticar usuario: admin
+[2026-02-04 13:54:42] AuthController: AuthController inicializado
+[2026-02-04 13:54:42] Username recibido: admin
+[2026-02-04 13:54:42] Password recibido: @dm...
+[2026-02-04 13:54:42] AuthController: Iniciando login para: admin
+[2026-02-04 13:54:42] AuthController: Username recibido: admin
+[2026-02-04 13:54:42] AuthController: Password recibido (primeros 3 chars): @dm...
+[2026-02-04 13:54:42] AuthController: Password completo: @dmin123.
+[2026-02-04 13:54:42] AuthController: Buscando usuario por username: admin
+[2026-02-04 13:54:42] AuthController: Usuario encontrado: {"id":1,"username":"admin","activo":true,"hash_length":60}
+[2026-02-04 13:54:42] AuthController: Hash en BD: $2y$10$xuyfNI4CNFy1YZ7ECE/jp.NV87gbUuFwBnezJZM2wfdck5pQ1Ufd.
+[2026-02-04 13:54:42] AuthController: Password a verificar: @dmin123.
+[2026-02-04 13:54:42] AuthController: Verificando contraseña...
+[2026-02-04 13:54:42] AuthController: === PRUEBA DE VERIFICACIÓN ===
+[2026-02-04 13:54:42] AuthController: password_verify resultado: TRUE
+[2026-02-04 13:54:42] AuthController: ✓ Contraseña verificada correctamente
+[2026-02-04 13:54:42] AuthController: Actualizando último login para usuario ID: 1
+[2026-02-04 13:54:42] AuthController: Login exitoso para: admin
+[2026-02-04 13:54:42] Resultado del login: {"success":true,"user":{"id":1,"username":"admin","nombre":"Administrador","email":"admin@inventario.com","rol":"admin"}}
+[2026-02-04 13:54:42] Login exitoso para usuario: admin
+[2026-02-04 10:42:34] [ERROR] Excepción no capturada: Class "Venta" not found {"file":"C:\\wamp64\\www\\inventario\\Controllers\\DashboardController.php","line":18,"trace":"#0 C:\\wamp64\\www\\inventario\\Views\\dashboard\\index.php(20): DashboardController->__construct(Object(PDO))\n#1 {main}"}
+[2026-02-04 10:58:44] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-02-04 14:59:03] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-02-04 14:59:06] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-02-04 14:59:37] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-02-04 14:59:40] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-02-04 14:59:43] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-02-04 15:00:19] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-02-04 15:00:21] [DEBUG] Todas las categorías obtenidas {"total":4}

@@ -101,7 +101,6 @@ class CierreCaja
         return false;
     }
 
-    // MÉTODO FALTANTE: obtenerPorId
     public function obtenerPorId($id)
     {
         $query = "SELECT cc.*, u.nombre as usuario_nombre, u.username as usuario_username 
@@ -174,9 +173,9 @@ class CierreCaja
             if (!$cierre) {
                 return [];
             }
-            
+
             $fecha = $cierre['fecha'];
-            
+
             // Usar la función SQL existente si está disponible, o hacer la consulta manual
             $query = "SELECT 
                         COALESCE(cat.nombre, 'Sin categoría') as categoria_nombre,
@@ -220,6 +219,7 @@ class CierreCaja
                   LEFT JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
                   WHERE v.estado = 'completada' 
                   AND DATE(v.fecha_hora) = :fecha
+                  AND v.cerrada_en_caja = FALSE  -- ← NUEVO: solo ventas no cerradas
                   ORDER BY v.fecha_hora DESC";
 
         $stmt = $this->conn->prepare($query);
@@ -234,7 +234,125 @@ class CierreCaja
         return $this->obtenerCierreHoy() !== false;
     }
 
-    // MÉTODO ADICIONAL: obtenerCierresPorRango
+    // NUEVO: Obtener ventas activas (para dashboard)
+    public function obtenerVentasActivasHoy()
+    {
+        $query = "SELECT v.*, c.nombre as cliente_nombre, tp.nombre as tipo_pago_nombre
+                  FROM ventas v
+                  LEFT JOIN clientes c ON v.cliente_id = c.id
+                  LEFT JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
+                  WHERE v.estado = 'completada'
+                  AND DATE(v.fecha_hora) = CURRENT_DATE
+                  AND v.cerrada_en_caja = FALSE
+                  ORDER BY v.fecha_hora DESC
+                  LIMIT 20";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    // NUEVO: Obtener estadísticas de ventas activas
+    public function obtenerEstadisticasActivasHoy()
+    {
+        $query = "SELECT 
+                    COUNT(*) as ventas_hoy,
+                    SUM(v.total) as total_usd_hoy,
+                    SUM(v.total_bs) as total_bs_hoy,
+                    COUNT(DISTINCT v.cliente_id) as clientes_hoy,
+                    MIN(v.fecha_hora) as primera_venta,
+                    MAX(v.fecha_hora) as ultima_venta
+                  FROM ventas v
+                  WHERE v.estado = 'completada'
+                  AND DATE(v.fecha_hora) = CURRENT_DATE
+                  AND v.cerrada_en_caja = FALSE";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // NUEVO: Marcar ventas como cerradas (para reinicio de contadores)
+    public function marcarVentasComoCerradas($fecha)
+    {
+        $query = "UPDATE ventas 
+                  SET cerrada_en_caja = TRUE 
+                  WHERE DATE(fecha_hora) = :fecha 
+                  AND estado = 'completada'
+                  AND cerrada_en_caja = FALSE
+                  RETURNING id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":fecha", $fecha);
+
+        if ($stmt->execute()) {
+            return $stmt->rowCount();
+        }
+        return 0;
+    }
+
+    // NUEVO: Verificar si hay ventas activas hoy
+    public function hayVentasActivasHoy()
+    {
+        $query = "SELECT COUNT(*) as total 
+                  FROM ventas 
+                  WHERE estado = 'completada'
+                  AND DATE(fecha_hora) = CURRENT_DATE
+                  AND cerrada_en_caja = FALSE";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return ($resultado['total'] > 0);
+    }
+
+    // NUEVO: Obtener resumen rápido del día (para dashboard)
+    public function obtenerResumenRapidoHoy()
+    {
+        $query = "SELECT 
+                    COUNT(*) as ventas_hoy,
+                    SUM(total) as total_usd_hoy,
+                    SUM(total_bs) as total_bs_hoy,
+                    COUNT(DISTINCT cliente_id) as clientes_hoy,
+                    (SELECT COUNT(*) FROM ventas WHERE DATE(fecha_hora) = CURRENT_DATE 
+                     AND estado != 'completada' AND cerrada_en_caja = FALSE) as ventas_pendientes
+                  FROM ventas 
+                  WHERE estado = 'completada'
+                  AND DATE(fecha_hora) = CURRENT_DATE
+                  AND cerrada_en_caja = FALSE";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // NUEVO: Obtener cierres por rango con ventas cerradas
+    public function obtenerCierresConVentasCerradas($fecha_inicio, $fecha_fin)
+    {
+        $query = "SELECT 
+                    cc.*,
+                    u.nombre as usuario_nombre,
+                    (SELECT COUNT(*) FROM ventas v 
+                     WHERE DATE(v.fecha_hora) = cc.fecha 
+                     AND v.cerrada_en_caja = TRUE) as ventas_cerradas,
+                    (SELECT SUM(v.total_bs) FROM ventas v 
+                     WHERE DATE(v.fecha_hora) = cc.fecha 
+                     AND v.cerrada_en_caja = TRUE) as total_bs_cerradas
+                  FROM " . $this->table . " cc
+                  JOIN usuarios u ON cc.usuario_id = u.id
+                  WHERE cc.fecha BETWEEN :fecha_inicio AND :fecha_fin
+                  AND cc.estado = 'completado'
+                  ORDER BY cc.fecha DESC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":fecha_inicio", $fecha_inicio);
+        $stmt->bindParam(":fecha_fin", $fecha_fin);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
     public function obtenerCierresPorRango($fecha_inicio, $fecha_fin)
     {
         $query = "SELECT cc.*, u.nombre as usuario_nombre 
@@ -252,17 +370,15 @@ class CierreCaja
         return $stmt->fetchAll();
     }
 
-    // MÉTODO ADICIONAL: eliminar
     public function eliminar($id)
     {
         $query = "DELETE FROM " . $this->table . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $id);
-        
+
         return $stmt->execute();
     }
 
-    // MÉTODO ADICIONAL: actualizar
     public function actualizar($id, $data)
     {
         $query = "UPDATE " . $this->table . " 
@@ -279,7 +395,6 @@ class CierreCaja
         return $stmt->execute();
     }
 
-    // MÉTODO ADICIONAL: obtenerEstadisticas
     public function obtenerEstadisticas()
     {
         $query = "SELECT 
@@ -297,5 +412,107 @@ class CierreCaja
         $stmt->execute();
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // NUEVO: Obtener ventas por tipo de pago del día (activas)
+    public function obtenerVentasPorTipoPagoHoy()
+    {
+        $query = "SELECT 
+                    tp.nombre as tipo_pago,
+                    COUNT(v.id) as cantidad_ventas,
+                    SUM(v.total) as total_usd,
+                    SUM(v.total_bs) as total_bs
+                  FROM ventas v
+                  JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
+                  WHERE v.estado = 'completada'
+                  AND DATE(v.fecha_hora) = CURRENT_DATE
+                  AND v.cerrada_en_caja = FALSE
+                  GROUP BY tp.nombre
+                  ORDER BY SUM(v.total_bs) DESC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    // NUEVO: Verificar estado de caja actual
+    public function obtenerEstadoCajaActual()
+    {
+        $estado = [
+            'hay_cierre_hoy' => false,
+            'ventas_activas' => 0,
+            'total_activo_usd' => 0,
+            'total_activo_bs' => 0,
+            'ultima_venta' => null
+        ];
+
+        // Verificar si hay cierre hoy
+        $cierre_hoy = $this->obtenerCierreHoy();
+        if ($cierre_hoy) {
+            $estado['hay_cierre_hoy'] = true;
+            $estado['cierre_id'] = $cierre_hoy['id'];
+            $estado['hora_cierre'] = $cierre_hoy['created_at'];
+        }
+
+        // Obtener ventas activas del día
+        $ventas_activas = $this->obtenerVentasActivasHoy();
+        $estado['ventas_activas'] = count($ventas_activas);
+
+        // Calcular totales
+        foreach ($ventas_activas as $venta) {
+            $estado['total_activo_usd'] += $venta['total'];
+            $estado['total_activo_bs'] += $venta['total_bs'];
+
+            // Obtener última venta
+            if (!$estado['ultima_venta'] || strtotime($venta['fecha_hora']) > strtotime($estado['ultima_venta'])) {
+                $estado['ultima_venta'] = $venta['fecha_hora'];
+            }
+        }
+
+        // Formatear última venta
+        if ($estado['ultima_venta']) {
+            $estado['ultima_venta_formateada'] = date('H:i', strtotime($estado['ultima_venta']));
+        }
+
+        return $estado;
+    }
+
+    // NUEVO: Reiniciar cierre (solo para administradores, en caso de error)
+    public function reiniciarCierre($fecha)
+    {
+        $this->conn->beginTransaction();
+
+        try {
+            // 1. Eliminar el cierre
+            $query1 = "DELETE FROM " . $this->table . " WHERE fecha = :fecha";
+            $stmt1 = $this->conn->prepare($query1);
+            $stmt1->bindParam(":fecha", $fecha);
+            $stmt1->execute();
+
+            // 2. Desmarcar ventas como cerradas
+            $query2 = "UPDATE ventas 
+                      SET cerrada_en_caja = FALSE 
+                      WHERE DATE(fecha_hora) = :fecha 
+                      AND estado = 'completada'";
+
+            $stmt2 = $this->conn->prepare($query2);
+            $stmt2->bindParam(":fecha", $fecha);
+            $stmt2->execute();
+            $ventas_reiniciadas = $stmt2->rowCount();
+
+            $this->conn->commit();
+
+            return [
+                'success' => true,
+                'ventas_reiniciadas' => $ventas_reiniciadas,
+                'message' => "Cierre reiniciado exitosamente. $ventas_reiniciadas ventas marcadas como activas."
+            ];
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            return [
+                'success' => false,
+                'message' => "Error al reiniciar cierre: " . $e->getMessage()
+            ];
+        }
     }
 }

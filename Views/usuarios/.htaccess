@@ -1,6 +1,0 @@
-# Views/usuarios/.htaccess
-# Proteger acceso directo a archivos
-<FilesMatch "\.(php|html|htm)$">
-    Order Allow,Deny
-    Allow from all
-</FilesMatch>
