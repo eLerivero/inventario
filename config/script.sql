@@ -1271,6 +1271,21 @@ GROUP BY p.id, p.codigo_sku, p.nombre, c.nombre
 ORDER BY total_vendido DESC, total_ingresos_usd DESC
 LIMIT 10;
 
+-- 1. Eliminar la restricción UNIQUE
+ALTER TABLE cierres_caja DROP CONSTRAINT IF EXISTS unique_fecha_cierre;
+
+-- 2. Agregar campo numero_cierre
+ALTER TABLE cierres_caja ADD COLUMN IF NOT EXISTS numero_cierre VARCHAR(50);
+CREATE INDEX IF NOT EXISTS idx_cierres_caja_numero ON cierres_caja(numero_cierre);
+
+-- 3. Actualizar cierres existentes con números
+UPDATE cierres_caja 
+SET numero_cierre = 'CC-' || TO_CHAR(fecha, 'YYYYMMDD') || '-001'
+WHERE numero_cierre IS NULL;
+
+-- 4. Agregar índice compuesto para mejor rendimiento
+CREATE INDEX IF NOT EXISTS idx_cierres_caja_fecha_creado ON cierres_caja(fecha, created_at DESC);
+
 -- MENSAJE FINAL ACTUALIZADO
 DO $$
 DECLARE

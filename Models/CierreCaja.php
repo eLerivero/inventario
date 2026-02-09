@@ -41,10 +41,63 @@ class CierreCaja
         $this->conn = $db;
     }
 
-    public function crear($data)
+    public function obtenerReporteDetalladoPorVentas($ventas_ids_array)
     {
+        try {
+            if (empty($ventas_ids_array)) {
+                return [];
+            }
+
+            // Convertir array de IDs a string
+            if (is_array($ventas_ids_array)) {
+                $ventas_ids = implode(',', array_map('intval', $ventas_ids_array));
+            } else if (is_string($ventas_ids_array) && strpos($ventas_ids_array, '{') === 0) {
+                // Si es un string en formato PostgreSQL array, limpiarlo
+                $ventas_ids = str_replace(['{', '}'], '', $ventas_ids_array);
+            } else {
+                $ventas_ids = $ventas_ids_array;
+            }
+
+            $query = "SELECT 
+                        COALESCE(cat.nombre, 'Sin categoría') as categoria_nombre,
+                        p.nombre as producto_nombre,
+                        SUM(dv.cantidad) as cantidad_vendida,
+                        AVG(dv.precio_unitario_bs) as precio_unitario_bs,
+                        SUM(dv.subtotal_bs) as subtotal_bs,
+                        AVG(dv.precio_unitario) as precio_unitario_usd,
+                        SUM(dv.subtotal) as subtotal_usd,
+                        tp.nombre as tipo_pago,
+                        cl.nombre as cliente_nombre,
+                        v.numero_venta,
+                        v.fecha_hora
+                      FROM detalle_ventas dv
+                      JOIN ventas v ON dv.venta_id = v.id
+                      JOIN productos p ON dv.producto_id = p.id
+                      LEFT JOIN categorias cat ON p.categoria_id = cat.id
+                      JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
+                      JOIN clientes cl ON v.cliente_id = cl.id
+                      WHERE v.id IN ($ventas_ids)
+                      AND v.estado = 'completada'
+                      GROUP BY cat.nombre, p.nombre, tp.nombre, cl.nombre, v.numero_venta, v.fecha_hora
+                      ORDER BY v.fecha_hora DESC, cat.nombre, SUM(dv.subtotal_bs) DESC";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute();
+
+            return $stmt->fetchAll();
+        } catch (Exception $e) {
+            error_log("Error al obtener reporte detallado por ventas: " . $e->getMessage());
+            return [];
+        }
+    }
+
+     public function crear($data)
+    {
+        // Generar número de cierre único
+        $numero_cierre = $this->generarNumeroCierre();
+        
         $query = "INSERT INTO " . $this->table . " 
-                  (fecha, usuario_id, total_ventas, total_unidades, total_usd, total_bs,
+                  (numero_cierre, fecha, usuario_id, total_ventas, total_unidades, total_usd, total_bs,
                    efectivo_usd, efectivo_bs_usd, transferencia_usd, pago_movil_usd,
                    tarjeta_debito_usd, tarjeta_credito_usd, divisa_usd, credito_usd,
                    efectivo_bs, efectivo_bs_bs, transferencia_bs, pago_movil_bs,
@@ -52,7 +105,7 @@ class CierreCaja
                    resumen_categorias, resumen_productos, resumen_clientes,
                    ventas_ids, observaciones, estado) 
                   VALUES 
-                  (:fecha, :usuario_id, :total_ventas, :total_unidades, :total_usd, :total_bs,
+                  (:numero_cierre, :fecha, :usuario_id, :total_ventas, :total_unidades, :total_usd, :total_bs,
                    :efectivo_usd, :efectivo_bs_usd, :transferencia_usd, :pago_movil_usd,
                    :tarjeta_debito_usd, :tarjeta_credito_usd, :divisa_usd, :credito_usd,
                    :efectivo_bs, :efectivo_bs_bs, :transferencia_bs, :pago_movil_bs,
@@ -63,13 +116,16 @@ class CierreCaja
 
         $stmt = $this->conn->prepare($query);
 
-        // Bindear parámetros
+        // Bindear todos los parámetros - CORREGIDO
+        $stmt->bindParam(":numero_cierre", $numero_cierre);
         $stmt->bindParam(":fecha", $data['fecha']);
         $stmt->bindParam(":usuario_id", $data['usuario_id']);
-        $stmt->bindParam(":total_ventas", $data['total_ventas']);
-        $stmt->bindParam(":total_unidades", $data['total_unidades']);
+        $stmt->bindParam(":total_ventas", $data['total_ventas'], PDO::PARAM_INT);
+        $stmt->bindParam(":total_unidades", $data['total_unidades'], PDO::PARAM_INT);
         $stmt->bindParam(":total_usd", $data['total_usd']);
         $stmt->bindParam(":total_bs", $data['total_bs']);
+        
+        // Totales USD
         $stmt->bindParam(":efectivo_usd", $data['efectivo_usd']);
         $stmt->bindParam(":efectivo_bs_usd", $data['efectivo_bs_usd']);
         $stmt->bindParam(":transferencia_usd", $data['transferencia_usd']);
@@ -78,6 +134,8 @@ class CierreCaja
         $stmt->bindParam(":tarjeta_credito_usd", $data['tarjeta_credito_usd']);
         $stmt->bindParam(":divisa_usd", $data['divisa_usd']);
         $stmt->bindParam(":credito_usd", $data['credito_usd']);
+        
+        // Totales BS
         $stmt->bindParam(":efectivo_bs", $data['efectivo_bs']);
         $stmt->bindParam(":efectivo_bs_bs", $data['efectivo_bs_bs']);
         $stmt->bindParam(":transferencia_bs", $data['transferencia_bs']);
@@ -86,9 +144,13 @@ class CierreCaja
         $stmt->bindParam(":tarjeta_credito_bs", $data['tarjeta_credito_bs']);
         $stmt->bindParam(":divisa_bs", $data['divisa_bs']);
         $stmt->bindParam(":credito_bs", $data['credito_bs']);
+        
+        // Resúmenes JSON
         $stmt->bindParam(":resumen_categorias", $data['resumen_categorias']);
         $stmt->bindParam(":resumen_productos", $data['resumen_productos']);
         $stmt->bindParam(":resumen_clientes", $data['resumen_clientes']);
+        
+        // Ventas IDs y observaciones
         $stmt->bindParam(":ventas_ids", $data['ventas_ids']);
         $stmt->bindParam(":observaciones", $data['observaciones']);
         $stmt->bindParam(":estado", $data['estado']);
@@ -98,10 +160,52 @@ class CierreCaja
             return $result['id'];
         }
 
+        // Para debug
+        error_log("Error al crear cierre: " . print_r($stmt->errorInfo(), true));
         return false;
     }
 
-    public function obtenerPorId($id)
+     /**
+     * Generar número de cierre único
+     */
+    private function generarNumeroCierre()
+    {
+        $fecha = date('Y-m-d');
+        
+        // Contar cierres del día
+        $query = "SELECT COUNT(*) as total 
+                  FROM " . $this->table . " 
+                  WHERE fecha = :fecha";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":fecha", $fecha);
+        $stmt->execute();
+        
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $secuencia = $result['total'] + 1;
+        
+        return 'CC-' . date('Ymd') . '-' . str_pad($secuencia, 3, '0', STR_PAD_LEFT);
+    }
+
+     private function obtenerSecuenciaDelDia()
+    {
+        $fecha = date('Y-m-d');
+        
+        $query = "SELECT COUNT(*) as total 
+                  FROM " . $this->table . " 
+                  WHERE fecha = :fecha";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":fecha", $fecha);
+        $stmt->execute();
+        
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        return $result['total'] + 1;
+    }
+
+
+     public function obtenerPorId($id)
     {
         $query = "SELECT cc.*, u.nombre as usuario_nombre, u.username as usuario_username 
                   FROM " . $this->table . " cc
@@ -118,11 +222,15 @@ class CierreCaja
         return false;
     }
 
+    /**
+     * Obtener último cierre del día
+     */
     public function obtenerCierreHoy()
     {
         $query = "SELECT * FROM " . $this->table . " 
                   WHERE fecha = CURRENT_DATE 
                   AND estado = 'completado'
+                  ORDER BY created_at DESC 
                   LIMIT 1";
 
         $stmt = $this->conn->prepare($query);
@@ -150,12 +258,12 @@ class CierreCaja
         return false;
     }
 
-    public function listar($limit = 30)
+     public function listar($limit = 30)
     {
         $query = "SELECT cc.*, u.nombre as usuario_nombre 
                   FROM " . $this->table . " cc
                   JOIN usuarios u ON cc.usuario_id = u.id
-                  ORDER BY cc.fecha DESC 
+                  ORDER BY cc.created_at DESC 
                   LIMIT :limit";
 
         $stmt = $this->conn->prepare($query);
@@ -165,51 +273,32 @@ class CierreCaja
         return $stmt;
     }
 
-    public function obtenerReporteDetallado($cierre_id)
+public function obtenerReporteDetallado($cierre_id)
     {
         try {
-            // Primero obtener la fecha del cierre
+            // Primero obtener el cierre
             $cierre = $this->obtenerPorId($cierre_id);
             if (!$cierre) {
                 return [];
             }
 
-            $fecha = $cierre['fecha'];
+            // Convertir ventas_ids de string a array
+            $ventas_ids = [];
+            if (isset($cierre['ventas_ids']) && !empty($cierre['ventas_ids'])) {
+                // Limpiar el string PostgreSQL array
+                $ventas_str = str_replace(['{', '}'], '', $cierre['ventas_ids']);
+                $ventas_ids = explode(',', $ventas_str);
+            }
 
-            // Usar la función SQL existente si está disponible, o hacer la consulta manual
-            $query = "SELECT 
-                        COALESCE(cat.nombre, 'Sin categoría') as categoria_nombre,
-                        p.nombre as producto_nombre,
-                        SUM(dv.cantidad) as cantidad_vendida,
-                        AVG(dv.precio_unitario_bs) as precio_unitario_bs,
-                        SUM(dv.subtotal_bs) as subtotal_bs,
-                        AVG(dv.precio_unitario) as precio_unitario_usd,
-                        SUM(dv.subtotal) as subtotal_usd,
-                        tp.nombre as tipo_pago,
-                        cl.nombre as cliente_nombre
-                      FROM detalle_ventas dv
-                      JOIN ventas v ON dv.venta_id = v.id
-                      JOIN productos p ON dv.producto_id = p.id
-                      LEFT JOIN categorias cat ON p.categoria_id = cat.id
-                      JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
-                      JOIN clientes cl ON v.cliente_id = cl.id
-                      WHERE v.estado = 'completada'
-                      AND DATE(v.fecha_hora) = :fecha
-                      GROUP BY cat.nombre, p.nombre, tp.nombre, cl.nombre
-                      ORDER BY cat.nombre, SUM(dv.subtotal_bs) DESC";
-
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(":fecha", $fecha);
-            $stmt->execute();
-
-            return $stmt->fetchAll();
+            // Usar el nuevo método
+            return $this->obtenerReporteDetalladoPorVentas($ventas_ids);
         } catch (Exception $e) {
             error_log("Error al obtener reporte detallado: " . $e->getMessage());
             return [];
         }
     }
 
-    public function obtenerVentasDelDia($fecha)
+public function obtenerVentasDelDia($fecha)
     {
         $query = "SELECT v.*, c.nombre as cliente_nombre, c.numero_documento as cliente_documento,
                          u.nombre as vendedor_nombre, tp.nombre as tipo_pago_nombre
@@ -219,7 +308,7 @@ class CierreCaja
                   LEFT JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
                   WHERE v.estado = 'completada' 
                   AND DATE(v.fecha_hora) = :fecha
-                  AND v.cerrada_en_caja = FALSE  -- ← NUEVO: solo ventas no cerradas
+                  AND v.cerrada_en_caja = FALSE
                   ORDER BY v.fecha_hora DESC";
 
         $stmt = $this->conn->prepare($query);
@@ -229,9 +318,35 @@ class CierreCaja
         return $stmt->fetchAll();
     }
 
-    public function existeCierreHoy()
+      public function existeCierreHoy()
     {
-        return $this->obtenerCierreHoy() !== false;
+        $query = "SELECT COUNT(*) as total 
+                  FROM " . $this->table . " 
+                  WHERE fecha = CURRENT_DATE 
+                  AND estado = 'completado'";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result['total'] > 0;
+    }
+
+    /**
+     * Obtener número total de cierres hoy
+     */
+    public function contarCierresHoy()
+    {
+        $query = "SELECT COUNT(*) as total 
+                  FROM " . $this->table . " 
+                  WHERE fecha = CURRENT_DATE 
+                  AND estado = 'completado'";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result['total'];
     }
 
     // NUEVO: Obtener ventas activas (para dashboard)
@@ -514,5 +629,9 @@ class CierreCaja
                 'message' => "Error al reiniciar cierre: " . $e->getMessage()
             ];
         }
+    }
+
+    public function CierreCajaVentas(){
+
     }
 }
