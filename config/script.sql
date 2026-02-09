@@ -1271,21 +1271,77 @@ GROUP BY p.id, p.codigo_sku, p.nombre, c.nombre
 ORDER BY total_vendido DESC, total_ingresos_usd DESC
 LIMIT 10;
 
--- 1. Eliminar la restricción UNIQUE
-ALTER TABLE cierres_caja DROP CONSTRAINT IF EXISTS unique_fecha_cierre;
+-- Si necesitas recrear completamente la tabla
+DROP TABLE IF EXISTS cierres_caja CASCADE;
 
--- 2. Agregar campo numero_cierre
-ALTER TABLE cierres_caja ADD COLUMN IF NOT EXISTS numero_cierre VARCHAR(50);
-CREATE INDEX IF NOT EXISTS idx_cierres_caja_numero ON cierres_caja(numero_cierre);
+CREATE TABLE cierres_caja (
+    id SERIAL PRIMARY KEY,
+    numero_cierre VARCHAR(50),
+    fecha DATE NOT NULL,
+    usuario_id INTEGER NOT NULL,
+    total_ventas INTEGER DEFAULT 0,
+    total_unidades INTEGER DEFAULT 0,
+    total_usd DECIMAL(10,2) DEFAULT 0,
+    total_bs DECIMAL(10,2) DEFAULT 0,
+    
+    -- Totales por tipo de pago en USD
+    efectivo_usd DECIMAL(10,2) DEFAULT 0,
+    efectivo_bs_usd DECIMAL(10,2) DEFAULT 0,
+    transferencia_usd DECIMAL(10,2) DEFAULT 0,
+    pago_movil_usd DECIMAL(10,2) DEFAULT 0,
+    tarjeta_debito_usd DECIMAL(10,2) DEFAULT 0,
+    tarjeta_credito_usd DECIMAL(10,2) DEFAULT 0,
+    divisa_usd DECIMAL(10,2) DEFAULT 0,
+    credito_usd DECIMAL(10,2) DEFAULT 0,
+    
+    -- Totales por tipo de pago en BS
+    efectivo_bs DECIMAL(10,2) DEFAULT 0,
+    efectivo_bs_bs DECIMAL(10,2) DEFAULT 0,
+    transferencia_bs DECIMAL(10,2) DEFAULT 0,
+    pago_movil_bs DECIMAL(10,2) DEFAULT 0,
+    tarjeta_debito_bs DECIMAL(10,2) DEFAULT 0,
+    tarjeta_credito_bs DECIMAL(10,2) DEFAULT 0,
+    divisa_bs DECIMAL(10,2) DEFAULT 0,
+    credito_bs DECIMAL(10,2) DEFAULT 0,
+    
+    -- Resúmenes
+    resumen_categorias JSONB,
+    resumen_productos JSONB,
+    resumen_clientes JSONB,
+    
+    -- IDs de ventas incluidas
+    ventas_ids INTEGER[],
+    
+    observaciones TEXT,
+    estado VARCHAR(20) DEFAULT 'completado',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_cierre_usuario 
+        FOREIGN KEY (usuario_id) 
+        REFERENCES usuarios(id) 
+        ON DELETE RESTRICT
+);
 
--- 3. Actualizar cierres existentes con números
-UPDATE cierres_caja 
-SET numero_cierre = 'CC-' || TO_CHAR(fecha, 'YYYYMMDD') || '-001'
-WHERE numero_cierre IS NULL;
+-- Crear índices
+CREATE INDEX idx_cierres_caja_fecha ON cierres_caja(fecha);
+CREATE INDEX idx_cierres_caja_numero ON cierres_caja(numero_cierre);
+CREATE INDEX idx_cierres_caja_usuario ON cierres_caja(usuario_id);
+CREATE INDEX idx_cierres_caja_estado ON cierres_caja(estado);
+CREATE INDEX idx_cierres_caja_created ON cierres_caja(created_at);
 
--- 4. Agregar índice compuesto para mejor rendimiento
-CREATE INDEX IF NOT EXISTS idx_cierres_caja_fecha_creado ON cierres_caja(fecha, created_at DESC);
+-- Trigger para updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
 
+CREATE TRIGGER update_cierres_caja_updated_at 
+    BEFORE UPDATE ON cierres_caja 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 -- MENSAJE FINAL ACTUALIZADO
 DO $$
 DECLARE
