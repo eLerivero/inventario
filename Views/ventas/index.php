@@ -18,6 +18,9 @@ $database = new Database();
 $db = $database->getConnection();
 $controller = new VentaController($db);
 
+// IDs de tipos de pago que son en USD/DIVISAS
+define('TIPOS_PAGO_USD', [2, 7]);
+
 // Manejar acciones
 $action = $_GET['action'] ?? '';
 $id = $_GET['id'] ?? '';
@@ -27,26 +30,18 @@ $error_message = '';
 
 // Procesar cambio de estado
 if ($action === 'completar' && $id) {
-    // Verificar token CSRF
-    $token_valido = true; // Temporalmente deshabilitado para pruebas
-
-    if (!$token_valido) {
-        $error_message = "Token de seguridad inválido o expirado. Por favor, recarga la página.";
+    $result = $controller->actualizarEstado($id, 'completada');
+    if ($result['success']) {
+        $success_message = $result['message'];
+        echo '<meta http-equiv="refresh" content="2;url=index.php">';
     } else {
-        $result = $controller->actualizarEstado($id, 'completada');
-        if ($result['success']) {
-            $success_message = $result['message'];
-            // Redirigir después de 2 segundos
-            echo '<meta http-equiv="refresh" content="2;url=index.php">';
-        } else {
-            $error_message = $result['message'];
-        }
+        $error_message = $result['message'];
     }
 }
 
-// Obtener ventas (solo las activas por defecto)
+// Obtener ventas
 $mostrar_todas = isset($_GET['mostrar_todas']) && $_GET['mostrar_todas'] == '1';
-$result = $controller->listar(!$mostrar_todas);  // ¡IMPORTANTE! Solo activas por defecto
+$result = $controller->listar(!$mostrar_todas);
 
 if ($result['success']) {
     $ventas = $result['data'];
@@ -57,15 +52,14 @@ if ($result['success']) {
     $filtro_activas = true;
 }
 
-// Obtener estadísticas del día (solo ventas activas)
+// Estadísticas
 $estadisticas_hoy = $controller->obtenerResumenHoy();
-$stats_hoy = $estadisticas_hoy['success'] ? $estadisticas_hoy['data'] : [];
+$stats_usd = $estadisticas_hoy['success'] ? $estadisticas_hoy['data'] : [];
 
-// Obtener total de ventas completadas en Bs (solo activas)
-$totalActivas = $controller->obtenerTotalVentasCompletadasBs();
-$totales_activos = $totalActivas['success'] ? $totalActivas['data'] : [];
+$stats_precios_fijos = $controller->obtenerTotalPreciosFijosHoy();
+$stats_bs = $stats_precios_fijos['success'] ? $stats_precios_fijos['data'] : [];
 
-// Generar token CSRF para seguridad
+// Token CSRF
 if (!isset($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
@@ -74,169 +68,523 @@ $page_title = "Gestión de Ventas";
 include __DIR__ . '/../layouts/header.php';
 ?>
 
-<!-- Header con Botón de Nueva Venta y Filtros -->
+<!-- ================================================================== -->
+<!-- 🎨 ESTILOS LIMPIOS Y PROFESIONALES -->
+<!-- ================================================================== -->
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    body {
+        background: #f8fafc;
+    }
+    
+    /* Tarjetas elegantes */
+    .card-elegant {
+        background: white;
+        border-radius: 20px;
+        padding: 1.75rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        transition: all 0.2s ease;
+        border: 1px solid rgba(203, 213, 225, 0.3);
+    }
+    
+    .card-elegant:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+        border-color: rgba(148, 163, 184, 0.3);
+    }
+    
+    /* Header limpio */
+    .header-limpio {
+        background: white;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1.5rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    /* Reloj minimalista */
+    .reloj-minimal {
+        background: white;
+        border-radius: 16px;
+        padding: 1.25rem;
+        border: 1px solid #e2e8f0;
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .reloj-minimal i {
+        color: #4f46e5;
+        font-size: 1.5rem;
+    }
+    
+    .reloj-minimal .hora {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #0f172a;
+        line-height: 1;
+        letter-spacing: 2px;
+    }
+    
+    .reloj-minimal .fecha {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin-top: 0.25rem;
+    }
+    
+    /* Tarjetas de estadísticas - Colores originales */
+    .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        border: 1px solid #e2e8f0;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card:hover {
+        border-color: #cbd5e1;
+        background: #fafcfc;
+    }
+    
+    .stat-card-ventas { border-top: 4px solid #4f46e5; }
+    .stat-card-usd { border-top: 4px solid #0d9488; }
+    .stat-card-bs { border-top: 4px solid #b45309; }
+    .stat-card-clientes { border-top: 4px solid #7c3aed; }
+    
+    .stat-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1;
+        margin: 0.75rem 0 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        font-weight: 600;
+    }
+    
+    .stat-detail {
+        font-size: 0.85rem;
+        color: #475569;
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    
+    /* Badges limpios */
+    .badge-limpio {
+        padding: 0.35rem 0.9rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        background: #f1f5f9;
+        color: #334155;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    
+    .badge-usd {
+        background: #e6fffa;
+        color: #0d9488;
+    }
+    
+    .badge-bs {
+        background: #fff7ed;
+        color: #b45309;
+    }
+    
+    .badge-success {
+        background: #dcfce7;
+        color: #059669;
+    }
+    
+    .badge-warning {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    
+    /* Botones limpios */
+    .btn-limpio {
+        padding: 0.6rem 1.2rem;
+        border-radius: 12px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+    
+    .btn-limpio-primary {
+        background: #4f46e5;
+        color: white;
+    }
+    
+    .btn-limpio-primary:hover {
+        background: #4338ca;
+    }
+    
+    .btn-limpio-outline {
+        background: transparent;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+    }
+    
+    .btn-limpio-outline:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+    }
+    
+    .btn-limpio-success {
+        background: #0d9488;
+        color: white;
+    }
+    
+    .btn-limpio-success:hover {
+        background: #0f766e;
+    }
+    
+    /* Tabla limpia */
+    .table-limpia {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+    
+    .table-limpia thead th {
+        background: #f8fafc;
+        color: #334155;
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 1rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .table-limpia tbody tr {
+        background: white;
+        border-radius: 16px;
+        transition: all 0.2s ease;
+    }
+    
+    .table-limpia tbody tr:hover {
+        background: #fafcfc;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    }
+    
+    .table-limpia td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .column-usd {
+        background: #f0fdfa;
+        color: #0d9488;
+        font-weight: 600;
+    }
+    
+    .column-bs {
+        background: #fff7ed;
+        color: #b45309;
+        font-weight: 600;
+    }
+    
+    /* Footer de tabla */
+    .table-footer {
+        background: #f8fafc;
+        border-top: 2px solid #e2e8f0;
+        padding: 1rem;
+    }
+    
+    /* Modal limpio */
+    .modal-limpio .modal-content {
+        border: none;
+        border-radius: 24px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .modal-header-limpio {
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1.5rem;
+    }
+    
+    /* Alertas limpias */
+    .alert-limpio {
+        border: none;
+        border-radius: 16px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        background: white;
+        border-left: 4px solid;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+    
+    .alert-success-limpio {
+        border-left-color: #10b981;
+        background: #f0fdf4;
+    }
+    
+    .alert-info-limpio {
+        border-left-color: #3b82f6;
+        background: #eff6ff;
+    }
+    
+    .alert-warning-limpio {
+        border-left-color: #f59e0b;
+        background: #fffbeb;
+    }
+    
+    /* Filtros */
+    .filtros-limpios {
+        background: white;
+        border-radius: 14px;
+        padding: 0.5rem;
+        border: 1px solid #e2e8f0;
+        display: inline-flex;
+    }
+    
+    .filtro-btn {
+        padding: 0.5rem 1.2rem;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #64748b;
+        transition: all 0.2s ease;
+    }
+    
+    .filtro-btn.active {
+        background: #4f46e5;
+        color: white;
+    }
+    
+    /* Separadores */
+    .separator {
+        height: 1px;
+        background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+        margin: 2rem 0;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .stat-value { font-size: 1.8rem; }
+        .reloj-minimal .hora { font-size: 1.4rem; }
+    }
+</style>
+
+<!-- ================================================================== -->
+<!-- 🕐 BARRA SUPERIOR - FECHA Y HORA MINIMALISTA -->
+<!-- ================================================================== -->
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div class="reloj-minimal">
+        <i class="fas fa-clock" style="color: #4f46e5;"></i>
+        <div>
+            <div class="hora" id="hora-actual"><?php echo date('H:i:s'); ?></div>
+            <div class="fecha" id="fecha-actual">
+                <?php 
+                setlocale(LC_TIME, 'spanish');
+                echo strftime('%A, %d de %B de %Y');
+                ?>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<!-- ================================================================== -->
+<!-- 🎯 HEADER PRINCIPAL -->
+<!-- ================================================================== -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h3 mb-0">
-            <i class="fas fa-shopping-cart me-2"></i>
+        <h1 class="display-6 fw-bold" style="color: #0f172a;">
+            <i class="fas fa-shopping-cart me-3" style="color: #4f46e5;"></i>
             Gestión de Ventas
-            <?php if (!$filtro_activas): ?>
-                <span class="badge bg-secondary ms-2">Mostrando todas</span>
-            <?php else: ?>
-                <span class="badge bg-success ms-2">Solo activas</span>
-            <?php endif; ?>
         </h1>
         <p class="text-muted mb-0">
+            <i class="fas fa-chart-line me-2" style="color: #64748b;"></i>
             <?php if ($filtro_activas): ?>
-                Solo se muestran ventas no cerradas en caja
+                Monitoreo de ventas activas - Pendientes por cierre
             <?php else: ?>
-                Mostrando todas las ventas (activas y cerradas)
+                Historial completo de ventas
             <?php endif; ?>
         </p>
     </div>
-    <div class="d-flex gap-2">
-        <!-- Botón para alternar entre mostrar todas y solo activas -->
-        <?php if ($filtro_activas): ?>
-            <a href="index.php?mostrar_todas=1" class="btn btn-outline-secondary">
-                <i class="fas fa-history me-1"></i> Mostrar Todas
-            </a>
-        <?php else: ?>
-            <a href="index.php" class="btn btn-outline-success">
-                <i class="fas fa-eye me-1"></i> Solo Activas
-            </a>
-        <?php endif; ?>
+    
+    <div class="d-flex gap-3">
+        <!-- Filtros -->
+        <div class="filtros-limpios">
+            <?php if ($filtro_activas): ?>
+                <a href="index.php?mostrar_todas=1" class="filtro-btn text-decoration-none">
+                    <i class="fas fa-history me-1"></i> Historial
+                </a>
+                <span class="filtro-btn active">
+                    <i class="fas fa-eye me-1"></i> Activas
+                </span>
+            <?php else: ?>
+                <span class="filtro-btn active">
+                    <i class="fas fa-history me-1"></i> Todas
+                </span>
+                <a href="index.php" class="filtro-btn text-decoration-none">
+                    <i class="fas fa-eye me-1"></i> Activas
+                </a>
+            <?php endif; ?>
+        </div>
         
-        <a href="crear.php" class="btn btn-success">
-            <i class="fas fa-plus me-1"></i> Nueva Venta
+        <!-- Botón Nueva Venta -->
+        <a href="crear.php" class="btn-limpio btn-limpio-primary text-decoration-none">
+            <i class="fas fa-plus-circle me-2"></i>
+            Nueva Venta
         </a>
     </div>
 </div>
 
-<!-- Alertas Informativas -->
+<!-- ================================================================== -->
+<!-- 📢 ALERTAS -->
+<!-- ================================================================== -->
 <?php if ($mostrar_todas): ?>
-    <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
-        <i class="fas fa-info-circle me-2"></i>
-        <strong>Modo Historial:</strong> Estás viendo todas las ventas (activas y cerradas).
+    <div class="alert-limpio alert-info-limpio d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-info-circle me-3" style="color: #3b82f6;"></i>
+            <span><strong>Modo Historial:</strong> Estás viendo todas las ventas (activas y cerradas)</span>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
 
-<!-- Alertas de Sistema -->
 <?php if (!empty($success_message)): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
-        <?php echo htmlspecialchars($success_message); ?>
-        <?php if ($action === 'completar'): ?>
-            <div class="mt-2">
-                <small>Serás redirigido automáticamente al listado...</small>
-            </div>
-        <?php endif; ?>
+    <div class="alert-limpio alert-success-limpio d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle me-3" style="color: #10b981;"></i>
+            <span><?php echo htmlspecialchars($success_message); ?></span>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
 
 <?php if (!empty($error_message)): ?>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i>
-        <?php echo htmlspecialchars($error_message); ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div class="alert-limpio" style="border-left-color: #ef4444; background: #fef2f2;">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle me-3" style="color: #ef4444;"></i>
+            <span><?php echo htmlspecialchars($error_message); ?></span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
     </div>
 <?php endif; ?>
 
-<!-- Estadísticas Rápidas (Solo Ventas Activas) -->
+<!-- ================================================================== -->
+<!-- 📊 ESTADÍSTICAS - SOLO VENTAS ACTIVAS -->
+<!-- ================================================================== -->
 <?php if ($filtro_activas): ?>
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h5 class="card-title">Ventas Hoy</h5>
-                        <h3><?php echo $stats_hoy['ventas_hoy'] ?? 0; ?></h3>
-                        <small class="opacity-75">Ventas activas hoy</small>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-receipt fa-2x"></i>
-                    </div>
-                </div>
+<div class="row g-4 mb-5">
+    <!-- Ventas Hoy -->
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card stat-card-ventas">
+            <div class="stat-label">
+                <i class="fas fa-receipt me-1"></i> VENTAS HOY
+            </div>
+            <div class="stat-value"><?php echo $stats_usd['ventas_hoy'] ?? 0; ?></div>
+            <div class="stat-detail">
+                <span class="badge-limpio">
+                    <i class="fas fa-check-circle me-1"></i> Completadas hoy
+                </span>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card bg-success text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h5 class="card-title">Ingresos Hoy USD</h5>
-                        <h3><?php echo $stats_hoy['total_usd_hoy_formateado'] ?? '$0.00'; ?></h3>
-                        <small class="opacity-75">Ingresos del día</small>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-dollar-sign fa-2x"></i>
-                    </div>
-                </div>
+    
+    <!-- USD Recibidos -->
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card stat-card-usd">
+            <div class="stat-label">
+                <i class="fas fa-dollar-sign me-1"></i> USD RECIBIDOS
+            </div>
+            <div class="stat-value"><?php echo TasaCambioHelper::formatearUSD($stats_usd['total_usd_hoy'] ?? 0); ?></div>
+            <div class="stat-detail">
+                <?php if (($stats_usd['total_efectivo_usd'] ?? 0) > 0): ?>
+                    <span class="badge-limpio badge-usd">
+                        💵 Efectivo: <?php echo TasaCambioHelper::formatearUSD($stats_usd['total_efectivo_usd']); ?>
+                    </span>
+                <?php endif; ?>
+                <?php if (($stats_usd['total_divisa'] ?? 0) > 0): ?>
+                    <span class="badge-limpio badge-usd">
+                        💶 Divisa: <?php echo TasaCambioHelper::formatearUSD($stats_usd['total_divisa']); ?>
+                    </span>
+                <?php endif; ?>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card bg-warning text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h5 class="card-title">Ingresos Hoy Bs</h5>
-                        <h3><?php echo $stats_hoy['total_bs_hoy_formateado'] ?? 'Bs 0.00'; ?></h3>
-                        <small class="opacity-75">Ingresos del día</small>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-bolt fa-2x"></i>
-                    </div>
-                </div>
+    
+    <!-- Bs Precio Fijo -->
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card stat-card-bs">
+            <div class="stat-label">
+                <i class="fas fa-lock me-1"></i> BS PRECIO FIJO
+            </div>
+            <div class="stat-value"><?php echo $stats_bs['total_bs_precio_fijo_formateado'] ?? 'Bs 0,00'; ?></div>
+            <div class="stat-detail">
+                <span class="badge-limpio badge-bs">
+                    <i class="fas fa-tag me-1"></i>
+                    <?php echo $stats_bs['ventas_con_precio_fijo'] ?? 0; ?> ventas
+                </span>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card bg-info text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h5 class="card-title">Clientes Hoy</h5>
-                        <h3><?php echo $stats_hoy['clientes_hoy'] ?? 0; ?></h3>
-                        <small class="opacity-75">Clientes atendidos hoy</small>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="fas fa-users fa-2x"></i>
-                    </div>
-                </div>
+    
+    <!-- Clientes Hoy -->
+    <div class="col-xl-3 col-md-6">
+        <div class="stat-card stat-card-clientes">
+            <div class="stat-label">
+                <i class="fas fa-users me-1"></i> CLIENTES HOY
+            </div>
+            <div class="stat-value"><?php echo $stats_usd['clientes_hoy'] ?? 0; ?></div>
+            <div class="stat-detail">
+                <span class="badge-limpio">
+                    <i class="fas fa-user-check me-1"></i> Atendidos hoy
+                </span>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Horario de Ventas -->
-<?php if (!empty($stats_hoy['primera_venta_formateada']) && !empty($stats_hoy['ultima_venta_formateada'])): ?>
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="text-center p-3">
-                            <div class="text-muted mb-2">
-                                <i class="fas fa-clock text-primary me-1"></i>
-                                Primera Venta Hoy
-                            </div>
-                            <h4 class="text-primary"><?php echo $stats_hoy['primera_venta_formateada']; ?></h4>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="text-center p-3">
-                            <div class="text-muted mb-2">
-                                <i class="fas fa-clock text-success me-1"></i>
-                                Última Venta Hoy
-                            </div>
-                            <h4 class="text-success"><?php echo $stats_hoy['ultima_venta_formateada']; ?></h4>
-                        </div>
-                    </div>
+<?php if (!empty($stats_usd['primera_venta_formateada']) || !empty($stats_usd['ultima_venta_formateada'])): ?>
+<div class="card-elegant mb-5">
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="d-flex align-items-center gap-4">
+                <div class="bg-light rounded-3 p-3">
+                    <i class="fas fa-sun fa-2x" style="color: #4f46e5;"></i>
+                </div>
+                <div>
+                    <small class="text-muted text-uppercase fw-semibold">Primera Venta</small>
+                    <h3 class="fw-bold mb-0" style="color: #0f172a;">
+                        <?php echo $stats_usd['primera_venta_formateada'] ?? '--:--'; ?>
+                    </h3>
+                    <span class="text-muted small">Inicio de operaciones</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="d-flex align-items-center gap-4">
+                <div class="bg-light rounded-3 p-3">
+                    <i class="fas fa-moon fa-2x" style="color: #0d9488;"></i>
+                </div>
+                <div>
+                    <small class="text-muted text-uppercase fw-semibold">Última Venta</small>
+                    <h3 class="fw-bold mb-0" style="color: #0f172a;">
+                        <?php echo $stats_usd['ultima_venta_formateada'] ?? '--:--'; ?>
+                    </h3>
+                    <span class="text-muted small">Cierre del día</span>
                 </div>
             </div>
         </div>
@@ -245,663 +593,444 @@ include __DIR__ . '/../layouts/header.php';
 <?php endif; ?>
 <?php endif; ?>
 
-<!-- Tabla de Ventas -->
-<div class="card">
-    <div class="card-header">
-        <h5 class="card-title mb-0">
-            <i class="fas fa-list me-2"></i>
-            Lista de Ventas
+<div class="separator"></div>
+
+<!-- ================================================================== -->
+<!-- 📋 TABLA DE VENTAS - DISEÑO LIMPIO -->
+<!-- ================================================================== -->
+<div class="card-elegant">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0" style="color: #0f172a;">
+            <i class="fas fa-list-ul me-2" style="color: #4f46e5;"></i>
+            Listado de Ventas
             <?php if ($filtro_activas): ?>
-                <small class="text-muted ms-2">(Solo ventas activas)</small>
+                <span class="badge-limpio ms-3" style="background: #e6f7e6; color: #059669;">
+                    <i class="fas fa-unlock me-1"></i> Activas
+                </span>
             <?php else: ?>
-                <small class="text-muted ms-2">(Todas las ventas)</small>
+                <span class="badge-limpio ms-3" style="background: #f1f5f9; color: #475569;">
+                    <i class="fas fa-history me-1"></i> Historial Completo
+                </span>
             <?php endif; ?>
-        </h5>
+        </h4>
+        <div class="d-flex gap-2">
+            <span class="badge-limpio badge-usd">
+                <i class="fas fa-dollar-sign me-1"></i> USD Recibido
+            </span>
+            <span class="badge-limpio badge-bs">
+                <i class="fas fa-lock me-1"></i> Bs Precio Fijo
+            </span>
+        </div>
     </div>
-    <div class="card-body">
-        <?php if (empty($ventas) && $filtro_activas): ?>
-            <div class="text-center py-5">
-                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                <h4 class="text-success">¡Todas las ventas han sido cerradas en caja!</h4>
-                <p class="text-muted">No hay ventas activas pendientes de cierre.</p>
-                <div class="mt-4">
-                    <a href="index.php?mostrar_todas=1" class="btn btn-outline-secondary me-2">
-                        <i class="fas fa-history me-1"></i> Ver Historial Completo
-                    </a>
-                    <a href="crear.php" class="btn btn-success">
-                        <i class="fas fa-plus me-1"></i> Crear Nueva Venta
-                    </a>
-                </div>
+    
+    <?php if (empty($ventas) && $filtro_activas): ?>
+        <!-- Estado vacío - Todas cerradas -->
+        <div class="text-center py-5">
+            <div class="bg-light rounded-circle d-inline-flex p-4 mb-4">
+                <i class="fas fa-check-circle fa-4x" style="color: #10b981;"></i>
             </div>
-        <?php elseif (empty($ventas)): ?>
-            <div class="text-center py-5">
-                <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-                <h4 class="text-muted">No hay ventas registradas</h4>
-                <p class="text-muted">Comienza creando tu primera venta.</p>
-                <a href="crear.php" class="btn btn-primary mt-3">
-                    <i class="fas fa-plus me-1"></i> Crear Primera Venta
+            <h4 class="fw-bold mb-3" style="color: #059669;">¡Todas las ventas han sido cerradas!</h4>
+            <p class="text-muted mb-4">No hay ventas activas pendientes de cierre en caja.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="index.php?mostrar_todas=1" class="btn-limpio btn-limpio-outline text-decoration-none">
+                    <i class="fas fa-history me-2"></i>Ver Historial
+                </a>
+                <a href="crear.php" class="btn-limpio btn-limpio-success text-decoration-none">
+                    <i class="fas fa-plus-circle me-2"></i>Nueva Venta
                 </a>
             </div>
-        <?php else: ?>
-            <div class="table-responsive">
-                <table class="table table-striped table-hover" id="tablaVentas">
-                    <thead class="table-dark">
-                        <tr>
-                            <th># Venta</th>
-                            <th>Cliente</th>
-                            <th>Total USD</th>
-                            <th>Total Bs</th>
-                            <th>Tasa del Día</th>
-                            <th>Tipo Pago</th>
-                            <th>Estado</th>
-                            <th>Cierre Caja</th>
-                            <th>Fecha</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php 
-                        $totalVentasUsd = 0;
-                        $totalVentasBs = 0;
-                        $totalActivasUsd = 0;
-                        $totalActivasBs = 0;
-                        $ventasActivas = 0;
-                        $ventasCerradas = 0;
+        </div>
+    <?php elseif (empty($ventas)): ?>
+        <!-- Estado vacío - Sin ventas -->
+        <div class="text-center py-5">
+            <div class="bg-light rounded-circle d-inline-flex p-4 mb-4">
+                <i class="fas fa-shopping-cart fa-4x" style="color: #4f46e5;"></i>
+            </div>
+            <h4 class="fw-bold mb-3" style="color: #334155;">No hay ventas registradas</h4>
+            <p class="text-muted mb-4">Comienza registrando tu primera venta en el sistema.</p>
+            <a href="crear.php" class="btn-limpio btn-limpio-primary text-decoration-none">
+                <i class="fas fa-plus-circle me-2"></i>Crear Primera Venta
+            </a>
+        </div>
+    <?php else: ?>
+        <!-- Tabla -->
+        <div class="table-responsive">
+            <table class="table table-limpia" id="tablaVentas">
+                <thead>
+                    <tr>
+                        <th># Venta</th>
+                        <th>Cliente</th>
+                        <th class="text-center">USD Recibido</th>
+                        <th class="text-center">Bs Precio Fijo</th>
+                        <th>Tasa</th>
+                        <th>Tipo Pago</th>
+                        <th>Estado</th>
+                        <th>Cierre</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php 
+                    $total_usd_recibido = 0;
+                    $total_bs_precio_fijo = 0;
+                    $ventasActivas = 0;
+                    $ventasCerradas = 0;
+                    
+                    foreach ($ventas as $venta):
+                        $es_pago_usd = in_array($venta['tipo_pago_id'] ?? 0, TIPOS_PAGO_USD);
                         
-                        foreach ($ventas as $venta):
-                            $estado_badge = [
-                                'pendiente' => 'bg-warning',
-                                'completada' => 'bg-success',
-                                'cancelada' => 'bg-danger'
-                            ];
-                            $estado_text = [
-                                'pendiente' => 'Pendiente',
-                                'completada' => 'Completada',
-                                'cancelada' => 'Cancelada'
-                            ];
-
-                            // Formatear fecha
-                            $fecha = '';
-                            if (!empty($venta['fecha_hora'])) {
-                                $fecha = Ayuda::formatDate($venta['fecha_hora']);
-                            } elseif (!empty($venta['created_at'])) {
-                                $fecha = Ayuda::formatDate($venta['created_at']);
-                            }
-
-                            // Obtener detalles para verificar si tiene precios fijos
-                            $detalles_venta = [];
-                            try {
-                                $detalles_venta = $controller->obtenerDetalles($venta['id']);
-                            } catch (Exception $e) {
-                                // Si hay error, continuar sin detalles
-                            }
-
-                            // Verificar si hay productos con precio fijo en esta venta
-                            $tiene_precio_fijo = false;
+                        // Calcular total de productos con precio fijo
+                        $detalles_venta = [];
+                        $total_bs_precio_fijo_venta = 0;
+                        
+                        try {
+                            $detalles_venta = $controller->obtenerDetalles($venta['id']);
                             foreach ($detalles_venta as $detalle) {
                                 if (
-                                    isset($detalle['precio_unitario_bs']) &&
-                                    isset($detalle['precio_unitario']) &&
+                                    isset($detalle['precio_unitario_bs']) && 
                                     $detalle['precio_unitario_bs'] > 0 &&
-                                    ($detalle['precio_unitario'] * $venta['tasa_cambio'] != $detalle['precio_unitario_bs'])
+                                    ($detalle['precio_unitario'] * $venta['tasa_cambio']) != $detalle['precio_unitario_bs']
                                 ) {
-                                    $tiene_precio_fijo = true;
-                                    break;
+                                    $total_bs_precio_fijo_venta += ($detalle['precio_unitario_bs'] * $detalle['cantidad']);
                                 }
                             }
-                            
-                            // Verificar estado de cierre
-                            $cerrada_en_caja = isset($venta['cerrada_en_caja']) && $venta['cerrada_en_caja'];
-                            
-                            // Contar ventas activas vs cerradas
-                            if ($cerrada_en_caja) {
-                                $ventasCerradas++;
-                            } else {
-                                $ventasActivas++;
-                            }
-                            
-                            // Acumular totales
-                            $totalVentasUsd += $venta['total'] ?? 0;
-                            $totalVentasBs += $venta['total_bs'] ?? 0;
-                            
-                            if (!$cerrada_en_caja && ($venta['estado'] ?? '') === 'completada') {
-                                $totalActivasUsd += $venta['total'] ?? 0;
-                                $totalActivasBs += $venta['total_bs'] ?? 0;
-                            }
-                        ?>
-                            <tr class="<?php echo $cerrada_en_caja ? 'venta-cerrada' : ($tiene_precio_fijo ? 'table-warning' : ''); ?>">
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <strong>#<?php echo htmlspecialchars($venta['numero_venta'] ?? 'N/A'); ?></strong>
-                                        <?php if ($tiene_precio_fijo): ?>
-                                            <span class="ms-2" title="Esta venta incluye productos con precio fijo en Bs" data-bs-toggle="tooltip">
-                                                <i class="fas fa-lock text-success"></i>
-                                            </span>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
-                                <td>
+                        } catch (Exception $e) {}
+                        
+                        $tiene_precio_fijo = $total_bs_precio_fijo_venta > 0;
+                        $cerrada_en_caja = isset($venta['cerrada_en_caja']) && $venta['cerrada_en_caja'];
+                        
+                        if ($cerrada_en_caja) $ventasCerradas++; else $ventasActivas++;
+                        
+                        if ($es_pago_usd) $total_usd_recibido += $venta['total'] ?? 0;
+                        $total_bs_precio_fijo += $total_bs_precio_fijo_venta;
+                    ?>
+                        <tr style="<?php echo $cerrada_en_caja ? 'opacity: 0.7;' : ''; ?>">
+                            <td>
+                                <span class="fw-semibold">#<?php echo htmlspecialchars($venta['numero_venta'] ?? 'N/A'); ?></span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-user-circle me-2" style="color: #64748b;"></i>
                                     <?php echo htmlspecialchars($venta['cliente_nombre'] ?? 'Cliente no especificado'); ?>
-                                </td>
-                                <td>
-                                    <strong class="text-primary">
-                                        <?php
-                                        if (isset($venta['total_formateado_usd'])) {
-                                            echo $venta['total_formateado_usd'];
-                                        } else {
-                                            echo '$' . number_format($venta['total'] ?? 0, 2);
-                                        }
-                                        ?>
-                                    </strong>
-                                </td>
-                                <td>
-                                    <div class="d-flex flex-column">
-                                        <strong class="text-success">
-                                            <?php
-                                            if (isset($venta['total_formateado_bs'])) {
-                                                echo $venta['total_formateado_bs'];
-                                            } else {
-                                                echo TasaCambioHelper::formatearBS($venta['total_bs'] ?? 0);
-                                            }
-                                            ?>
-                                        </strong>
-                                        <?php if ($tiene_precio_fijo): ?>
-                                            <small class="text-success">
-                                                <i class="fas fa-lock me-1"></i> Incluye precios fijos
-                                            </small>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
-                                <td>
-                                    <small class="text-muted">
-                                        <?php
-                                        // Mostrar la tasa de cambio utilizada en esta venta
-                                        if (isset($venta['tasa_cambio_utilizada'])) {
-                                            echo number_format($venta['tasa_cambio_utilizada'], 2) . ' Bs/$';
-                                        } elseif (isset($venta['tasa_formateada'])) {
-                                            echo $venta['tasa_formateada'];
-                                        } elseif (isset($venta['tasa_cambio'])) {
-                                            echo number_format($venta['tasa_cambio'], 2) . ' Bs/$';
-                                        } else {
-                                            echo 'N/A';
-                                        }
-                                        ?>
-                                    </small>
-                                </td>
-                                <td>
-                                    <?php echo htmlspecialchars($venta['tipo_pago_nombre'] ?? 'No especificado'); ?>
-                                </td>
-                                <td>
-                                    <?php
-                                    $estado = $venta['estado'] ?? 'pendiente';
-                                    $badge_class = $estado_badge[$estado] ?? 'bg-secondary';
-                                    $badge_text = $estado_text[$estado] ?? $estado;
-                                    ?>
-                                    <span class="badge <?php echo $badge_class; ?>">
-                                        <?php echo $badge_text; ?>
+                                </div>
+                            </td>
+                            
+                            <!-- USD Recibido -->
+                            <td class="text-center column-usd">
+                                <?php if ($es_pago_usd): ?>
+                                    <span class="fw-semibold">
+                                        <?php echo TasaCambioHelper::formatearUSD($venta['total'] ?? 0); ?>
                                     </span>
-                                </td>
-                                <td>
-                                    <?php if ($cerrada_en_caja): ?>
-                                        <span class="badge bg-secondary" title="Esta venta ya fue procesada en cierre de caja" data-bs-toggle="tooltip">
-                                            <i class="fas fa-lock me-1"></i> Cerrada
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="badge bg-success" title="Venta activa - Aparecerá en cierre de caja" data-bs-toggle="tooltip">
-                                            <i class="fas fa-unlock me-1"></i> Activa
-                                        </span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php echo $fecha; ?>
-                                </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="ver.php?id=<?php echo $venta['id']; ?>"
-                                            class="btn btn-outline-info"
-                                            title="Ver detalles de la venta"
-                                            data-bs-toggle="tooltip">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        
-                                        <?php if (($venta['estado'] ?? '') === 'pendiente' && !$cerrada_en_caja): ?>
-                                            <button type="button"
-                                                class="btn btn-outline-success"
-                                                title="Completar venta"
+                                    <br>
+                                    <small class="text-muted">
+                                        <?php echo ($venta['tipo_pago_id'] ?? 0) == 2 ? 'Efectivo USD' : 'Divisa'; ?>
+                                    </small>
+                                <?php else: ?>
+                                    <span class="text-muted">—</span>
+                                <?php endif; ?>
+                            </td>
+                            
+                            <!-- Bs Precio Fijo -->
+                            <td class="text-center column-bs">
+                                <?php if ($total_bs_precio_fijo_venta > 0): ?>
+                                    <span class="fw-semibold">
+                                        <?php echo TasaCambioHelper::formatearBS($total_bs_precio_fijo_venta); ?>
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="fas fa-lock"></i> Precio fijo
+                                    </small>
+                                <?php else: ?>
+                                    <span class="text-muted">—</span>
+                                <?php endif; ?>
+                            </td>
+                            
+                            <td>
+                                <span class="badge-limpio">
+                                    <?php 
+                                    $tasa = $venta['tasa_cambio'] ?? $venta['tasa_cambio_utilizada'] ?? 0;
+                                    echo number_format($tasa, 2); ?> Bs/$
+                                </span>
+                            </td>
+                            
+                            <td>
+                                <?php if ($es_pago_usd): ?>
+                                    <span class="badge-limpio badge-usd">
+                                        <i class="fas fa-dollar-sign me-1"></i>
+                                        <?php echo htmlspecialchars($venta['tipo_pago_nombre'] ?? 'USD'); ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge-limpio">
+                                        <?php echo htmlspecialchars($venta['tipo_pago_nombre'] ?? 'N/A'); ?>
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            
+                            <td>
+                                <?php
+                                $estado = $venta['estado'] ?? 'pendiente';
+                                if ($estado == 'completada'): ?>
+                                    <span class="badge-limpio badge-success">
+                                        <i class="fas fa-check-circle me-1"></i> Completada
+                                    </span>
+                                <?php elseif ($estado == 'pendiente'): ?>
+                                    <span class="badge-limpio badge-warning">
+                                        <i class="fas fa-clock me-1"></i> Pendiente
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge-limpio" style="background: #fee2e2; color: #dc2626;">
+                                        <i class="fas fa-times-circle me-1"></i> Cancelada
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            
+                            <td>
+                                <?php if ($cerrada_en_caja): ?>
+                                    <span class="badge-limpio" style="background: #f1f5f9; color: #475569;">
+                                        <i class="fas fa-lock me-1"></i> Cerrada
+                                    </span>
+                                <?php else: ?>
+                                    <span class="badge-limpio" style="background: #e6f7e6; color: #059669;">
+                                        <i class="fas fa-unlock me-1"></i> Activa
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+                            
+                            <td>
+                                <div style="line-height: 1.4;">
+                                    <i class="fas fa-calendar-alt me-1" style="color: #64748b;"></i>
+                                    <?php 
+                                    $fecha = !empty($venta['fecha_hora']) ? Ayuda::formatDate($venta['fecha_hora']) : 
+                                             (!empty($venta['created_at']) ? Ayuda::formatDate($venta['created_at']) : '');
+                                    echo $fecha;
+                                    ?>
+                                    <br>
+                                    <small class="text-muted">
+                                        <?php echo date('H:i', strtotime($venta['fecha_hora'] ?? $venta['created_at'] ?? '')); ?>
+                                    </small>
+                                </div>
+                            </td>
+                            
+                            <td>
+                                <div class="btn-group">
+                                    <a href="ver.php?id=<?php echo $venta['id']; ?>" 
+                                       class="btn btn-sm btn-outline-secondary border-0"
+                                       style="padding: 0.5rem 0.8rem;"
+                                       data-bs-toggle="tooltip" 
+                                       title="Ver detalles">
+                                        <i class="fas fa-eye" style="color: #4f46e5;"></i>
+                                    </a>
+                                    
+                                    <?php if (($venta['estado'] ?? '') === 'pendiente' && !$cerrada_en_caja): ?>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-success border-0"
+                                                style="padding: 0.5rem 0.8rem;"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#modalCompletar"
                                                 data-id="<?php echo $venta['id']; ?>"
                                                 data-numero="<?php echo $venta['numero_venta'] ?? ''; ?>"
-                                                <?php echo $tiene_precio_fijo ? 'data-precio-fijo="true"' : ''; ?>>
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        <?php elseif ($cerrada_en_caja): ?>
-                                            <button type="button"
-                                                class="btn btn-outline-secondary"
-                                                title="Venta cerrada en caja - No se puede modificar"
-                                                data-bs-toggle="tooltip" disabled>
-                                                <i class="fas fa-lock"></i>
-                                            </button>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                    <tfoot>
-                        <tr class="table-active">
-                            <td colspan="2" class="text-end"><strong>Resumen:</strong></td>
-                            <td>
-                                <strong class="text-primary">$<?php echo number_format($totalVentasUsd, 2); ?></strong>
-                                <br>
-                                <small class="text-muted">
-                                    Activas: $<?php echo number_format($totalActivasUsd, 2); ?>
-                                </small>
-                            </td>
-                            <td>
-                                <strong class="text-success"><?php echo TasaCambioHelper::formatearBS($totalVentasBs); ?></strong>
-                                <br>
-                                <small class="text-muted">
-                                    Activas: <?php echo TasaCambioHelper::formatearBS($totalActivasBs); ?>
-                                </small>
-                            </td>
-                            <td colspan="6" class="text-end">
-                                <small class="text-muted">
-                                    <i class="fas fa-unlock text-success me-1"></i>
-                                    Activas: <strong class="text-success"><?php echo $ventasActivas; ?></strong>
-                                    <span class="mx-2">|</span>
-                                    <i class="fas fa-lock text-secondary me-1"></i>
-                                    Cerradas: <strong class="text-secondary"><?php echo $ventasCerradas; ?></strong>
-                                    <span class="mx-2">|</span>
-                                    <i class="fas fa-shopping-cart text-primary me-1"></i>
-                                    Total: <strong class="text-primary"><?php echo count($ventas); ?></strong>
-                                </small>
+                                                <?php echo $tiene_precio_fijo ? 'data-precio-fijo="true"' : ''; ?>
+                                                data-bs-toggle="tooltip"
+                                                title="Completar venta">
+                                            <i class="fas fa-check" style="color: #10b981;"></i>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
-                    </tfoot>
-                </table>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Totales -->
+        <div class="table-footer mt-4 rounded-3">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex gap-4">
+                        <div>
+                            <small class="text-muted d-block">Total USD Recibidos</small>
+                            <span class="fw-bold fs-5" style="color: #0d9488;">
+                                <?php echo TasaCambioHelper::formatearUSD($total_usd_recibido); ?>
+                            </span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Total Bs Precio Fijo</small>
+                            <span class="fw-bold fs-5" style="color: #b45309;">
+                                <?php echo TasaCambioHelper::formatearBS($total_bs_precio_fijo); ?>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                    <span class="badge-limpio me-2">
+                        <i class="fas fa-unlock me-1" style="color: #059669;"></i>
+                        Activas: <strong><?php echo $ventasActivas; ?></strong>
+                    </span>
+                    <span class="badge-limpio me-2">
+                        <i class="fas fa-lock me-1" style="color: #475569;"></i>
+                        Cerradas: <strong><?php echo $ventasCerradas; ?></strong>
+                    </span>
+                    <span class="badge-limpio">
+                        <i class="fas fa-shopping-cart me-1" style="color: #4f46e5;"></i>
+                        Total: <strong><?php echo count($ventas); ?></strong>
+                    </span>
+                </div>
             </div>
-        <?php endif; ?>
-    </div>
+        </div>
+    <?php endif; ?>
 </div>
 
-<!-- Modal Completar Venta -->
+<!-- ================================================================== -->
+<!-- 🎯 MODAL COMPLETAR VENTA - LIMPIO -->
+<!-- ================================================================== -->
 <div class="modal fade" id="modalCompletar" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-check-circle text-success me-2"></i>
-                    Confirmar Completar Venta
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-limpio">
+            <div class="modal-header modal-header-limpio">
+                <h5 class="modal-title fw-bold" style="color: #0f172a;">
+                    <i class="fas fa-check-circle me-2" style="color: #10b981;"></i>
+                    Completar Venta
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <p>¿Estás seguro de que deseas completar la venta <strong id="numeroVenta"></strong>?</p>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    <strong>Importante:</strong> Al completar la venta, el stock de los productos se actualizará automáticamente.
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <div class="bg-light rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="fas fa-shopping-cart fa-3x" style="color: #10b981;"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">¿Completar venta <span id="numeroVenta" style="color: #10b981;"></span>?</h5>
+                    <p class="text-muted mb-0">Esta acción actualizará el stock de productos automáticamente.</p>
                 </div>
-                <div id="precioFijoWarning" class="alert alert-warning d-none">
-                    <i class="fas fa-lock me-2"></i>
-                    <strong>Atención:</strong> Esta venta incluye productos con precio fijo en Bs.
-                    Estos precios no se verán afectados por cambios futuros en la tasa de cambio.
+                
+                <div class="alert alert-success-limpio d-flex align-items-center p-3">
+                    <i class="fas fa-info-circle me-3" style="color: #10b981;"></i>
+                    <div>
+                        <strong>Proceso automático</strong><br>
+                        <small>El stock se actualizará y la venta pasará a estado "Completada"</small>
+                    </div>
+                </div>
+                
+                <div id="precioFijoWarning" class="alert alert-warning-limpio d-flex align-items-center p-3 d-none">
+                    <i class="fas fa-lock me-3" style="color: #f59e0b;"></i>
+                    <div>
+                        <strong>Productos con precio fijo en Bs</strong><br>
+                        <small>Esta venta incluye productos con precio fijo en Bolívares</small>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-1"></i> Cancelar
+            <div class="modal-footer bg-light border-0 p-3">
+                <button type="button" class="btn-limpio btn-limpio-outline" data-bs-dismiss="modal">
+                    Cancelar
                 </button>
-                <a href="#" id="btnCompletarConfirmar" class="btn btn-success">
-                    <i class="fas fa-check me-1"></i> Completar Venta
+                <a href="#" id="btnCompletarConfirmar" class="btn-limpio btn-limpio-success text-decoration-none">
+                    <i class="fas fa-check-circle me-2"></i>Sí, completar
                 </a>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    /* Estilos para resaltar ventas con precios fijos */
-    .table-warning {
-        background-color: rgba(255, 243, 205, 0.3) !important;
-    }
-
-    .table-warning:hover {
-        background-color: rgba(255, 243, 205, 0.5) !important;
-    }
-
-    /* Estilos para ventas cerradas */
-    .venta-cerrada {
-        opacity: 0.7;
-    }
-    
-    .venta-cerrada:hover {
-        opacity: 0.9;
-        background-color: rgba(108, 117, 125, 0.1) !important;
-    }
-    
-    .venta-cerrada td {
-        color: #6c757d !important;
-    }
-    
-    .venta-cerrada .badge.bg-secondary {
-        background-color: #6c757d !important;
-        color: white !important;
-    }
-
-    /* Animación para el ícono de candado */
-    .fa-lock.text-success {
-        animation: lock-pulse 2s infinite;
-    }
-
-    @keyframes lock-pulse {
-        0% {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.1);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-    }
-
-    /* Tooltip personalizado */
-    .tooltip-inner {
-        max-width: 300px;
-    }
-
-    /* Estilos para los totales */
-    .table-active {
-        background-color: rgba(0, 0, 0, 0.05) !important;
-    }
-    
-    /* Estilo para filtros */
-    .dataTables_wrapper .dataTables_filter {
-        margin-bottom: 10px;
-    }
-    
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_filter,
-    .dataTables_wrapper .dataTables_info,
-    .dataTables_wrapper .dataTables_paginate {
-        margin-top: 10px;
-    }
-    
-    /* Badge para estado activo/cerrado */
-    .badge.bg-success {
-        background-color: #198754 !important;
-    }
-    
-    .badge.bg-secondary {
-        background-color: #6c757d !important;
-    }
-</style>
-
+<!-- ================================================================== -->
+<!-- 🚀 SCRIPTS -->
+<!-- ================================================================== -->
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Inicializar tooltips
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl, {
-                delay: {
-                    show: 100,
-                    hide: 100
-                }
-            });
-        });
+// Reloj en tiempo real - Simple y elegante
+function actualizarReloj() {
+    const ahora = new Date();
+    const horas = ahora.getHours().toString().padStart(2, '0');
+    const minutos = ahora.getMinutes().toString().padStart(2, '0');
+    const segundos = ahora.getSeconds().toString().padStart(2, '0');
+    
+    const horaElement = document.getElementById('hora-actual');
+    if (horaElement) {
+        horaElement.textContent = `${horas}:${minutos}:${segundos}`;
+    }
+    
+    // Actualizar fecha completa
+    const fechaElement = document.getElementById('fecha-actual');
+    if (fechaElement) {
+        const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+        const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+        fechaElement.textContent = `${dias[ahora.getDay()]}, ${ahora.getDate()} de ${meses[ahora.getMonth()]} de ${ahora.getFullYear()}`;
+    }
+}
 
-        // Configurar DataTables
-        const tablaVentas = $('#tablaVentas').DataTable({
+actualizarReloj();
+setInterval(actualizarReloj, 1000);
+
+// Inicializar tooltips
+document.addEventListener('DOMContentLoaded', function() {
+    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltips.forEach(el => new bootstrap.Tooltip(el));
+    
+    // Inicializar DataTables
+    if ($.fn.DataTable && $.fn.DataTable.isDataTable('#tablaVentas')) {
+        $('#tablaVentas').DataTable().destroy();
+    }
+    
+    if ($('#tablaVentas').length > 0) {
+        $('#tablaVentas').DataTable({
             language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                processing: "Procesando...",
+                lengthMenu: "Mostrar _MENU_ registros",
+                zeroRecords: "No se encontraron resultados",
+                emptyTable: "No hay datos disponibles",
+                infoEmpty: "Mostrando 0 a 0 de 0 registros",
+                infoFiltered: "(filtrado de _MAX_ registros totales)",
+                search: "Buscar:",
+                paginate: {
+                    first: "Primero",
+                    last: "Último",
+                    next: "Siguiente",
+                    previous: "Anterior"
+                },
+                info: "Mostrando _START_ a _END_ de _TOTAL_ registros"
             },
             pageLength: 10,
-            order: [
-                [8, 'desc'] // Ordenar por fecha descendente
-            ],
-            columnDefs: [{
-                orderable: false,
-                targets: [9] // Columna de acciones no ordenable
-            }],
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-            initComplete: function() {
-                $('.dataTables_filter input').addClass('form-control form-control-sm');
-                $('.dataTables_length select').addClass('form-control form-control-sm');
-                
-                // Añadir filtro personalizado para estado de cierre
-                this.api().columns([7]).every(function() {
-                    const column = this;
-                    const select = $('<select class="form-select form-select-sm ms-2"><option value="">Todos</option><option value="Activa">Activas</option><option value="Cerrada">Cerradas</option></select>')
-                        .appendTo($(column.header()))
-                        .on('change', function() {
-                            const val = $.fn.dataTable.util.escapeRegex($(this).val());
-                            column.search(val ? '^' + val + '$' : '', true, false).draw();
-                        });
-                });
-            },
-            footerCallback: function(row, data, start, end, display) {
-                const api = this.api();
-                
-                // Actualizar totales en el footer
-                $(api.column(2).footer()).find('strong.text-primary').text(
-                    '$' + api.column(2, {page: 'current'}).data().reduce(function(a, b) {
-                        // Extraer el valor numérico del formato
-                        const val = parseFloat(b.replace(/[^0-9.-]+/g, ""));
-                        return (parseFloat(a) + (isNaN(val) ? 0 : val)).toFixed(2);
-                    }, 0)
-                );
-                
-                $(api.column(3).footer()).find('strong.text-success').text(
-                    formatBsTotal(api.column(3, {page: 'current'}).data().reduce(function(a, b) {
-                        // Extraer el valor numérico del formato Bs
-                        const val = parseFloat(b.replace(/[^0-9.-]+/g, ""));
-                        return (parseFloat(a) + (isNaN(val) ? 0 : val)).toFixed(2);
-                    }, 0))
-                );
-                
-                // Contar ventas activas y cerradas
-                                let activas = 0;
-                                let cerradas = 0;
-                                
-                                api.rows({page: 'current'}).every(function() {
-                                    const data = this.data();
-                                    const cierreCell = $(data[7]).text().toLowerCase();
-                                    if (cierreCell.includes('activa')) {
-                                        activas++;
-                                    } else if (cierreCell.includes('cerrada')) {
-                                        cerradas++;
-                                    }
-                                });
-                                
-                                // Actualizar contadores en el footer
-                                $(api.column(9).footer()).find('strong.text-success').text(activas);
-                                $(api.column(9).footer()).find('strong.text-secondary').text(cerradas);
-                                $(api.column(9).footer()).find('strong.text-primary').text(activas + cerradas);
-                            }
-                        });
-
-        // Configurar modal de completar venta
-        const modalCompletar = document.getElementById('modalCompletar');
-        if (modalCompletar) {
-            modalCompletar.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                const id = button.getAttribute('data-id');
-                const numeroVenta = button.getAttribute('data-numero');
-                const tienePrecioFijo = button.getAttribute('data-precio-fijo') === 'true';
-                
-                // Actualizar contenido del modal
-                document.getElementById('numeroVenta').textContent = '#' + numeroVenta;
-                
-                // Mostrar/ocultar advertencia de precio fijo
-                const precioFijoWarning = document.getElementById('precioFijoWarning');
-                if (tienePrecioFijo) {
-                    precioFijoWarning.classList.remove('d-none');
+            order: [[8, 'desc']],
+            columnDefs: [
+                { orderable: false, targets: [9] }
+            ]
+        });
+    }
+    
+    // Modal completar venta
+    const modal = document.getElementById('modalCompletar');
+    if (modal) {
+        modal.addEventListener('show.bs.modal', function(event) {
+            const btn = event.relatedTarget;
+            if (!btn) return;
+            
+            const id = btn.dataset.id;
+            const numero = btn.dataset.numero;
+            const precioFijo = btn.dataset.precioFijo === 'true';
+            
+            const numeroEl = document.getElementById('numeroVenta');
+            if (numeroEl) numeroEl.textContent = '#' + (numero || '');
+            
+            const warningEl = document.getElementById('precioFijoWarning');
+            if (warningEl) {
+                if (precioFijo) {
+                    warningEl.classList.remove('d-none');
                 } else {
-                    precioFijoWarning.classList.add('d-none');
+                    warningEl.classList.add('d-none');
                 }
-                
-                // Configurar enlace de confirmación con token CSRF
-                const confirmarBtn = document.getElementById('btnCompletarConfirmar');
-                confirmarBtn.href = `index.php?action=completar&id=${id}&csrf_token=<?php echo $_SESSION['csrf_token']; ?>`;
-            });
-        }
-
-        // Función para formatear totales en Bs
-        function formatBsTotal(value) {
-            const num = parseFloat(value);
-            if (isNaN(num)) return 'Bs 0.00';
-            return `Bs ${num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
-        }
-
-        // Actualizar contadores en tiempo real cuando se filtra la tabla
-        tablaVentas.on('draw.dt', function() {
-            const api = tablaVentas.api();
+            }
             
-            // Recalcular totales USD
-            let totalUsd = 0;
-            let totalUsdActivas = 0;
-            
-            api.rows({page: 'current'}).every(function() {
-                const rowData = this.data();
-                const totalUsdCell = $(rowData[2]).text().replace(/[^0-9.-]+/g, "");
-                const valorUsd = parseFloat(totalUsdCell) || 0;
-                totalUsd += valorUsd;
-                
-                // Verificar si es activa
-                const cierreCell = $(rowData[7]).text().toLowerCase();
-                if (cierreCell.includes('activa')) {
-                    totalUsdActivas += valorUsd;
-                }
-            });
-            
-            // Actualizar USD en footer
-            const footerUsd = tablaVentas.footer();
-            $(footerUsd).find('td').eq(2).find('strong.text-primary').text('$' + totalUsd.toFixed(2));
-            $(footerUsd).find('td').eq(2).find('small.text-muted').text('Activas: $' + totalUsdActivas.toFixed(2));
-            
-            // Recalcular totales Bs
-            let totalBs = 0;
-            let totalBsActivas = 0;
-            
-            api.rows({page: 'current'}).every(function() {
-                const rowData = this.data();
-                const totalBsCell = $(rowData[3]).text().replace(/[^0-9.-]+/g, "");
-                const valorBs = parseFloat(totalBsCell) || 0;
-                totalBs += valorBs;
-                
-                // Verificar si es activa
-                const cierreCell = $(rowData[7]).text().toLowerCase();
-                if (cierreCell.includes('activa')) {
-                    totalBsActivas += valorBs;
-                }
-            });
-            
-            // Actualizar Bs en footer
-            $(footerUsd).find('td').eq(3).find('strong.text-success').text(formatBsTotal(totalBs));
-            $(footerUsd).find('td').eq(3).find('small.text-muted').text('Activas: ' + formatBsTotal(totalBsActivas));
-            
-            // Recalcular contadores de ventas
-            let activas = 0;
-            let cerradas = 0;
-            
-            api.rows({page: 'current'}).every(function() {
-                const rowData = this.data();
-                const cierreCell = $(rowData[7]).text().toLowerCase();
-                if (cierreCell.includes('activa')) {
-                    activas++;
-                } else if (cierreCell.includes('cerrada')) {
-                    cerradas++;
-                }
-            });
-            
-            // Actualizar contadores en footer
-            const totalVentas = activas + cerradas;
-            $(footerUsd).find('td').eq(9).find('strong.text-success').text(activas);
-            $(footerUsd).find('td').eq(9).find('strong.text-secondary').text(cerradas);
-            $(footerUsd).find('td').eq(9).find('strong.text-primary').text(totalVentas);
+            const confirmBtn = document.getElementById('btnCompletarConfirmar');
+            if (confirmBtn && id) {
+                confirmBtn.href = `index.php?action=completar&id=${id}&csrf_token=<?php echo $_SESSION['csrf_token']; ?>`;
+            }
         });
-
-        // Configurar filtros rápidos por estado
-        const urlParams = new URLSearchParams(window.location.search);
-        const filtroEstado = urlParams.get('estado');
-        
-        if (filtroEstado) {
-            tablaVentas.column(7).search(filtroEstado, true, false).draw();
-        }
-
-        // Auto-refrescar la página cada 5 minutos para mantener datos actualizados
-        setTimeout(function() {
-            location.reload();
-        }, 300000); // 5 minutos
-
-        // Notificación de ventas pendientes
-        <?php if ($ventasActivas > 0 && $filtro_activas): ?>
-            // Mostrar notificación si hay ventas activas pendientes
-            const notificacion = document.createElement('div');
-            notificacion.className = 'alert alert-warning alert-dismissible fade show position-fixed bottom-0 end-0 m-3';
-            notificacion.style.zIndex = '1050';
-            notificacion.style.maxWidth = '300px';
-            notificacion.innerHTML = `
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <strong>Tienes ${ventasActivas} ventas activas</strong>
-                <small class="d-block mt-1">Recuerda cerrarlas en caja al finalizar el día</small>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
-            document.body.appendChild(notificacion);
-            
-            // Auto-ocultar después de 10 segundos
-            setTimeout(() => {
-                const alert = new bootstrap.Alert(notificacion);
-                alert.close();
-            }, 10000);
-        <?php endif; ?>
-
-        // Botón para exportar datos
-        const exportBtn = document.createElement('button');
-        exportBtn.className = 'btn btn-outline-primary btn-sm ms-2';
-        exportBtn.innerHTML = '<i class="fas fa-download me-1"></i> Exportar';
-        exportBtn.addEventListener('click', function() {
-            // Exportar tabla a CSV
-            const data = [];
-            const headers = [];
-            
-            // Obtener encabezados
-            $('#tablaVentas thead th').each(function() {
-                headers.push($(this).text().trim());
-            });
-            data.push(headers.join(','));
-            
-            // Obtener datos
-            tablaVentas.rows({search: 'applied'}).every(function() {
-                const rowData = this.data();
-                const row = [];
-                $(rowData).each(function(index, cell) {
-                    // Limpiar HTML y extraer texto
-                    row.push($(cell).text().trim().replace(/,/g, ''));
-                });
-                data.push(row.join(','));
-            });
-            
-            // Crear y descargar archivo CSV
-            const csvContent = "data:text/csv;charset=utf-8," + data.join('\n');
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `ventas_${new Date().toISOString().split('T')[0]}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-        
-        // Añadir botón de exportar a los controles de DataTables
-        $('.dataTables_length').before(exportBtn);
-    });
+    }
+    
+    // Auto-refrescar cada 5 minutos
+    setTimeout(() => location.reload(), 300000);
+});
 </script>
 
 <!-- <?php
-// Incluir pie de página
 include __DIR__ . '/../layouts/footer.php';
 ?> -->
