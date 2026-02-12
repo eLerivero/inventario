@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [2026-02-10 01:23:49] Intento de login - Usuario: ventas
 [2026-02-10 01:23:49] Intentando autenticar usuario: ventas
 [2026-02-10 01:23:49] AuthController: AuthController inicializado
@@ -1081,3 +1082,93 @@
 [2026-02-12 18:28:26] [DEBUG] Todas las categorías obtenidas {"total":4}
 [2026-02-12 18:28:35] [DEBUG] Todas las categorías obtenidas {"total":4}
 [2026-02-12 18:28:37] [DEBUG] Todas las categorías obtenidas {"total":4}
+=======
+[2026-02-12 11:19:18] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active (started from C:\wamp64\www\inventario\config\Config.php on line 146) en C:\wamp64\www\inventario\index.php línea 349 
+[2026-02-12 15:19:25] Intento de login - Usuario: admin
+[2026-02-12 15:19:25] Intentando autenticar usuario: admin
+[2026-02-12 15:19:25] AuthController: AuthController inicializado
+[2026-02-12 15:19:25] Username recibido: admin
+[2026-02-12 15:19:25] Password recibido: @dm...
+[2026-02-12 15:19:25] AuthController: Iniciando login para: admin
+[2026-02-12 15:19:25] AuthController: Username recibido: admin
+[2026-02-12 15:19:25] AuthController: Password recibido (primeros 3 chars): @dm...
+[2026-02-12 15:19:25] AuthController: Password completo: @dmin123.
+[2026-02-12 15:19:25] AuthController: Buscando usuario por username: admin
+[2026-02-12 15:19:25] AuthController: Usuario encontrado: {"id":1,"username":"admin","activo":true,"hash_length":60}
+[2026-02-12 15:19:25] AuthController: Hash en BD: $2y$10$xuyfNI4CNFy1YZ7ECE/jp.NV87gbUuFwBnezJZM2wfdck5pQ1Ufd.
+[2026-02-12 15:19:25] AuthController: Password a verificar: @dmin123.
+[2026-02-12 15:19:25] AuthController: Verificando contraseña...
+[2026-02-12 15:19:25] AuthController: === PRUEBA DE VERIFICACIÓN ===
+[2026-02-12 15:19:26] AuthController: password_verify resultado: TRUE
+[2026-02-12 15:19:26] AuthController: ✓ Contraseña verificada correctamente
+[2026-02-12 15:19:26] AuthController: Actualizando último login para usuario ID: 1
+[2026-02-12 15:19:26] AuthController: Login exitoso para: admin
+[2026-02-12 15:19:26] Resultado del login: {"success":true,"user":{"id":1,"username":"admin","nombre":"Administrador","email":"admin@inventario.com","rol":"admin"}}
+[2026-02-12 15:19:26] Login exitoso para usuario: admin
+[2026-02-12 15:21:36] Intento de login - Usuario: admin
+[2026-02-12 15:21:36] Intentando autenticar usuario: admin
+[2026-02-12 15:21:36] AuthController: AuthController inicializado
+[2026-02-12 15:21:36] Username recibido: admin
+[2026-02-12 15:21:36] Password recibido: @dm...
+[2026-02-12 15:21:36] AuthController: Iniciando login para: admin
+[2026-02-12 15:21:36] AuthController: Username recibido: admin
+[2026-02-12 15:21:36] AuthController: Password recibido (primeros 3 chars): @dm...
+[2026-02-12 15:21:36] AuthController: Password completo: @dmin123.
+[2026-02-12 15:21:36] AuthController: Buscando usuario por username: admin
+[2026-02-12 15:21:36] AuthController: Usuario encontrado: {"id":1,"username":"admin","activo":true,"hash_length":60}
+[2026-02-12 15:21:36] AuthController: Hash en BD: $2y$10$xuyfNI4CNFy1YZ7ECE/jp.NV87gbUuFwBnezJZM2wfdck5pQ1Ufd.
+[2026-02-12 15:21:36] AuthController: Password a verificar: @dmin123.
+[2026-02-12 15:21:36] AuthController: Verificando contraseña...
+[2026-02-12 15:21:36] AuthController: === PRUEBA DE VERIFICACIÓN ===
+[2026-02-12 15:21:37] AuthController: password_verify resultado: TRUE
+[2026-02-12 15:21:37] AuthController: ✓ Contraseña verificada correctamente
+[2026-02-12 15:21:37] AuthController: Actualizando último login para usuario ID: 1
+[2026-02-12 15:21:37] AuthController: Login exitoso para: admin
+[2026-02-12 15:21:37] Resultado del login: {"success":true,"user":{"id":1,"username":"admin","nombre":"Administrador","email":"admin@inventario.com","rol":"admin"}}
+[2026-02-12 15:21:37] Login exitoso para usuario: admin
+[2026-02-12 14:16:28] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:17:45] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:17:54] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:18:12] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:18:36] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:18:47] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:18:54] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:19:05] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:19:09] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:19:10] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:19:16] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:21:16] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:21:16] [ERROR] WARNING: Undefined variable $total_bs_precio_fijo en C:\wamp64\www\inventario\Views\ventas\index.php línea 533 
+[2026-02-12 14:21:45] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:22:02] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:22:02] [ERROR] WARNING: Undefined variable $total_bs_precio_fijo en C:\wamp64\www\inventario\Views\ventas\index.php línea 533 
+[2026-02-12 14:22:04] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:22:04] [ERROR] WARNING: Undefined variable $total_bs_precio_fijo en C:\wamp64\www\inventario\Views\ventas\index.php línea 533 
+[2026-02-12 14:22:15] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:22:47] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:22:47] [ERROR] WARNING: Undefined variable $total_bs_precio_fijo en C:\wamp64\www\inventario\Views\ventas\index.php línea 544 
+[2026-02-12 14:23:42] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:24:10] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:24:10] [ERROR] WARNING: Undefined variable $total_bs_precio_fijoo en C:\wamp64\www\inventario\Views\ventas\index.php línea 861 
+[2026-02-12 14:24:15] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:24:48] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:24:48] [ERROR] WARNING: Undefined variable $total_bs_precio_fijo en C:\wamp64\www\inventario\Views\ventas\index.php línea 537 
+[2026-02-12 14:24:56] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:24:56] [ERROR] WARNING: Undefined variable $total_bs_precio_fijo en C:\wamp64\www\inventario\Views\ventas\index.php línea 536 
+[2026-02-12 14:25:32] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:25:32] [ERROR] WARNING: Undefined variable $total_bs_precio_fijo en C:\wamp64\www\inventario\Views\ventas\index.php línea 544 
+[2026-02-12 14:25:42] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:26:33] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:31:34] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:33:21] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:38:22] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:38:46] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:45:47] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:48:12] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:52:52] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:52:59] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:53:01] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:53:59] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:54:14] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+[2026-02-12 14:54:16] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
+>>>>>>> fa33cc78d5d38cac45174a4c5d78df55b8ae7f83
