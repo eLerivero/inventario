@@ -858,7 +858,7 @@ include __DIR__ . '/../layouts/header.php';
                         <div>
                             <small class="text-muted d-block">Total Bs Precio Fijo</small>
                             <span class="fw-bold fs-5" style="color: #b45309;">
-                                <?php echo TasaCambioHelper::formatearBS($total_bs_precio_fijo); ?>
+                                <?php echo $stats_bs['total_bs_precio_fijo_formateado'] ?? 'Bs 0,00'; ?>
                             </span>
                         </div>
                     </div>

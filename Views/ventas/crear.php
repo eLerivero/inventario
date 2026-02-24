@@ -32,17 +32,17 @@ $productos_data = $productos['success'] ? $productos['data'] : [];
 $tiposPago_data = $tiposPago['success'] ? $tiposPago['data'] : [];
 $tasa_info = $tasaActual['success'] ? $tasaActual['data'] : null;
 
-        // Procesar formulario de venta
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cliente_id'])) {
-            try {
-                // Preparar datos de la venta
-                $datosVenta = [
-                    'cliente_id' => $_POST['cliente_id'],
-                    'tipo_pago_id' => $_POST['tipo_pago_id'],
-                    'observaciones' => $_POST['observaciones'] ?? '',
-                    'estado' => 'pendiente',
-                    'detalles' => []
-                ];
+// Procesar formulario de venta
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cliente_id'])) {
+    try {
+        // Preparar datos de la venta
+        $datosVenta = [
+            'cliente_id' => $_POST['cliente_id'],
+            'tipo_pago_id' => $_POST['tipo_pago_id'],
+            'observaciones' => $_POST['observaciones'] ?? '',
+            'estado' => 'pendiente',
+            'detalles' => []
+        ];
 
         // Procesar detalles de la venta 
         if (isset($_POST['productos']) && is_array($_POST['productos'])) {
@@ -92,47 +92,47 @@ $tasa_info = $tasaActual['success'] ? $tasaActual['data'] : null;
             }
         }
 
-                if (empty($datosVenta['detalles'])) {
-                    throw new Exception("Debe agregar al menos un producto a la venta");
-                }
-
-                $result = $ventaController->crear($datosVenta);
-
-                if ($result['success']) {
-                    $success_message = $result['message'];
-                    // Mostrar resumen de la venta
-                    $success_message .= "<br><br><strong>Resumen de la Venta:</strong>";
-                    $success_message .= "<br>Número: " . $result['numero_venta'];
-                    $success_message .= "<br>Tasa de Cambio: " . number_format($result['tasa_cambio'], 2) . " Bs/USD";
-                    $success_message .= "<br>Total USD: " . TasaCambioHelper::formatearUSD($result['total_usd']);
-                    $success_message .= "<br>Total Bs: " . TasaCambioHelper::formatearBS($result['total_bs']);
-
-                    // Mostrar detalles
-                    if (isset($result['detalles_procesados'])) {
-                        $success_message .= "<br><br><strong>Detalles:</strong>";
-                        foreach ($result['detalles_procesados'] as $detalle) {
-                            $tipo_precio = $detalle['es_precio_fijo'] ? " (Precio Fijo BS)" : " (Conversión automática)";
-                            $success_message .= "<br>• " . $detalle['producto_nombre'] .
-                                " - Cant: " . $detalle['cantidad'] .
-                                " - Precio: $" . number_format($detalle['precio_unitario'], 2) .
-                                " / Bs " . number_format($detalle['precio_unitario_bs'], 2) . $tipo_precio;
-
-                            // Si es precio fijo, mostrar el precio exacto
-                            if ($detalle['es_precio_fijo']) {
-                                $success_message .= " [Precio fijo exacto: Bs " . number_format($detalle['precio_fijo_original'], 2) . "]";
-                            }
-                        }
-                    }
-
-                    // Redirigir después de 5 segundos
-                    header("Refresh: 5; URL=index.php");
-                } else {
-                    $error_message = $result['message'];
-                }
-            } catch (Exception $e) {
-                $error_message = "Error inesperado: " . $e->getMessage();
-            }
+        if (empty($datosVenta['detalles'])) {
+            throw new Exception("Debe agregar al menos un producto a la venta");
         }
+
+        $result = $ventaController->crear($datosVenta);
+
+        if ($result['success']) {
+            $success_message = $result['message'];
+            // Mostrar resumen de la venta
+            $success_message .= "<br><br><strong>Resumen de la Venta:</strong>";
+            $success_message .= "<br>Número: " . $result['numero_venta'];
+            $success_message .= "<br>Tasa de Cambio: " . number_format($result['tasa_cambio'], 2) . " Bs/USD";
+            $success_message .= "<br>Total USD: " . TasaCambioHelper::formatearUSD($result['total_usd']);
+            $success_message .= "<br>Total Bs: " . TasaCambioHelper::formatearBS($result['total_bs']);
+
+            // Mostrar detalles
+            if (isset($result['detalles_procesados'])) {
+                $success_message .= "<br><br><strong>Detalles:</strong>";
+                foreach ($result['detalles_procesados'] as $detalle) {
+                    $tipo_precio = $detalle['es_precio_fijo'] ? " (Precio Fijo BS)" : " (Conversión automática)";
+                    $success_message .= "<br>• " . $detalle['producto_nombre'] .
+                        " - Cant: " . $detalle['cantidad'] .
+                        " - Precio: $" . number_format($detalle['precio_unitario'], 2) .
+                        " / Bs " . number_format($detalle['precio_unitario_bs'], 2) . $tipo_precio;
+
+                    // Si es precio fijo, mostrar el precio exacto
+                    if ($detalle['es_precio_fijo']) {
+                        $success_message .= " [Precio fijo exacto: Bs " . number_format($detalle['precio_fijo_original'], 2) . "]";
+                    }
+                }
+            }
+
+            // Redirigir después de 5 segundos
+            header("Refresh: 5; URL=index.php");
+        } else {
+            $error_message = $result['message'];
+        }
+    } catch (Exception $e) {
+        $error_message = "Error inesperado: " . $e->getMessage();
+    }
+}
 
 // Procesar creación de nuevo cliente desde AJAX
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'crear_cliente') {
@@ -263,53 +263,18 @@ include __DIR__ . '/../layouts/header.php';
     </div>
     <div class="card-body">
         <form method="POST" id="formVenta" novalidate>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="cliente_id" class="form-label">
-                            <i class="fas fa-user me-1"></i>Cliente *
-                        </label>
-                        <div class="input-group">
-                            <select class="form-control" id="cliente_id" name="cliente_id" required>
-                                <option value="">Seleccionar cliente...</option>
-                                <?php foreach ($clientes_data as $cliente): ?>
-                                    <option value="<?php echo $cliente['id']; ?>"
-                                        <?php echo ($_POST['cliente_id'] ?? '') == $cliente['id'] ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($cliente['nombre']); ?>
-                                        <?php if (!empty($cliente['numero_documento'])): ?>
-                                            (<?php echo htmlspecialchars($cliente['numero_documento']); ?>)
-                                        <?php endif; ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoCliente">
-                                <i class="fas fa-plus"></i> Nuevo
-                            </button>
-                        </div>
-                        <div class="form-text">Selecciona un cliente existente o crea uno nuevo.</div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="tipo_pago_id" class="form-label">
-                            <i class="fas fa-credit-card me-1"></i>Tipo de Pago *
-                        </label>
-                        <select class="form-control" id="tipo_pago_id" name="tipo_pago_id" required>
-                            <option value="">Seleccionar tipo de pago...</option>
-                            <?php foreach ($tiposPago_data as $tipoPago): ?>
-                                <option value="<?php echo $tipoPago['id']; ?>"
-                                    <?php echo ($_POST['tipo_pago_id'] ?? '') == $tipoPago['id'] ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($tipoPago['nombre']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <div class="form-text">Selecciona el método de pago.</div>
+            <!-- PASO 1: PRODUCTOS (PRIMERO) -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-primary">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Paso 1:</strong> Agrega los productos a la venta
                     </div>
                 </div>
             </div>
 
             <!-- Sistema Avanzado de Búsqueda de Productos -->
-            <div class="row mt-4">
+            <div class="row mt-2">
                 <div class="col-12">
                     <h5 class="mb-3">
                         <i class="fas fa-boxes me-2"></i>
@@ -384,6 +349,61 @@ include __DIR__ . '/../layouts/header.php';
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 2: DATOS DEL CLIENTE (SEGUNDO) -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="alert alert-success">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Paso 2:</strong> Selecciona o crea el cliente
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label for="cliente_id" class="form-label">
+                            <i class="fas fa-user me-1"></i>Cliente *
+                        </label>
+                        <div class="input-group">
+                            <select class="form-control" id="cliente_id" name="cliente_id" required>
+                                <option value="">Seleccionar cliente...</option>
+                                <?php foreach ($clientes_data as $cliente): ?>
+                                    <option value="<?php echo $cliente['id']; ?>"
+                                        <?php echo ($_POST['cliente_id'] ?? '') == $cliente['id'] ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($cliente['nombre']); ?>
+                                        <?php if (!empty($cliente['numero_documento'])): ?>
+                                            (<?php echo htmlspecialchars($cliente['numero_documento']); ?>)
+                                        <?php endif; ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoCliente">
+                                <i class="fas fa-plus"></i> Nuevo
+                            </button>
+                        </div>
+                        <div class="form-text">Selecciona un cliente existente o crea uno nuevo.</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="tipo_pago_id" class="form-label">
+                            <i class="fas fa-credit-card me-1"></i>Tipo de Pago *
+                        </label>
+                        <select class="form-control" id="tipo_pago_id" name="tipo_pago_id" required>
+                            <option value="">Seleccionar tipo de pago...</option>
+                            <?php foreach ($tiposPago_data as $tipoPago): ?>
+                                <option value="<?php echo $tipoPago['id']; ?>"
+                                    <?php echo ($_POST['tipo_pago_id'] ?? '') == $tipoPago['id'] ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($tipoPago['nombre']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="form-text">Selecciona el método de pago.</div>
                     </div>
                 </div>
             </div>
