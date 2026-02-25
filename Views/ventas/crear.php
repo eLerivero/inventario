@@ -23,7 +23,7 @@ $success_message = '';
 // Obtener datos para formulario
 $clientes = $clienteController->obtenerClientesActivos();
 $productos = $ventaController->obtenerProductosConInfoCompleta();
-$tiposPago = $tipoPagoController->listar();
+$tiposPago = $tipoPagoController->listar(true); // Solo tipos de pago activos
 $tasaActual = $tasaController->obtenerTasaActual();
 
 // Verificar y asignar datos correctamente
@@ -38,10 +38,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cliente_id'])) {
         // Preparar datos de la venta
         $datosVenta = [
             'cliente_id' => $_POST['cliente_id'],
-            'tipo_pago_id' => $_POST['tipo_pago_id'],
             'observaciones' => $_POST['observaciones'] ?? '',
             'estado' => 'pendiente',
-            'detalles' => []
+            'detalles' => [],
+            'pagos' => []
         ];
 
         // Procesar detalles de la venta 
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cliente_id'])) {
                 if (!empty($producto_id) && isset($_POST['cantidades'][$index])) {
                     $cantidad = intval($_POST['cantidades'][$index]);
 
-                    // **OBTENER INFORMACIÓN EXACTA DEL PRODUCTO**
+                    // Obtener información exacta del producto
                     $producto_info = null;
                     foreach ($productos_data as $prod) {
                         if ($prod['id'] == $producto_id) {
@@ -60,30 +60,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cliente_id'])) {
                     }
 
                     if ($producto_info) {
-                        // **DETERMINAR SI ES PRECIO FIJO DESDE LA BD**
                         $es_precio_fijo = isset($producto_info['usar_precio_fijo_bs']) &&
                             $producto_info['usar_precio_fijo_bs'] == true;
 
-                        // **PARA PRECIO FIJO: ENVIAR 0 COMO PRECIO USD (EL CONTROLADOR USARÁ precio_bs)**
-                        // **PARA PRODUCTO NORMAL: ENVIAR EL PRECIO USD DEL FORMULARIO**
                         $precio_usd = 0;
 
                         if (!$es_precio_fijo && isset($_POST['precios'][$index])) {
                             $precio_usd = floatval($_POST['precios'][$index]);
                         }
 
-                        // **DEBUG EN EL FORMULARIO**
-                        error_log("Formulario - Producto ID: " . $producto_id);
-                        error_log("  Nombre: " . $producto_info['nombre']);
-                        error_log("  Es precio fijo: " . ($es_precio_fijo ? 'Sí' : 'No'));
-                        error_log("  Precio BS en BD: " . ($producto_info['precio_bs'] ?? '0'));
-                        error_log("  Precio USD enviado: " . $precio_usd);
-
                         if ($cantidad > 0) {
                             $datosVenta['detalles'][] = [
                                 'producto_id' => $producto_id,
                                 'cantidad' => $cantidad,
-                                'precio_unitario' => $precio_usd, // 0 para precio fijo
+                                'precio_unitario' => $precio_usd,
                                 'es_precio_fijo' => $es_precio_fijo
                             ];
                         }
@@ -92,8 +82,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cliente_id'])) {
             }
         }
 
+        // Procesar pagos múltiples
+        if (isset($_POST['pagos']) && is_array($_POST['pagos'])) {
+            foreach ($_POST['pagos'] as $pago) {
+                if (!empty($pago['tipo_pago_id']) && !empty($pago['monto_usd'])) {
+                    $datosVenta['pagos'][] = [
+                        'tipo_pago_id' => intval($pago['tipo_pago_id']),
+                        'monto_usd' => floatval($pago['monto_usd']),
+                        'monto_bs' => floatval($pago['monto_bs'])
+                    ];
+                }
+            }
+        }
+
         if (empty($datosVenta['detalles'])) {
             throw new Exception("Debe agregar al menos un producto a la venta");
+        }
+
+        if (empty($datosVenta['pagos'])) {
+            throw new Exception("Debe registrar al menos un método de pago");
         }
 
         $result = $ventaController->crear($datosVenta);
@@ -106,10 +113,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cliente_id'])) {
             $success_message .= "<br>Tasa de Cambio: " . number_format($result['tasa_cambio'], 2) . " Bs/USD";
             $success_message .= "<br>Total USD: " . TasaCambioHelper::formatearUSD($result['total_usd']);
             $success_message .= "<br>Total Bs: " . TasaCambioHelper::formatearBS($result['total_bs']);
+            $success_message .= "<br>Total Pagado: " . TasaCambioHelper::formatearUSD($result['total_pagado_usd']);
+            $success_message .= "<br>Cantidad de Pagos: " . $result['cantidad_pagos'];
 
             // Mostrar detalles
             if (isset($result['detalles_procesados'])) {
-                $success_message .= "<br><br><strong>Detalles:</strong>";
+                $success_message .= "<br><br><strong>Detalles de Productos:</strong>";
                 foreach ($result['detalles_procesados'] as $detalle) {
                     $tipo_precio = $detalle['es_precio_fijo'] ? " (Precio Fijo BS)" : " (Conversión automática)";
                     $success_message .= "<br>• " . $detalle['producto_nombre'] .
@@ -117,7 +126,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cliente_id'])) {
                         " - Precio: $" . number_format($detalle['precio_unitario'], 2) .
                         " / Bs " . number_format($detalle['precio_unitario_bs'], 2) . $tipo_precio;
 
-                    // Si es precio fijo, mostrar el precio exacto
                     if ($detalle['es_precio_fijo']) {
                         $success_message .= " [Precio fijo exacto: Bs " . number_format($detalle['precio_fijo_original'], 2) . "]";
                     }
@@ -364,7 +372,7 @@ include __DIR__ . '/../layouts/header.php';
             </div>
 
             <div class="row">
-                <div class="col-md-8">
+                <div class="col-md-12">
                     <div class="mb-3">
                         <label for="cliente_id" class="form-label">
                             <i class="fas fa-user me-1"></i>Cliente *
@@ -389,21 +397,158 @@ include __DIR__ . '/../layouts/header.php';
                         <div class="form-text">Selecciona un cliente existente o crea uno nuevo.</div>
                     </div>
                 </div>
-                <div class="col-md-4">
+            </div>
+
+            <!-- PASO 3: TIPO DE PAGO MÚLTIPLE -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Paso 3:</strong> Registra los pagos (puedes usar múltiples métodos)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sistema de Pagos Múltiples -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-money-bill-wave me-2"></i>
+                        Desglose de Pagos
+                        <span class="badge bg-dark ms-2" id="total-pagos-badge">Total Pagado: $0.00</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Barra de progreso del pago -->
                     <div class="mb-3">
-                        <label for="tipo_pago_id" class="form-label">
-                            <i class="fas fa-credit-card me-1"></i>Tipo de Pago *
-                        </label>
-                        <select class="form-control" id="tipo_pago_id" name="tipo_pago_id" required>
-                            <option value="">Seleccionar tipo de pago...</option>
-                            <?php foreach ($tiposPago_data as $tipoPago): ?>
-                                <option value="<?php echo $tipoPago['id']; ?>"
-                                    <?php echo ($_POST['tipo_pago_id'] ?? '') == $tipoPago['id'] ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($tipoPago['nombre']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                        <div class="form-text">Selecciona el método de pago.</div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Progreso del pago:</span>
+                            <span id="progreso-pago-texto">$0.00 de $0.00 (0%)</span>
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div id="progreso-pago-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                        <div id="alerta-pago-insuficiente" class="alert alert-danger mt-2 d-none">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            El total pagado es menor que el total de la venta. Faltan <span id="monto-faltante">$0.00</span>
+                        </div>
+                        <div id="alerta-pago-excedente" class="alert alert-warning mt-2 d-none">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            El total pagado excede el total de la venta. Excedente: <span id="monto-excedente">$0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Lista de pagos realizados -->
+                    <div id="pagos-container">
+                        <!-- Los pagos se agregarán aquí dinámicamente -->
+                        <div class="text-center text-muted py-4" id="mensaje-sin-pagos">
+                            <i class="fas fa-money-bill fa-2x mb-2"></i>
+                            <p>No hay pagos registrados. Agrega uno o más métodos de pago.</p>
+                        </div>
+                    </div>
+
+                    <!-- Formulario para agregar pago -->
+                    <div class="card mt-3">
+                        <div class="card-header bg-light">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                Agregar Pago
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="nuevo_pago_tipo" class="form-label">Tipo de Pago *</label>
+                                    <select class="form-control" id="nuevo_pago_tipo">
+                                        <option value="">Seleccionar...</option>
+                                        <?php 
+                                        // Filtrar solo tipos de pago activos
+                                        $tiposPagoActivos = array_filter($tiposPago_data, function($tipo) {
+                                            return isset($tipo['activo']) && $tipo['activo'] == true;
+                                        });
+                                        foreach ($tiposPagoActivos as $tipoPago): 
+                                        ?>
+                                            <option value="<?php echo $tipoPago['id']; ?>" 
+                                                    data-nombre="<?php echo htmlspecialchars($tipoPago['nombre']); ?>"
+                                                    data-moneda="<?php echo (in_array($tipoPago['id'], [2, 7])) ? 'USD' : (($tipoPago['id'] == 1) ? 'BS' : 'MIXTO'); ?>">
+                                                <?php echo htmlspecialchars($tipoPago['nombre']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="nuevo_pago_monto_usd" class="form-label">Monto en USD *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" 
+                                               class="form-control" 
+                                               id="nuevo_pago_monto_usd" 
+                                               min="0.01" 
+                                               step="0.01" 
+                                               placeholder="0.00"
+                                               value="0.00">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="nuevo_pago_monto_bs" class="form-label">Equivalente en Bs</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Bs</span>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="nuevo_pago_monto_bs" 
+                                               readonly
+                                               placeholder="Se calcula automáticamente"
+                                               value="0.00">
+                                    </div>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button type="button" class="btn btn-primary w-100" onclick="agregarPago()" id="btn-agregar-pago">
+                                        <i class="fas fa-plus me-1"></i> Agregar
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-12">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Para pagos en efectivo USD o divisa, el monto en Bs se calcula automáticamente. 
+                                        Para pagos en BS, ingresa el monto en USD y se calculará su equivalente en Bs.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen de pagos por moneda -->
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span><i class="fas fa-dollar-sign text-success me-1"></i>Total USD recibido:</span>
+                                        <strong id="total-usd-recibido">$0.00</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span><i class="fas fa-bolt text-warning me-1"></i>Total BS recibido:</span>
+                                        <strong id="total-bs-recibido">Bs 0.00</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span><i class="fas fa-shopping-cart text-primary me-1"></i>Total venta:</span>
+                                        <strong id="total-venta-resumen">$0.00 / Bs 0.00</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span><i class="fas fa-check-circle text-success me-1"></i>Estado:</span>
+                                        <strong id="estado-pago-texto" class="text-warning">Pendiente</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -431,16 +576,30 @@ include __DIR__ . '/../layouts/header.php';
                                 <span id="total-usd">$0.00</span>
                             </div>
                             <div class="d-flex justify-content-between">
+                                <span>Total Bs:</span>
+                                <span id="total-bs">Bs 0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
                                 <span>Tasa de Cambio:</span>
                                 <span id="tasa-cambio"><?php echo $tasa_info ? number_format($tasa_info['tasa_cambio'], 2) : '0.00'; ?> Bs/$</span>
                             </div>
+                            <hr>
                             <div class="d-flex justify-content-between">
-                                <strong>Total Bs:</strong>
-                                <strong id="total-bs" class="text-success">Bs 0.00</strong>
+                                <span>Pagado USD:</span>
+                                <span id="pagado-usd" class="text-success">$0.00</span>
                             </div>
-                            <div class="d-flex justify-content-between mt-1">
-                                <small class="text-muted">Productos:</small>
-                                <small id="cantidad-total-productos" class="text-muted">0</small>
+                            <div class="d-flex justify-content-between">
+                                <span>Pagado BS:</span>
+                                <span id="pagado-bs" class="text-success">Bs 0.00</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between">
+                                <strong>Total Pagado:</strong>
+                                <strong id="total-pagado" class="text-primary">$0.00</strong>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <strong>Vuelto/Cambio:</strong>
+                                <strong id="vuelto" class="text-info">$0.00</strong>
                             </div>
                             <div class="mt-2">
                                 <small class="text-muted">
@@ -552,12 +711,12 @@ include __DIR__ . '/../layouts/header.php';
                 </ul>
             </div>
             <div class="col-md-6">
-                <h6 class="text-success">Gestión de Productos:</h6>
+                <h6 class="text-success">Sistema de Pagos Múltiples:</h6>
                 <ul class="list-unstyled">
-                    <li><i class="fas fa-plus-circle text-success me-2"></i> <strong>Agregar rápido:</strong> Click para agregar productos inmediatamente</li>
-                    <li><i class="fas fa-sort-amount-up text-info me-2"></i> <strong>Cambiar cantidad:</strong> Usa las flechas o escribe directamente</li>
-                    <li><i class="fas fa-trash text-danger me-2"></i> <strong>Eliminar fácil:</strong> Click en la X para quitar un producto</li>
-                    <li><i class="fas fa-eye text-warning me-2"></i> <strong>Visualización clara:</strong> Stock, precio y subtotal visibles</li>
+                    <li><i class="fas fa-plus-circle text-success me-2"></i> <strong>Pagos múltiples:</strong> Puedes combinar varios métodos de pago</li>
+                    <li><i class="fas fa-chart-line text-info me-2"></i> <strong>Barra de progreso:</strong> Visualiza el avance del pago</li>
+                    <li><i class="fas fa-calculator text-warning me-2"></i> <strong>Cálculo automático:</strong> Conversión USD/BS en tiempo real</li>
+                    <li><i class="fas fa-exchange-alt text-danger me-2"></i> <strong>Vuelto calculado:</strong> Muestra el cambio a devolver</li>
                 </ul>
             </div>
         </div>

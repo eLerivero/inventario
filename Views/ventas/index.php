@@ -30,12 +30,16 @@ $error_message = '';
 
 // Procesar cambio de estado
 if ($action === 'completar' && $id) {
-    $result = $controller->actualizarEstado($id, 'completada');
-    if ($result['success']) {
-        $success_message = $result['message'];
-        echo '<meta http-equiv="refresh" content="2;url=index.php">';
+    // Verificar token CSRF
+    if (!isset($_GET['csrf_token']) || $_GET['csrf_token'] !== $_SESSION['csrf_token']) {
+        $error_message = "Token de seguridad inválido";
     } else {
-        $error_message = $result['message'];
+        $result = $controller->actualizarEstado($id, 'completada');
+        if ($result['success']) {
+            $success_message = $result['message'];
+        } else {
+            $error_message = $result['message'];
+        }
     }
 }
 
@@ -52,7 +56,7 @@ if ($result['success']) {
     $filtro_activas = true;
 }
 
-// Estadísticas
+// Estadísticas - Solo para ventas activas
 $estadisticas_hoy = $controller->obtenerResumenHoy();
 $stats_usd = $estadisticas_hoy['success'] ? $estadisticas_hoy['data'] : [];
 
@@ -135,7 +139,7 @@ include __DIR__ . '/../layouts/header.php';
         margin-top: 0.25rem;
     }
     
-    /* Tarjetas de estadísticas - Colores originales */
+    /* Tarjetas de estadísticas */
     .stat-card {
         background: white;
         border-radius: 20px;
@@ -214,6 +218,16 @@ include __DIR__ . '/../layouts/header.php';
         color: #d97706;
     }
     
+    .badge-info {
+        background: #e0f2fe;
+        color: #0284c7;
+    }
+    
+    .badge-multiple {
+        background: #f3e8ff;
+        color: #7e22ce;
+    }
+    
     /* Botones limpios */
     .btn-limpio {
         padding: 0.6rem 1.2rem;
@@ -222,6 +236,10 @@ include __DIR__ . '/../layouts/header.php';
         font-size: 0.9rem;
         transition: all 0.2s ease;
         border: 1px solid transparent;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .btn-limpio-primary {
@@ -231,6 +249,7 @@ include __DIR__ . '/../layouts/header.php';
     
     .btn-limpio-primary:hover {
         background: #4338ca;
+        color: white;
     }
     
     .btn-limpio-outline {
@@ -242,6 +261,7 @@ include __DIR__ . '/../layouts/header.php';
     .btn-limpio-outline:hover {
         background: #f8fafc;
         border-color: #94a3b8;
+        color: #1e293b;
     }
     
     .btn-limpio-success {
@@ -251,6 +271,7 @@ include __DIR__ . '/../layouts/header.php';
     
     .btn-limpio-success:hover {
         background: #0f766e;
+        color: white;
     }
     
     /* Tabla limpia */
@@ -305,6 +326,7 @@ include __DIR__ . '/../layouts/header.php';
         background: #f8fafc;
         border-top: 2px solid #e2e8f0;
         padding: 1rem;
+        border-radius: 12px;
     }
     
     /* Modal limpio */
@@ -318,6 +340,7 @@ include __DIR__ . '/../layouts/header.php';
         background: #f8fafc;
         border-bottom: 1px solid #e2e8f0;
         padding: 1.5rem;
+        border-radius: 24px 24px 0 0;
     }
     
     /* Alertas limpias */
@@ -362,10 +385,22 @@ include __DIR__ . '/../layouts/header.php';
         font-weight: 500;
         color: #64748b;
         transition: all 0.2s ease;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    
+    .filtro-btn:hover {
+        background: #f1f5f9;
+        color: #334155;
     }
     
     .filtro-btn.active {
         background: #4f46e5;
+        color: white;
+    }
+    
+    .filtro-btn.active:hover {
+        background: #4338ca;
         color: white;
     }
     
@@ -376,10 +411,41 @@ include __DIR__ . '/../layouts/header.php';
         margin: 2rem 0;
     }
     
+    /* Paginación de pagos */
+    .pagos-mini {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        max-width: 200px;
+    }
+    
+    .pago-mini-item {
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 600;
+        cursor: help;
+    }
+    
+    .pago-mini-usd {
+        background: #e6fffa;
+        color: #0d9488;
+    }
+    
+    .pago-mini-bs {
+        background: #fff7ed;
+        color: #b45309;
+    }
+    
     /* Responsive */
     @media (max-width: 768px) {
         .stat-value { font-size: 1.8rem; }
         .reloj-minimal .hora { font-size: 1.4rem; }
+        .table-responsive { overflow-x: auto; }
     }
 </style>
 
@@ -400,6 +466,11 @@ include __DIR__ . '/../layouts/header.php';
         </div>
     </div>
     
+    <!-- Botón de recargar manual -->
+    <button class="btn-limpio btn-limpio-outline" onclick="location.reload()">
+        <i class="fas fa-sync-alt me-2"></i>
+        Actualizar
+    </button>
 </div>
 
 <!-- ================================================================== -->
@@ -416,7 +487,7 @@ include __DIR__ . '/../layouts/header.php';
             <?php if ($filtro_activas): ?>
                 Monitoreo de ventas activas - Pendientes por cierre
             <?php else: ?>
-                Historial completo de ventas
+                Historial completo de ventas (activas y cerradas)
             <?php endif; ?>
         </p>
     </div>
@@ -458,7 +529,7 @@ include __DIR__ . '/../layouts/header.php';
             <i class="fas fa-info-circle me-3" style="color: #3b82f6;"></i>
             <span><strong>Modo Historial:</strong> Estás viendo todas las ventas (activas y cerradas)</span>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 <?php endif; ?>
 
@@ -468,7 +539,7 @@ include __DIR__ . '/../layouts/header.php';
             <i class="fas fa-check-circle me-3" style="color: #10b981;"></i>
             <span><?php echo htmlspecialchars($success_message); ?></span>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 <?php endif; ?>
 
@@ -477,8 +548,8 @@ include __DIR__ . '/../layouts/header.php';
         <div class="d-flex align-items-center">
             <i class="fas fa-exclamation-triangle me-3" style="color: #ef4444;"></i>
             <span><?php echo htmlspecialchars($error_message); ?></span>
-            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
         </div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 <?php endif; ?>
 
@@ -615,10 +686,13 @@ include __DIR__ . '/../layouts/header.php';
         </h4>
         <div class="d-flex gap-2">
             <span class="badge-limpio badge-usd">
-                <i class="fas fa-dollar-sign me-1"></i> USD Recibido
+                <i class="fas fa-dollar-sign me-1"></i> USD
             </span>
             <span class="badge-limpio badge-bs">
-                <i class="fas fa-lock me-1"></i> Bs Precio Fijo
+                <i class="fas fa-lock me-1"></i> Bs Fijo
+            </span>
+            <span class="badge-limpio badge-multiple">
+                <i class="fas fa-layer-group me-1"></i> Múltiple
             </span>
         </div>
     </div>
@@ -633,10 +707,10 @@ include __DIR__ . '/../layouts/header.php';
             <p class="text-muted mb-4">No hay ventas activas pendientes de cierre en caja.</p>
             <div class="d-flex justify-content-center gap-3">
                 <a href="index.php?mostrar_todas=1" class="btn-limpio btn-limpio-outline text-decoration-none">
-                    <i class="fas fa-history me-2"></i>Ver Historial
+                    <i class="fas fa-history me-2"></i> Ver Historial
                 </a>
                 <a href="crear.php" class="btn-limpio btn-limpio-success text-decoration-none">
-                    <i class="fas fa-plus-circle me-2"></i>Nueva Venta
+                    <i class="fas fa-plus-circle me-2"></i> Nueva Venta
                 </a>
             </div>
         </div>
@@ -649,7 +723,7 @@ include __DIR__ . '/../layouts/header.php';
             <h4 class="fw-bold mb-3" style="color: #334155;">No hay ventas registradas</h4>
             <p class="text-muted mb-4">Comienza registrando tu primera venta en el sistema.</p>
             <a href="crear.php" class="btn-limpio btn-limpio-primary text-decoration-none">
-                <i class="fas fa-plus-circle me-2"></i>Crear Primera Venta
+                <i class="fas fa-plus-circle me-2"></i> Crear Primera Venta
             </a>
         </div>
     <?php else: ?>
@@ -660,10 +734,10 @@ include __DIR__ . '/../layouts/header.php';
                     <tr>
                         <th># Venta</th>
                         <th>Cliente</th>
-                        <th class="text-center">USD Recibido</th>
-                        <th class="text-center">Bs Precio Fijo</th>
+                        <th class="text-center">Métodos Pago</th>
+                        <th class="text-center">USD</th>
+                        <th class="text-center">Bs</th>
                         <th>Tasa</th>
-                        <th>Tipo Pago</th>
                         <th>Estado</th>
                         <th>Cierre</th>
                         <th>Fecha</th>
@@ -673,41 +747,47 @@ include __DIR__ . '/../layouts/header.php';
                 <tbody>
                     <?php 
                     $total_usd_recibido = 0;
-                    $total_bs_precio_fijo = 0;
+                    $total_bs_recibido = 0;
                     $ventasActivas = 0;
                     $ventasCerradas = 0;
                     
                     foreach ($ventas as $venta):
-                        $es_pago_usd = in_array($venta['tipo_pago_id'] ?? 0, TIPOS_PAGO_USD);
+                        $cerrada_en_caja = isset($venta['cerrada_en_caja']) && $venta['cerrada_en_caja'];
+                        $cantidad_pagos = $venta['cantidad_pagos'] ?? 1;
+                        $es_pago_multiple = $cantidad_pagos > 1;
+                        $total_pagado_usd = $venta['total_pagado_usd'] ?? $venta['total'] ?? 0;
+                        $total_pagado_bs = $venta['total_pagado_bs'] ?? $venta['total_bs'] ?? 0;
                         
-                        // Calcular total de productos con precio fijo
-                        $detalles_venta = [];
+                        // Determinar si tiene pagos en USD
+                        $tiene_usd = $es_pago_multiple ? true : in_array($venta['tipo_pago_id'] ?? 0, TIPOS_PAGO_USD);
+                        
+                        // Calcular total de productos con precio fijo (esto debería venir del controlador)
                         $total_bs_precio_fijo_venta = 0;
-                        
-                        try {
-                            $detalles_venta = $controller->obtenerDetalles($venta['id']);
-                            foreach ($detalles_venta as $detalle) {
-                                if (
-                                    isset($detalle['precio_unitario_bs']) && 
+                        if (isset($venta['detalles']) && is_array($venta['detalles'])) {
+                            foreach ($venta['detalles'] as $detalle) {
+                                if (isset($detalle['precio_unitario_bs']) && 
                                     $detalle['precio_unitario_bs'] > 0 &&
-                                    ($detalle['precio_unitario'] * $venta['tasa_cambio']) != $detalle['precio_unitario_bs']
-                                ) {
+                                    ($detalle['precio_unitario'] * ($venta['tasa_cambio'] ?? 1)) != $detalle['precio_unitario_bs']) {
                                     $total_bs_precio_fijo_venta += ($detalle['precio_unitario_bs'] * $detalle['cantidad']);
                                 }
                             }
-                        } catch (Exception $e) {}
+                        }
                         
                         $tiene_precio_fijo = $total_bs_precio_fijo_venta > 0;
-                        $cerrada_en_caja = isset($venta['cerrada_en_caja']) && $venta['cerrada_en_caja'];
                         
                         if ($cerrada_en_caja) $ventasCerradas++; else $ventasActivas++;
                         
-                        if ($es_pago_usd) $total_usd_recibido += $venta['total'] ?? 0;
-                        $total_bs_precio_fijo += $total_bs_precio_fijo_venta;
+                        if ($tiene_usd) $total_usd_recibido += $total_pagado_usd;
+                        $total_bs_recibido += $total_bs_precio_fijo_venta;
                     ?>
                         <tr style="<?php echo $cerrada_en_caja ? 'opacity: 0.7;' : ''; ?>">
                             <td>
                                 <span class="fw-semibold">#<?php echo htmlspecialchars($venta['numero_venta'] ?? 'N/A'); ?></span>
+                                <?php if ($es_pago_multiple): ?>
+                                    <br><small class="text-muted badge-multiple px-2 py-1 rounded" style="font-size: 0.7rem;">
+                                        <i class="fas fa-layer-group"></i> <?php echo $cantidad_pagos; ?> pagos
+                                    </small>
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
@@ -716,24 +796,43 @@ include __DIR__ . '/../layouts/header.php';
                                 </div>
                             </td>
                             
-                            <!-- USD Recibido -->
-                            <td class="text-center column-usd">
-                                <?php if ($es_pago_usd): ?>
-                                    <span class="fw-semibold">
-                                        <?php echo TasaCambioHelper::formatearUSD($venta['total'] ?? 0); ?>
+                            <!-- Métodos de Pago -->
+                            <td class="text-center">
+                                <?php if ($es_pago_multiple): ?>
+                                    <span class="badge-limpio badge-multiple" data-bs-toggle="tooltip" title="<?php echo $cantidad_pagos; ?> métodos de pago">
+                                        <i class="fas fa-layer-group me-1"></i> Múltiple
                                     </span>
-                                    <br>
-                                    <small class="text-muted">
-                                        <?php echo ($venta['tipo_pago_id'] ?? 0) == 2 ? 'Efectivo USD' : 'Divisa'; ?>
-                                    </small>
+                                <?php else: ?>
+                                    <?php if ($tiene_usd): ?>
+                                        <span class="badge-limpio badge-usd">
+                                            <i class="fas fa-dollar-sign me-1"></i>
+                                            <?php echo htmlspecialchars($venta['tipo_pago_nombre'] ?? 'USD'); ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge-limpio">
+                                            <?php echo htmlspecialchars($venta['tipo_pago_nombre'] ?? 'N/A'); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </td>
+                            
+                            <!-- USD -->
+                            <td class="text-center column-usd">
+                                <?php if ($tiene_usd): ?>
+                                    <span class="fw-semibold">
+                                        <?php echo TasaCambioHelper::formatearUSD($total_pagado_usd); ?>
+                                    </span>
+                                    <?php if ($es_pago_multiple): ?>
+                                        <br><small class="text-muted">de <?php echo $cantidad_pagos; ?> pagos</small>
+                                    <?php endif; ?>
                                 <?php else: ?>
                                     <span class="text-muted">—</span>
                                 <?php endif; ?>
                             </td>
                             
-                            <!-- Bs Precio Fijo -->
+                            <!-- Bs (solo precio fijo) -->
                             <td class="text-center column-bs">
-                                <?php if ($total_bs_precio_fijo_venta > 0): ?>
+                                <?php if ($tiene_precio_fijo): ?>
                                     <span class="fw-semibold">
                                         <?php echo TasaCambioHelper::formatearBS($total_bs_precio_fijo_venta); ?>
                                     </span>
@@ -752,19 +851,6 @@ include __DIR__ . '/../layouts/header.php';
                                     $tasa = $venta['tasa_cambio'] ?? $venta['tasa_cambio_utilizada'] ?? 0;
                                     echo number_format($tasa, 2); ?> Bs/$
                                 </span>
-                            </td>
-                            
-                            <td>
-                                <?php if ($es_pago_usd): ?>
-                                    <span class="badge-limpio badge-usd">
-                                        <i class="fas fa-dollar-sign me-1"></i>
-                                        <?php echo htmlspecialchars($venta['tipo_pago_nombre'] ?? 'USD'); ?>
-                                    </span>
-                                <?php else: ?>
-                                    <span class="badge-limpio">
-                                        <?php echo htmlspecialchars($venta['tipo_pago_nombre'] ?? 'N/A'); ?>
-                                    </span>
-                                <?php endif; ?>
                             </td>
                             
                             <td>
@@ -802,7 +888,7 @@ include __DIR__ . '/../layouts/header.php';
                                     <i class="fas fa-calendar-alt me-1" style="color: #64748b;"></i>
                                     <?php 
                                     $fecha = !empty($venta['fecha_hora']) ? Ayuda::formatDate($venta['fecha_hora']) : 
-                                             (!empty($venta['created_at']) ? Ayuda::formatDate($venta['created_at']) : '');
+                                             (!empty($venta['created_at']) ? Ayuda::formatDate($venta['created_at']) : 'N/A');
                                     echo $fecha;
                                     ?>
                                     <br>
@@ -813,7 +899,7 @@ include __DIR__ . '/../layouts/header.php';
                             </td>
                             
                             <td>
-                                <div class="btn-group">
+                                <div class="btn-group" role="group">
                                     <a href="ver.php?id=<?php echo $venta['id']; ?>" 
                                        class="btn btn-sm btn-outline-secondary border-0"
                                        style="padding: 0.5rem 0.8rem;"
@@ -830,6 +916,7 @@ include __DIR__ . '/../layouts/header.php';
                                                 data-bs-target="#modalCompletar"
                                                 data-id="<?php echo $venta['id']; ?>"
                                                 data-numero="<?php echo $venta['numero_venta'] ?? ''; ?>"
+                                                data-pagos="<?php echo $cantidad_pagos; ?>"
                                                 <?php echo $tiene_precio_fijo ? 'data-precio-fijo="true"' : ''; ?>
                                                 data-bs-toggle="tooltip"
                                                 title="Completar venta">
@@ -848,7 +935,7 @@ include __DIR__ . '/../layouts/header.php';
         <div class="table-footer mt-4 rounded-3">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <div class="d-flex gap-4">
+                    <div class="d-flex gap-4 flex-wrap">
                         <div>
                             <small class="text-muted d-block">Total USD Recibidos</small>
                             <span class="fw-bold fs-5" style="color: #0d9488;">
@@ -858,7 +945,13 @@ include __DIR__ . '/../layouts/header.php';
                         <div>
                             <small class="text-muted d-block">Total Bs Precio Fijo</small>
                             <span class="fw-bold fs-5" style="color: #b45309;">
-                                <?php echo $stats_bs['total_bs_precio_fijo_formateado'] ?? 'Bs 0,00'; ?>
+                                <?php echo TasaCambioHelper::formatearBS($total_bs_recibido); ?>
+                            </span>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Ventas con Múltiples Pagos</small>
+                            <span class="fw-bold fs-5" style="color: #7e22ce;">
+                                <?php echo count(array_filter($ventas, function($v) { return ($v['cantidad_pagos'] ?? 1) > 1; })); ?>
                             </span>
                         </div>
                     </div>
@@ -883,7 +976,7 @@ include __DIR__ . '/../layouts/header.php';
 </div>
 
 <!-- ================================================================== -->
-<!-- 🎯 MODAL COMPLETAR VENTA - LIMPIO -->
+<!-- 🎯 MODAL COMPLETAR VENTA - ACTUALIZADO PARA PAGOS MÚLTIPLES -->
 <!-- ================================================================== -->
 <div class="modal fade" id="modalCompletar" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -893,7 +986,7 @@ include __DIR__ . '/../layouts/header.php';
                     <i class="fas fa-check-circle me-2" style="color: #10b981;"></i>
                     Completar Venta
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
                 <div class="text-center mb-4">
@@ -901,7 +994,7 @@ include __DIR__ . '/../layouts/header.php';
                         <i class="fas fa-shopping-cart fa-3x" style="color: #10b981;"></i>
                     </div>
                     <h5 class="fw-bold mb-2">¿Completar venta <span id="numeroVenta" style="color: #10b981;"></span>?</h5>
-                    <p class="text-muted mb-0">Esta acción actualizará el stock de productos automáticamente.</p>
+                    <p class="text-muted mb-0" id="mensajePagos"></p>
                 </div>
                 
                 <div class="alert alert-success-limpio d-flex align-items-center p-3">
@@ -917,6 +1010,14 @@ include __DIR__ . '/../layouts/header.php';
                     <div>
                         <strong>Productos con precio fijo en Bs</strong><br>
                         <small>Esta venta incluye productos con precio fijo en Bolívares</small>
+                    </div>
+                </div>
+                
+                <div id="pagoMultipleInfo" class="alert alert-info-limpio d-flex align-items-center p-3 d-none">
+                    <i class="fas fa-layer-group me-3" style="color: #3b82f6;"></i>
+                    <div>
+                        <strong>Venta con múltiples pagos</strong><br>
+                        <small id="pagoMultipleTexto"></small>
                     </div>
                 </div>
             </div>
@@ -936,7 +1037,7 @@ include __DIR__ . '/../layouts/header.php';
 <!-- 🚀 SCRIPTS -->
 <!-- ================================================================== -->
 <script>
-// Reloj en tiempo real - Simple y elegante
+// Reloj en tiempo real
 function actualizarReloj() {
     const ahora = new Date();
     const horas = ahora.getHours().toString().padStart(2, '0');
@@ -960,17 +1061,19 @@ function actualizarReloj() {
 actualizarReloj();
 setInterval(actualizarReloj, 1000);
 
-// Inicializar tooltips
+// Inicializar tooltips y DataTables cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar tooltips
     const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
     tooltips.forEach(el => new bootstrap.Tooltip(el));
     
-    // Inicializar DataTables
-    if ($.fn.DataTable && $.fn.DataTable.isDataTable('#tablaVentas')) {
-        $('#tablaVentas').DataTable().destroy();
-    }
-    
-    if ($('#tablaVentas').length > 0) {
+    // Inicializar DataTables si existe la tabla
+    const tablaElement = document.getElementById('tablaVentas');
+    if (tablaElement && typeof $.fn !== 'undefined' && $.fn.DataTable) {
+        if ($.fn.DataTable.isDataTable('#tablaVentas')) {
+            $('#tablaVentas').DataTable().destroy();
+        }
+        
         $('#tablaVentas').DataTable({
             language: {
                 processing: "Procesando...",
@@ -991,7 +1094,7 @@ document.addEventListener('DOMContentLoaded', function() {
             pageLength: 10,
             order: [[8, 'desc']],
             columnDefs: [
-                { orderable: false, targets: [9] }
+                { orderable: false, targets: [1, 2, 9] }
             ]
         });
     }
@@ -1006,9 +1109,19 @@ document.addEventListener('DOMContentLoaded', function() {
             const id = btn.dataset.id;
             const numero = btn.dataset.numero;
             const precioFijo = btn.dataset.precioFijo === 'true';
+            const cantidadPagos = btn.dataset.pagos || 1;
             
             const numeroEl = document.getElementById('numeroVenta');
             if (numeroEl) numeroEl.textContent = '#' + (numero || '');
+            
+            const mensajePagosEl = document.getElementById('mensajePagos');
+            if (mensajePagosEl) {
+                if (cantidadPagos > 1) {
+                    mensajePagosEl.textContent = `Esta venta tiene ${cantidadPagos} métodos de pago registrados.`;
+                } else {
+                    mensajePagosEl.textContent = 'Esta acción actualizará el stock de productos automáticamente.';
+                }
+            }
             
             const warningEl = document.getElementById('precioFijoWarning');
             if (warningEl) {
@@ -1019,6 +1132,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
+            const pagoMultipleInfo = document.getElementById('pagoMultipleInfo');
+            const pagoMultipleTexto = document.getElementById('pagoMultipleTexto');
+            if (pagoMultipleInfo && pagoMultipleTexto) {
+                if (cantidadPagos > 1) {
+                    pagoMultipleInfo.classList.remove('d-none');
+                    pagoMultipleTexto.textContent = `La venta fue pagada con ${cantidadPagos} métodos de pago diferentes.`;
+                } else {
+                    pagoMultipleInfo.classList.add('d-none');
+                }
+            }
+            
             const confirmBtn = document.getElementById('btnCompletarConfirmar');
             if (confirmBtn && id) {
                 confirmBtn.href = `index.php?action=completar&id=${id}&csrf_token=<?php echo $_SESSION['csrf_token']; ?>`;
@@ -1026,8 +1150,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Auto-refrescar cada 5 minutos
+    // Auto-refrescar cada 5 minutos (300000 ms)
     setTimeout(() => location.reload(), 300000);
+});
+
+// Función para cerrar alertas manualmente
+document.querySelectorAll('.alert .btn-close').forEach(button => {
+    button.addEventListener('click', function() {
+        this.closest('.alert').remove();
+    });
 });
 </script>
 

@@ -1,11 +1,20 @@
 // Variables globales
 let productosSeleccionados = [];
+let pagosRegistrados = [];
 
 document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOM cargado, inicializando...');
+    
+    // Verificar que los elementos existen antes de usarlos
     inicializarBusqueda();
-    actualizarContadores();
-
-    if (!window.tasaInfo) {
+    inicializarPagos();
+    inicializarPaginacionPagos();
+    
+    // Actualizar contadores de productos (solo si existen los elementos)
+    actualizarContadoresProductos();
+    
+    // Verificar tasa de cambio
+    if (!window.tasaInfo || !window.tasaInfo.success) {
         showToast('error', 'No hay tasa de cambio configurada. Configure la tasa primero.');
     }
 
@@ -14,22 +23,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// Sistema de búsqueda avanzada
+// =========================================================================
+// SISTEMA DE BÚSQUEDA DE PRODUCTOS
+// =========================================================================
+
 function inicializarBusqueda() {
     const buscarInput = document.getElementById('buscar-producto');
     const filtroCategoria = document.getElementById('filtro-categoria');
+    
+    if (!buscarInput || !filtroCategoria) return;
 
-    // Búsqueda en tiempo real
     buscarInput.addEventListener('input', function () {
         buscarProductos();
     });
 
-    // Filtro por categoría
     filtroCategoria.addEventListener('change', function () {
         buscarProductos();
     });
 
-    // Prevenir envío del formulario al presionar Enter en la búsqueda
     buscarInput.addEventListener('keypress', function (e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -41,17 +52,17 @@ function inicializarBusqueda() {
 function buscarProductos() {
     const termino = document.getElementById('buscar-producto').value.trim();
     const categoria = document.getElementById('filtro-categoria').value;
-
-    // Si no hay término y no hay categoría, ocultar resultados
-    if (!termino && !categoria) {
-        document.getElementById('resultados-busqueda').classList.add('d-none');
-        document.getElementById('contador-resultados').textContent = '';
-        return;
-    }
-
-    // Mostrar loading
     const resultadosDiv = document.getElementById('resultados-busqueda');
     const listaProductos = document.getElementById('lista-productos');
+    const contadorResultados = document.getElementById('contador-resultados');
+
+    if (!resultadosDiv || !listaProductos || !contadorResultados) return;
+
+    if (!termino && !categoria) {
+        resultadosDiv.classList.add('d-none');
+        contadorResultados.textContent = '';
+        return;
+    }
 
     resultadosDiv.classList.remove('d-none');
     listaProductos.innerHTML = `
@@ -61,7 +72,6 @@ function buscarProductos() {
         </div>
     `;
 
-    // Hacer búsqueda en el servidor
     const url = `crear.php?action=buscar_productos&q=${encodeURIComponent(termino)}&categoria=${encodeURIComponent(categoria)}`;
 
     fetch(url)
@@ -84,6 +94,8 @@ function mostrarResultadosBusqueda(data) {
     const listaProductos = document.getElementById('lista-productos');
     const contador = document.getElementById('contador-resultados');
 
+    if (!listaProductos || !contador) return;
+
     if (!data.success || data.data.length === 0) {
         listaProductos.innerHTML = `
             <div class="alert alert-warning mb-0">
@@ -99,15 +111,12 @@ function mostrarResultadosBusqueda(data) {
     let contadorProductos = 0;
 
     data.data.forEach(producto => {
-        // Verificar si el producto ya está seleccionado
         const yaSeleccionado = productosSeleccionados.some(p => p.id === producto.id);
 
-        // Determinar clase de stock
         let stockClase = 'stock-alto';
         if (producto.stock_actual <= 10) stockClase = 'stock-medio';
         if (producto.stock_actual <= 3) stockClase = 'stock-bajo';
 
-        // Precio a mostrar
         let precioMostrar = '';
         if (producto.usar_precio_fijo_bs) {
             precioMostrar = `${parseFloat(producto.precio_bs).toFixed(2)} Bs (Fijo)`;
@@ -115,27 +124,29 @@ function mostrarResultadosBusqueda(data) {
             precioMostrar = `${parseFloat(producto.precio).toFixed(2)} USD`;
         }
 
+        // Escapar el JSON para pasarlo correctamente
+        const productoJson = JSON.stringify(producto).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
         html += `
             <div class="list-group-item producto-busqueda ${yaSeleccionado ? 'seleccionado' : ''}" 
-                 data-producto-id="${producto.id}"
-                 onclick="${!yaSeleccionado ? `seleccionarProducto(${JSON.stringify(producto).replace(/"/g, '&quot;')})` : ''}">
+                 data-producto-id="${producto.id}">
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="flex-grow-1">
                         <div class="d-flex align-items-center mb-1">
                             <strong>${producto.nombre}</strong>
                             ${producto.usar_precio_fijo_bs ?
-                '<span class="badge precio-fijo-badge ms-2">Precio Fijo</span>' :
-                '<span class="badge precio-normal-badge ms-2">USD</span>'}
-                            <span class="badge ${stockClase} badge-stock ms-2">
+                '<span class="badge bg-warning text-dark ms-2">Precio Fijo</span>' :
+                '<span class="badge bg-info ms-2">USD</span>'}
+                            <span class="badge ${stockClase} ms-2">
                                 Stock: ${producto.stock_actual}
                             </span>
                         </div>
-                        <div class="producto-info">
+                        <div class="producto-info small">
                             ${producto.codigo_sku ? `<span class="me-3"><i class="fas fa-barcode"></i> ${producto.codigo_sku}</span>` : ''}
                             ${producto.categoria_nombre ? `<span class="me-3"><i class="fas fa-tag"></i> ${producto.categoria_nombre}</span>` : ''}
-                            ${producto.usar_precio_fijo_bs ?
-                `<span class="precio-fijo"><i class="fas fa-bolt"></i> ${precioMostrar}</span>` :
-                `<span class="precio-normal"><i class="fas fa-dollar-sign"></i> ${precioMostrar}</span>`}
+                            <span class="${producto.usar_precio_fijo_bs ? 'text-warning' : 'text-success'}">
+                                <i class="fas ${producto.usar_precio_fijo_bs ? 'fa-bolt' : 'fa-dollar-sign'}"></i> ${precioMostrar}
+                            </span>
                             ${!producto.usar_precio_fijo_bs && window.tasaCambio > 0 ?
                 `<span class="ms-3"><i class="fas fa-calculator"></i> ${(parseFloat(producto.precio) * window.tasaCambio).toFixed(2)} Bs</span>` : ''}
                         </div>
@@ -143,7 +154,9 @@ function mostrarResultadosBusqueda(data) {
                     <div>
                         ${yaSeleccionado ?
                 '<span class="badge bg-success"><i class="fas fa-check"></i> Agregado</span>' :
-                '<button class="btn btn-sm btn-primary"><i class="fas fa-plus"></i> Agregar</button>'}
+                `<button class="btn btn-sm btn-primary" onclick='seleccionarProducto(${productoJson})'>
+                            <i class="fas fa-plus"></i> Agregar
+                         </button>`}
                     </div>
                 </div>
             </div>
@@ -156,35 +169,28 @@ function mostrarResultadosBusqueda(data) {
 }
 
 function seleccionarProducto(producto) {
-    // Verificar si ya está seleccionado
     if (productosSeleccionados.some(p => p.id === producto.id)) {
         showToast('info', 'Este producto ya está en la lista');
         return;
     }
 
-    // Verificar stock
     if (producto.stock_actual <= 0) {
         showToast('error', 'Producto sin stock disponible');
         return;
     }
 
-    // CRÍTICO: Para productos con precio fijo, el controlador usará precio_bs directamente
-    // Para productos normales, usar precio USD
     let precioUSD = 0;
-
     if (!producto.usar_precio_fijo_bs && producto.precio) {
         precioUSD = parseFloat(producto.precio);
     }
 
-    // IMPORTANTE: Guardar el precio BS EXACTO de la BD
     const precioBSExacto = parseFloat(producto.precio_bs) || 0;
 
-    // Agregar producto a la lista
     productosSeleccionados.push({
         id: producto.id,
         nombre: producto.nombre,
-        precio: precioUSD, // Para precio fijo, este puede ser 0
-        precio_bs: precioBSExacto, // ¡EXACTO de la BD!
+        precio: precioUSD,
+        precio_bs: precioBSExacto,
         usar_precio_fijo_bs: producto.usar_precio_fijo_bs,
         stock_actual: producto.stock_actual,
         cantidad: 1,
@@ -192,170 +198,35 @@ function seleccionarProducto(producto) {
         categoria: producto.categoria_nombre || ''
     });
 
-    // Actualizar interfaz
     actualizarListaProductos();
-    actualizarContadores();
-    calcularTotal();
-
-    // Mostrar mensaje
-    showToast('success', 'Producto agregado correctamente');
+    actualizarContadoresProductos();
+    calcularTotalVenta();
     buscarProductos();
+    showToast('success', 'Producto agregado correctamente');
 }
 
 function actualizarListaProductos() {
     const container = document.getElementById('productos-container');
     const mensajeSinProductos = document.getElementById('mensaje-sin-productos');
+    const btnGuardar = document.getElementById('btn-guardar-venta');
+
+    if (!container) return;
 
     if (productosSeleccionados.length === 0) {
-        // ... código para lista vacía ...
-        return;
-    }
-
-    let html = '';
-
-    productosSeleccionados.forEach((producto, index) => {
-        let subtotalUSD = 0;
-        let subtotalBS = 0;
-        let precioMostrar = '';
-        let precioUnitario = '';
-
-        if (producto.usar_precio_fijo_bs) {
-            // CRÍTICO: Para precio fijo, usar EXACTAMENTE el precio BS
-            subtotalBS = producto.cantidad * producto.precio_bs;
-            precioMostrar = `${producto.precio_bs.toFixed(2)} Bs`;
-            precioUnitario = `${producto.precio_bs.toFixed(2)} Bs (Precio Fijo)`;
-
-            // Calcular USD solo para visualización (no para cálculo real)
-            if (window.tasaCambio > 0) {
-                subtotalUSD = subtotalBS / window.tasaCambio;
-                precioUnitario += ` ($${(producto.precio_bs / window.tasaCambio).toFixed(4)} USD)`;
-            }
+        if (mensajeSinProductos) {
+            mensajeSinProductos.classList.remove('d-none');
         } else {
-            // Producto normal
-            subtotalUSD = producto.cantidad * producto.precio;
-            subtotalBS = subtotalUSD * window.tasaCambio;
-            precioMostrar = `$${producto.precio.toFixed(2)} USD`;
-            precioUnitario = `$${producto.precio.toFixed(2)} USD`;
-        }
-
-        html += `
-            <div class="producto-seleccionado p-3 border-bottom" data-index="${index}">
-                <div class="row align-items-center">
-                    <div class="col-md-4">
-                        <strong>${producto.nombre}</strong>
-                        <div class="producto-info small text-muted">
-                            ${producto.sku ? `<div><i class="fas fa-barcode"></i> ${producto.sku}</div>` : ''}
-                            ${producto.categoria ? `<div><i class="fas fa-tag"></i> ${producto.categoria}</div>` : ''}
-                            <div>
-                                <i class="fas fa-box"></i> Stock: ${producto.stock_actual} 
-                                ${producto.usar_precio_fijo_bs ?
-                `| <i class="fas fa-lock text-warning"></i> Precio Fijo BS` :
-                `| <i class="fas fa-dollar-sign text-success"></i> Precio USD`}
-                            </div>
-                            <div class="mt-1">
-                                <small>${precioUnitario}</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="cantidad-input-container d-flex align-items-center">
-                            <button class="btn btn-sm btn-outline-secondary btn-cantidad" onclick="cambiarCantidad(${index}, -1)">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <input type="number" 
-                                   class="form-control form-control-sm text-center mx-2" 
-                                   value="${producto.cantidad}" 
-                                   min="1" 
-                                   max="${producto.stock_actual}"
-                                   onchange="actualizarCantidad(${index}, this.value)"
-                                   style="width: 70px;">
-                            <button class="btn btn-sm btn-outline-secondary btn-cantidad" onclick="cambiarCantidad(${index}, 1)">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <small class="ms-2 text-muted">máx ${producto.stock_actual}</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="text-end">
-                            <div><strong>Subtotal:</strong></div>
-                            ${producto.usar_precio_fijo_bs ?
-                `<div class="text-warning fw-bold"><i class="fas fa-bolt"></i> ${subtotalBS.toFixed(2)} Bs</div>
-                                 <div><small>($${subtotalUSD.toFixed(2)} USD)</small></div>` :
-                `<div class="text-success fw-bold">$${subtotalUSD.toFixed(2)} USD</div>
-                                 <div><small>(${subtotalBS.toFixed(2)} Bs)</small></div>`}
-                        </div>
-                    </div>
-                    <div class="col-md-2 text-end">
-                        <button class="btn btn-sm btn-danger" onclick="eliminarProductoSeleccionado(${index})">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Campos ocultos para el formulario -->
-                <input type="hidden" name="productos[]" value="${producto.id}">
-                <input type="hidden" name="cantidades[]" value="${producto.cantidad}">
-                <input type="hidden" name="precios[]" value="${producto.precio}">
-                <input type="hidden" name="es_precio_fijo[]" value="${producto.usar_precio_fijo_bs ? '1' : '0'}">
-            </div>
-        `;
-    });
-
-    container.innerHTML = html;
-    document.getElementById('btn-guardar-venta').disabled = productosSeleccionados.length === 0;
-}
-
-function calcularTotal() {
-    let subtotalUSD = 0;
-    let subtotalBS = 0;
-
-    productosSeleccionados.forEach(producto => {
-        if (producto.usar_precio_fijo_bs) {
-            // CRÍTICO: Para precio fijo, multiplicar por el precio BS EXACTO
-            const subtotalItemBS = producto.cantidad * producto.precio_bs;
-            const subtotalItemUSD = window.tasaCambio > 0 ? (subtotalItemBS / window.tasaCambio) : 0;
-
-            subtotalBS += subtotalItemBS;
-            subtotalUSD += subtotalItemUSD;
-        } else {
-            // Producto normal
-            const subtotalItemUSD = producto.cantidad * producto.precio;
-            const subtotalItemBS = subtotalItemUSD * window.tasaCambio;
-
-            subtotalUSD += subtotalItemUSD;
-            subtotalBS += subtotalItemBS;
-        }
-    });
-
-    document.getElementById('total-usd').textContent = '$' + subtotalUSD.toFixed(2);
-    document.getElementById('total-bs').textContent = 'Bs ' + subtotalBS.toFixed(2);
-    document.getElementById('tasa-cambio').textContent = (window.tasaCambio || 0).toFixed(2) + ' Bs/$';
-
-    actualizarContadores();
-}
-
-function actualizarListaProductos() {
-    const container = document.getElementById('productos-container');
-    const mensajeSinProductos = document.getElementById('mensaje-sin-productos');
-
-    if (productosSeleccionados.length === 0) {
-        if (!mensajeSinProductos) {
             container.innerHTML = `
                 <div class="text-center text-muted py-4" id="mensaje-sin-productos">
                     <i class="fas fa-box-open fa-2x mb-2"></i>
                     <p>No hay productos agregados. Busca y selecciona productos para comenzar.</p>
                 </div>
             `;
-        } else {
-            mensajeSinProductos.classList.remove('d-none');
         }
-
-        // Deshabilitar botón de guardar
-        document.getElementById('btn-guardar-venta').disabled = true;
+        if (btnGuardar) btnGuardar.disabled = true;
         return;
     }
 
-    // Ocultar mensaje si existe
     if (mensajeSinProductos) {
         mensajeSinProductos.classList.add('d-none');
     }
@@ -365,73 +236,55 @@ function actualizarListaProductos() {
     productosSeleccionados.forEach((producto, index) => {
         let subtotalUSD = 0;
         let subtotalBS = 0;
-        let precioMostrar = '';
-        let precioUnitario = '';
 
         if (producto.usar_precio_fijo_bs) {
-            // Para productos con precio fijo
             subtotalBS = producto.cantidad * producto.precio_bs;
-            precioMostrar = `${producto.precio_bs.toFixed(2)} Bs`;
-            precioUnitario = producto.precio_bs.toFixed(2);
-
-            // Calcular equivalente en USD para mostrar (solo visual)
-            if (window.tasaCambio > 0) {
-                subtotalUSD = subtotalBS / window.tasaCambio;
-                precioUnitario += ` ($${(producto.precio_bs / window.tasaCambio).toFixed(2)} USD)`;
-            }
+            subtotalUSD = window.tasaCambio > 0 ? subtotalBS / window.tasaCambio : 0;
         } else {
-            // Para productos normales
             subtotalUSD = producto.cantidad * producto.precio;
             subtotalBS = subtotalUSD * window.tasaCambio;
-            precioMostrar = `$${producto.precio.toFixed(2)} USD`;
-            precioUnitario = `$${producto.precio.toFixed(2)} USD`;
         }
 
         html += `
-            <div class="producto-seleccionado p-3" data-index="${index}">
+            <div class="producto-seleccionado p-3 border-bottom" data-index="${index}">
                 <div class="row align-items-center">
                     <div class="col-md-4">
                         <strong>${producto.nombre}</strong>
-                        <div class="producto-info">
+                        <div class="small text-muted">
                             ${producto.sku ? `<div><i class="fas fa-barcode"></i> ${producto.sku}</div>` : ''}
-                            ${producto.categoria ? `<div><i class="fas fa-tag"></i> ${producto.categoria}</div>` : ''}
                             <div>
-                                <i class="fas fa-box"></i> Stock: ${producto.stock_actual} 
+                                <i class="fas fa-box"></i> Stock: ${producto.stock_actual}
                                 ${producto.usar_precio_fijo_bs ?
-                `| <i class="fas fa-lock text-warning"></i> Precio Fijo BS` :
-                `| <i class="fas fa-dollar-sign text-success"></i> Precio USD`}
-                            </div>
-                            <div class="mt-1">
-                                <small>Precio unitario: ${precioUnitario}</small>
+                `<span class="badge bg-warning text-dark ms-2">Precio Fijo BS</span>` :
+                `<span class="badge bg-info ms-2">USD</span>`}
                             </div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="cantidad-input-container">
-                            <button class="btn btn-sm btn-outline-secondary btn-cantidad" onclick="cambiarCantidad(${index}, -1)">
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="cambiarCantidad(${index}, -1)">
                                 <i class="fas fa-minus"></i>
                             </button>
                             <input type="number" 
-                                   class="form-control form-control-sm text-center" 
+                                   class="form-control form-control-sm text-center mx-2" 
                                    value="${producto.cantidad}" 
                                    min="1" 
                                    max="${producto.stock_actual}"
                                    onchange="actualizarCantidad(${index}, this.value)"
-                                   data-producto-index="${index}">
-                            <button class="btn btn-sm btn-outline-secondary btn-cantidad" onclick="cambiarCantidad(${index}, 1)">
+                                   style="width: 70px;">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="cambiarCantidad(${index}, 1)">
                                 <i class="fas fa-plus"></i>
                             </button>
-                            <small class="ms-2 text-muted">max ${producto.stock_actual}</small>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="text-end">
                             <div><strong>Subtotal:</strong></div>
                             ${producto.usar_precio_fijo_bs ?
-                `<div class="text-warning"><i class="fas fa-bolt"></i> ${subtotalBS.toFixed(2)} Bs</div>
-     ${window.tasaCambio > 0 ? `<div><small>($${subtotalUSD.toFixed(2)} USD)</small></div>` : ''}` :
-                `<div class="text-success">$${subtotalUSD.toFixed(2)} USD</div>
-     <div><small>(${subtotalBS.toFixed(2)} Bs)</small></div>`}
+                `<div class="text-warning fw-bold">${subtotalBS.toFixed(2)} Bs</div>
+                             <div class="small">$${subtotalUSD.toFixed(2)} USD</div>` :
+                `<div class="text-success fw-bold">$${subtotalUSD.toFixed(2)} USD</div>
+                             <div class="small">${subtotalBS.toFixed(2)} Bs</div>`}
                         </div>
                     </div>
                     <div class="col-md-2 text-end">
@@ -441,7 +294,6 @@ function actualizarListaProductos() {
                     </div>
                 </div>
                 
-                <!-- Campos ocultos para el formulario -->
                 <input type="hidden" name="productos[]" value="${producto.id}">
                 <input type="hidden" name="cantidades[]" value="${producto.cantidad}">
                 <input type="hidden" name="precios[]" value="${producto.precio}">
@@ -451,10 +303,9 @@ function actualizarListaProductos() {
     });
 
     container.innerHTML = html;
-
-    // Habilitar botón de guardar
-    document.getElementById('btn-guardar-venta').disabled = productosSeleccionados.length === 0;
+    if (btnGuardar) btnGuardar.disabled = false;
 }
+
 function actualizarCantidad(index, nuevaCantidad) {
     nuevaCantidad = parseInt(nuevaCantidad);
 
@@ -462,7 +313,6 @@ function actualizarCantidad(index, nuevaCantidad) {
         nuevaCantidad = 1;
     }
 
-    // Verificar stock máximo
     const stockMaximo = productosSeleccionados[index].stock_actual;
     if (nuevaCantidad > stockMaximo) {
         nuevaCantidad = stockMaximo;
@@ -471,7 +321,7 @@ function actualizarCantidad(index, nuevaCantidad) {
 
     productosSeleccionados[index].cantidad = nuevaCantidad;
     actualizarListaProductos();
-    calcularTotal();
+    calcularTotalVenta();
 }
 
 function cambiarCantidad(index, cambio) {
@@ -482,78 +332,480 @@ function cambiarCantidad(index, cambio) {
 function eliminarProductoSeleccionado(index) {
     productosSeleccionados.splice(index, 1);
     actualizarListaProductos();
-    actualizarContadores();
-    calcularTotal();
-    buscarProductos(); // Actualizar búsqueda para quitar "agregado"
+    actualizarContadoresProductos();
+    calcularTotalVenta();
+    buscarProductos();
     showToast('info', 'Producto eliminado de la lista');
 }
 
-function actualizarContadores() {
+function actualizarContadoresProductos() {
     const contadorProductos = document.getElementById('contador-productos');
     const cantidadTotalProductos = document.getElementById('cantidad-total-productos');
 
-    // Contar productos únicos
-    contadorProductos.textContent = productosSeleccionados.length;
+    if (contadorProductos) {
+        contadorProductos.textContent = productosSeleccionados.length;
+    }
 
-    // Contar cantidad total de productos
-    const totalItems = productosSeleccionados.reduce((total, producto) => total + producto.cantidad, 0);
-    cantidadTotalProductos.textContent = totalItems;
+    if (cantidadTotalProductos) {
+        const totalItems = productosSeleccionados.reduce((total, producto) => total + producto.cantidad, 0);
+        cantidadTotalProductos.textContent = totalItems;
+    }
 }
 
-function calcularTotal() {
+function calcularTotalVenta() {
     let subtotalUSD = 0;
     let subtotalBS = 0;
 
     productosSeleccionados.forEach(producto => {
         if (producto.usar_precio_fijo_bs) {
-            // **PRODUCTO CON PRECIO FIJO EN BS**
-            // Calcular BS directamente del precio fijo
             const subtotalItemBS = producto.cantidad * producto.precio_bs;
-
-            // Calcular USD dividiendo por tasa (solo para visualización)
-            const subtotalItemUSD = window.tasaCambio > 0 ? (subtotalItemBS / window.tasaCambio) : 0;
-
+            const subtotalItemUSD = window.tasaCambio > 0 ? subtotalItemBS / window.tasaCambio : 0;
             subtotalBS += subtotalItemBS;
             subtotalUSD += subtotalItemUSD;
-
-            // **DEBUG EN CONSOLA**
-            console.log("Producto precio fijo: " + producto.nombre);
-            console.log("  Precio BS fijo: " + producto.precio_bs);
-            console.log("  Subtotal BS: " + subtotalItemBS);
-            console.log("  Subtotal USD: " + subtotalItemUSD);
-
         } else {
-            // **PRODUCTO SIN PRECIO FIJO**
             const subtotalItemUSD = producto.cantidad * producto.precio;
             const subtotalItemBS = subtotalItemUSD * window.tasaCambio;
-
             subtotalUSD += subtotalItemUSD;
             subtotalBS += subtotalItemBS;
         }
     });
 
-    // Formatear con 2 decimales exactos
-    document.getElementById('total-usd').textContent = '$' + subtotalUSD.toFixed(2);
-    document.getElementById('total-bs').textContent = 'Bs ' + subtotalBS.toFixed(2);
+    const totalUsdElement = document.getElementById('total-usd');
+    const totalBsElement = document.getElementById('total-bs');
+    const tasaCambioElement = document.getElementById('tasa-cambio');
 
-    actualizarContadores();
+    if (totalUsdElement) totalUsdElement.textContent = '$' + subtotalUSD.toFixed(2);
+    if (totalBsElement) totalBsElement.textContent = 'Bs ' + subtotalBS.toFixed(2);
+    if (tasaCambioElement) {
+        tasaCambioElement.textContent = (window.tasaCambio || 0).toFixed(2) + ' Bs/$';
+    }
+
+    actualizarContadoresProductos();
+    actualizarResumenPagos(); // Actualizar también el resumen de pagos
 }
 
 function limpiarBusqueda() {
-    document.getElementById('buscar-producto').value = '';
-    document.getElementById('filtro-categoria').value = '';
-    document.getElementById('resultados-busqueda').classList.add('d-none');
-    document.getElementById('contador-resultados').textContent = '';
+    const buscarInput = document.getElementById('buscar-producto');
+    const filtroCategoria = document.getElementById('filtro-categoria');
+    const resultadosDiv = document.getElementById('resultados-busqueda');
+    const contadorResultados = document.getElementById('contador-resultados');
+
+    if (buscarInput) buscarInput.value = '';
+    if (filtroCategoria) filtroCategoria.value = '';
+    if (resultadosDiv) resultadosDiv.classList.add('d-none');
+    if (contadorResultados) contadorResultados.textContent = '';
 }
 
-// Funciones para gestión de clientes
+// =========================================================================
+// SISTEMA DE PAGOS MÚLTIPLES MEJORADO
+// =========================================================================
+
+function inicializarPagos() {
+    pagosRegistrados = [];
+    
+    const tipoPagoSelect = document.getElementById('nuevo_pago_tipo');
+    const montoUSD = document.getElementById('nuevo_pago_monto_usd');
+    const montoBS = document.getElementById('nuevo_pago_monto_bs');
+    
+    if (tipoPagoSelect) {
+        tipoPagoSelect.addEventListener('change', function() {
+            actualizarInterfazPorMoneda();
+            calcularEquivalenciaPago();
+        });
+    }
+    
+    if (montoUSD) {
+        montoUSD.addEventListener('input', function() {
+            const tipoPagoSelect = document.getElementById('nuevo_pago_tipo');
+            if (tipoPagoSelect && tipoPagoSelect.value) {
+                const selectedOption = tipoPagoSelect.options[tipoPagoSelect.selectedIndex];
+                const moneda = selectedOption.dataset.moneda;
+                
+                if (moneda === 'BS') {
+                    // Si es BS, el usuario ingresó USD pero queremos que ingrese BS
+                    // Por ahora, calculamos BS desde USD
+                    const montoUsd = parseFloat(this.value) || 0;
+                    const montoBs = montoUsd * window.tasaCambio;
+                    if (montoBS) montoBS.value = montoBs.toFixed(2);
+                } else {
+                    // Si es USD, calcular BS
+                    calcularEquivalenciaPago();
+                }
+            }
+        });
+    }
+    
+    if (montoBS) {
+        montoBS.addEventListener('input', function() {
+            const tipoPagoSelect = document.getElementById('nuevo_pago_tipo');
+            if (tipoPagoSelect && tipoPagoSelect.value) {
+                const selectedOption = tipoPagoSelect.options[tipoPagoSelect.selectedIndex];
+                const moneda = selectedOption.dataset.moneda;
+                
+                if (moneda === 'BS') {
+                    // Si es BS, calcular USD a partir de BS
+                    const montoBs = parseFloat(this.value) || 0;
+                    const montoUsd = window.tasaCambio > 0 ? montoBs / window.tasaCambio : 0;
+                    if (montoUSD) montoUSD.value = montoUsd.toFixed(2);
+                }
+            }
+        });
+    }
+    
+    actualizarListaPagos();
+    actualizarResumenPagos();
+}
+
+function inicializarPaginacionPagos() {
+    // Crear contenedor de paginación si no existe
+    const pagosContainer = document.getElementById('pagos-container');
+    if (pagosContainer && !document.getElementById('pagos-pagination')) {
+        const paginationDiv = document.createElement('div');
+        paginationDiv.id = 'pagos-pagination';
+        paginationDiv.className = 'mt-2 d-flex justify-content-end';
+        pagosContainer.parentNode.insertBefore(paginationDiv, pagosContainer.nextSibling);
+    }
+}
+
+function actualizarInterfazPorMoneda() {
+    const tipoPagoSelect = document.getElementById('nuevo_pago_tipo');
+    const labelMontoUSD = document.querySelector('label[for="nuevo_pago_monto_usd"]');
+    const labelMontoBS = document.querySelector('label[for="nuevo_pago_monto_bs"]');
+    const montoUSD = document.getElementById('nuevo_pago_monto_usd');
+    const montoBS = document.getElementById('nuevo_pago_monto_bs');
+    
+    if (!tipoPagoSelect || !tipoPagoSelect.value) return;
+    
+    const selectedOption = tipoPagoSelect.options[tipoPagoSelect.selectedIndex];
+    const moneda = selectedOption.dataset.moneda;
+    
+    if (moneda === 'BS') {
+        // Para pagos en BS: el campo principal es BS
+        if (labelMontoUSD) labelMontoUSD.innerHTML = 'Monto en USD (referencia)';
+        if (labelMontoBS) labelMontoBS.innerHTML = 'Monto en BS *';
+        if (montoUSD) montoUSD.placeholder = '0.00 USD (ref)';
+        if (montoBS) {
+            montoBS.readOnly = false;
+            montoBS.classList.add('border-primary');
+            montoBS.placeholder = 'Ingrese monto en BS';
+        }
+    } else {
+        // Para pagos en USD o mixtos
+        if (labelMontoUSD) labelMontoUSD.innerHTML = 'Monto en USD *';
+        if (labelMontoBS) labelMontoBS.innerHTML = 'Equivalente en Bs';
+        if (montoUSD) montoUSD.placeholder = '0.00';
+        if (montoBS) {
+            montoBS.readOnly = true;
+            montoBS.classList.remove('border-primary');
+            montoBS.placeholder = 'Se calcula automáticamente';
+        }
+    }
+}
+
+function calcularEquivalenciaPago() {
+    const tipoPagoSelect = document.getElementById('nuevo_pago_tipo');
+    const montoUSD = parseFloat(document.getElementById('nuevo_pago_monto_usd').value) || 0;
+    const montoBsInput = document.getElementById('nuevo_pago_monto_bs');
+    
+    if (!tipoPagoSelect || !tipoPagoSelect.value || !montoBsInput) return;
+    
+    const selectedOption = tipoPagoSelect.options[tipoPagoSelect.selectedIndex];
+    const moneda = selectedOption.dataset.moneda;
+    
+    if (moneda === 'BS') {
+        // Para BS, el cálculo se hace desde el campo BS (que es editable)
+        // Esta función se llama cuando cambia USD, pero para BS no hacemos nada
+        return;
+    } else {
+        // Para USD, calcular BS automáticamente
+        const montoBs = montoUSD * window.tasaCambio;
+        montoBsInput.value = montoBs.toFixed(2);
+    }
+}
+
+function agregarPago() {
+    const tipoPagoSelect = document.getElementById('nuevo_pago_tipo');
+    const montoUSD = parseFloat(document.getElementById('nuevo_pago_monto_usd').value);
+    const montoBS = parseFloat(document.getElementById('nuevo_pago_monto_bs').value) || 0;
+    
+    if (!tipoPagoSelect || !tipoPagoSelect.value) {
+        showToast('error', 'Debes seleccionar un tipo de pago');
+        return;
+    }
+    
+    const selectedOption = tipoPagoSelect.options[tipoPagoSelect.selectedIndex];
+    const moneda = selectedOption.dataset.moneda;
+    
+    // Validar según la moneda
+    if (moneda === 'BS') {
+        if (isNaN(montoBS) || montoBS <= 0) {
+            showToast('error', 'Debes ingresar un monto válido en BS');
+            return;
+        }
+        // Si es BS, el montoUSD se calcula automáticamente
+        document.getElementById('nuevo_pago_monto_usd').value = (montoBS / window.tasaCambio).toFixed(2);
+    } else {
+        if (isNaN(montoUSD) || montoUSD <= 0) {
+            showToast('error', 'Debes ingresar un monto válido en USD');
+            return;
+        }
+    }
+    
+    // Obtener valores actualizados
+    const montoUSDFinal = parseFloat(document.getElementById('nuevo_pago_monto_usd').value);
+    const montoBSFinal = parseFloat(document.getElementById('nuevo_pago_monto_bs').value);
+    
+    const tipoPagoId = parseInt(tipoPagoSelect.value);
+    const tipoPagoNombre = selectedOption.dataset.nombre;
+    
+    // Verificar que no exceda el total pendiente
+    const totalVentaUSD = parseFloat(document.getElementById('total-usd').textContent.replace('$', '')) || 0;
+    const totalPagadoUSD = pagosRegistrados.reduce((sum, p) => sum + p.monto_usd, 0);
+    const pendienteUSD = totalVentaUSD - totalPagadoUSD;
+    
+    if (montoUSDFinal > pendienteUSD + 0.01) {
+        showToast('warning', `El monto excede el pendiente. Pendiente: $${pendienteUSD.toFixed(2)}`);
+        return;
+    }
+    
+    const nuevoPago = {
+        id: Date.now() + Math.random(),
+        tipo_pago_id: tipoPagoId,
+        tipo_pago_nombre: tipoPagoNombre,
+        moneda: moneda,
+        monto_usd: montoUSDFinal,
+        monto_bs: montoBSFinal,
+        es_usd: (moneda === 'USD')
+    };
+    
+    pagosRegistrados.push(nuevoPago);
+    actualizarListaPagos();
+    actualizarResumenPagos();
+    
+    // Limpiar formulario
+    tipoPagoSelect.value = '';
+    document.getElementById('nuevo_pago_monto_usd').value = '0.00';
+    document.getElementById('nuevo_pago_monto_bs').value = '0.00';
+    
+    // Restaurar interfaz por defecto
+    const labelMontoUSD = document.querySelector('label[for="nuevo_pago_monto_usd"]');
+    const labelMontoBS = document.querySelector('label[for="nuevo_pago_monto_bs"]');
+    const montoBSInput = document.getElementById('nuevo_pago_monto_bs');
+    
+    if (labelMontoUSD) labelMontoUSD.innerHTML = 'Monto en USD *';
+    if (labelMontoBS) labelMontoBS.innerHTML = 'Equivalente en Bs';
+    if (montoBSInput) {
+        montoBSInput.readOnly = true;
+        montoBSInput.classList.remove('border-primary');
+        montoBSInput.placeholder = 'Se calcula automáticamente';
+    }
+    
+    showToast('success', 'Pago agregado correctamente');
+}
+
+function actualizarListaPagos() {
+    const container = document.getElementById('pagos-container');
+    const mensajeSinPagos = document.getElementById('mensaje-sin-pagos');
+    
+    if (!container) return;
+    
+    if (pagosRegistrados.length === 0) {
+        if (mensajeSinPagos) {
+            mensajeSinPagos.classList.remove('d-none');
+        } else {
+            container.innerHTML = `
+                <div class="text-center text-muted py-4" id="mensaje-sin-pagos">
+                    <i class="fas fa-money-bill fa-2x mb-2"></i>
+                    <p>No hay pagos registrados. Agrega uno o más métodos de pago.</p>
+                </div>
+            `;
+        }
+        return;
+    }
+    
+    if (mensajeSinPagos) {
+        mensajeSinPagos.classList.add('d-none');
+    }
+    
+    // Paginación simple (mostrar últimos 5 pagos)
+    const pagosVisibles = pagosRegistrados.slice(-5);
+    let html = '<div class="list-group">';
+    
+    pagosVisibles.forEach(pago => {
+        const fecha = new Date().toLocaleTimeString();
+        const esBS = pago.moneda === 'BS';
+        
+        html += `
+            <div class="list-group-item list-group-item-action" data-pago-id="${pago.id}">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>${pago.tipo_pago_nombre}</strong>
+                        <br>
+                        <small class="text-muted">${fecha}</small>
+                    </div>
+                    <div class="text-end">
+                        <div class="${esBS ? 'text-warning' : 'text-success'} fw-bold">
+                            ${esBS ? 'Bs' : '$'} ${esBS ? pago.monto_bs.toFixed(2) : pago.monto_usd.toFixed(2)}
+                        </div>
+                        <small>
+                            ${esBS ? 
+                `$${pago.monto_usd.toFixed(2)} USD` : 
+                `Bs ${pago.monto_bs.toFixed(2)}`}
+                        </small>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="eliminarPago(${pago.id})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    
+    if (pagosRegistrados.length > 5) {
+        html += `<div class="text-end mt-2">
+            <small class="text-muted">Mostrando últimos 5 de ${pagosRegistrados.length} pagos</small>
+        </div>`;
+    }
+    
+    container.innerHTML = html;
+}
+
+function eliminarPago(pagoId) {
+    pagosRegistrados = pagosRegistrados.filter(p => p.id !== pagoId);
+    actualizarListaPagos();
+    actualizarResumenPagos();
+    showToast('info', 'Pago eliminado');
+}
+
+function actualizarResumenPagos() {
+    const totalVentaUSD = parseFloat(document.getElementById('total-usd')?.textContent.replace('$', '')) || 0;
+    const totalVentaBS = parseFloat(document.getElementById('total-bs')?.textContent.replace('Bs', '')) || 0;
+    
+    let totalUSDRecibido = 0;
+    let totalBSRecibido = 0;
+    
+    pagosRegistrados.forEach(pago => {
+        totalUSDRecibido += pago.monto_usd;
+        totalBSRecibido += pago.monto_bs;
+    });
+    
+    // Actualizar elementos del DOM
+    const elementos = {
+        'total-usd-recibido': '$' + totalUSDRecibido.toFixed(2),
+        'total-bs-recibido': 'Bs ' + totalBSRecibido.toFixed(2),
+        'total-pagos-badge': 'Total Pagado: $' + totalUSDRecibido.toFixed(2),
+        'pagado-usd': '$' + totalUSDRecibido.toFixed(2),
+        'pagado-bs': 'Bs ' + totalBSRecibido.toFixed(2),
+        'total-venta-resumen': `$${totalVentaUSD.toFixed(2)} / Bs ${totalVentaBS.toFixed(2)}`,
+        'total-pagado': '$' + totalUSDRecibido.toFixed(2)
+    };
+    
+    for (const [id, valor] of Object.entries(elementos)) {
+        const elemento = document.getElementById(id);
+        if (elemento) elemento.textContent = valor;
+    }
+    
+    // Calcular vuelto
+    const vuelto = totalUSDRecibido - totalVentaUSD;
+    const vueltoElement = document.getElementById('vuelto');
+    if (vueltoElement) {
+        vueltoElement.textContent = (vuelto >= 0 ? '+' : '-') + '$' + Math.abs(vuelto).toFixed(2);
+    }
+    
+    // Actualizar barra de progreso
+    const progreso = totalVentaUSD > 0 ? (totalUSDRecibido / totalVentaUSD) * 100 : 0;
+    const progresoBar = document.getElementById('progreso-pago-bar');
+    const progresoTexto = document.getElementById('progreso-pago-texto');
+    const alertaInsuficiente = document.getElementById('alerta-pago-insuficiente');
+    const alertaExcedente = document.getElementById('alerta-pago-excedente');
+    const estadoPagoTexto = document.getElementById('estado-pago-texto');
+    
+    if (progresoBar) {
+        progresoBar.style.width = Math.min(progreso, 100) + '%';
+        progresoBar.textContent = Math.min(progreso, 100).toFixed(0) + '%';
+        progresoBar.setAttribute('aria-valuenow', progreso);
+    }
+    
+    if (progresoTexto) {
+        progresoTexto.textContent = `$${totalUSDRecibido.toFixed(2)} de $${totalVentaUSD.toFixed(2)} (${progreso.toFixed(0)}%)`;
+    }
+    
+    // Actualizar estado y color
+    if (estadoPagoTexto) {
+        if (progreso >= 100) {
+            estadoPagoTexto.textContent = 'Completado';
+            estadoPagoTexto.className = 'text-success';
+            if (progresoBar) {
+                progresoBar.classList.remove('bg-warning', 'bg-danger');
+                progresoBar.classList.add('bg-success');
+            }
+        } else if (progreso > 0) {
+            estadoPagoTexto.textContent = 'Pago Parcial';
+            estadoPagoTexto.className = 'text-warning';
+            if (progresoBar) {
+                progresoBar.classList.remove('bg-success', 'bg-danger');
+                progresoBar.classList.add('bg-warning');
+            }
+        } else {
+            estadoPagoTexto.textContent = 'Pendiente';
+            estadoPagoTexto.className = 'text-danger';
+            if (progresoBar) {
+                progresoBar.classList.remove('bg-success', 'bg-warning');
+                progresoBar.classList.add('bg-danger');
+            }
+        }
+    }
+    
+    // Mostrar alertas
+    if (alertaInsuficiente && alertaExcedente) {
+        if (totalUSDRecibido < totalVentaUSD - 0.01) {
+            const faltante = totalVentaUSD - totalUSDRecibido;
+            document.getElementById('monto-faltante').textContent = '$' + faltante.toFixed(2);
+            alertaInsuficiente.classList.remove('d-none');
+            alertaExcedente.classList.add('d-none');
+        } else if (totalUSDRecibido > totalVentaUSD + 0.01) {
+            const excedente = totalUSDRecibido - totalVentaUSD;
+            document.getElementById('monto-excedente').textContent = '$' + excedente.toFixed(2);
+            alertaInsuficiente.classList.add('d-none');
+            alertaExcedente.classList.remove('d-none');
+        } else {
+            alertaInsuficiente.classList.add('d-none');
+            alertaExcedente.classList.add('d-none');
+        }
+    }
+    
+    // Habilitar/deshabilitar botón de guardar
+    const btnGuardar = document.getElementById('btn-guardar-venta');
+    const clienteSelect = document.getElementById('cliente_id');
+    
+    if (btnGuardar) {
+        if (productosSeleccionados.length > 0 && 
+            clienteSelect && clienteSelect.value && 
+            pagosRegistrados.length > 0 && 
+            totalUSDRecibido >= totalVentaUSD - 0.01) {
+            btnGuardar.disabled = false;
+        } else {
+            btnGuardar.disabled = true;
+        }
+    }
+}
+
+// =========================================================================
+// FUNCIONES PARA CLIENTES
+// =========================================================================
+
 function crearCliente() {
     const form = document.getElementById('formNuevoCliente');
+    if (!form) return;
+    
     const formData = new FormData(form);
     formData.append('action', 'crear_cliente');
 
-    // Mostrar loading
     const submitBtn = document.querySelector('#modalNuevoCliente .btn-primary');
+    if (!submitBtn) return;
+    
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Guardando...';
     submitBtn.disabled = true;
@@ -564,8 +816,11 @@ function crearCliente() {
     })
         .then(response => response.json())
         .then(data => {
+            const clienteMessage = document.getElementById('cliente-message');
+            if (!clienteMessage) return;
+            
             if (data.success) {
-                document.getElementById('cliente-message').innerHTML = `
+                clienteMessage.innerHTML = `
                     <div class="alert alert-success">
                         <i class="fas fa-check-circle me-2"></i>
                         ${data.message}
@@ -576,12 +831,12 @@ function crearCliente() {
 
                 setTimeout(() => {
                     const modal = bootstrap.Modal.getInstance(document.getElementById('modalNuevoCliente'));
-                    modal.hide();
+                    if (modal) modal.hide();
                     form.reset();
-                    document.getElementById('cliente-message').innerHTML = '';
+                    clienteMessage.innerHTML = '';
                 }, 2000);
             } else {
-                document.getElementById('cliente-message').innerHTML = `
+                clienteMessage.innerHTML = `
                     <div class="alert alert-danger">
                         <i class="fas fa-exclamation-triangle me-2"></i>
                         ${data.message}
@@ -590,12 +845,15 @@ function crearCliente() {
             }
         })
         .catch(error => {
-            document.getElementById('cliente-message').innerHTML = `
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Error de conexión: ${error}
-                </div>
-            `;
+            const clienteMessage = document.getElementById('cliente-message');
+            if (clienteMessage) {
+                clienteMessage.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error de conexión: ${error}
+                    </div>
+                `;
+            }
         })
         .finally(() => {
             submitBtn.innerHTML = originalText;
@@ -605,21 +863,29 @@ function crearCliente() {
 
 function actualizarSelectClientes(clienteId, clienteNombre, documento) {
     const select = document.getElementById('cliente_id');
+    if (!select) return;
+    
     const option = document.createElement('option');
     option.value = clienteId;
     option.text = clienteNombre + (documento ? ` (${documento})` : '');
     option.selected = true;
-
     select.appendChild(option);
 }
 
+// =========================================================================
+// FUNCIONES UTILITARIAS
+// =========================================================================
+
 function limpiarFormulario() {
     if (confirm('¿Estás seguro de que deseas limpiar todo el formulario? Se perderán todos los datos ingresados.')) {
-        document.getElementById('formVenta').reset();
+        document.getElementById('formVenta')?.reset();
         productosSeleccionados = [];
+        pagosRegistrados = [];
         actualizarListaProductos();
-        actualizarContadores();
-        calcularTotal();
+        actualizarContadoresProductos();
+        calcularTotalVenta();
+        actualizarListaPagos();
+        actualizarResumenPagos();
         limpiarBusqueda();
         showToast('info', 'Formulario limpiado correctamente.');
     }
@@ -629,12 +895,26 @@ function showToast(type, message) {
     const toastContainer = document.getElementById('toastContainer') || createToastContainer();
     const toast = document.createElement('div');
 
-    toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type === 'warning' ? 'warning' : type} border-0`;
+    let bgColor = 'bg-info';
+    let icon = 'fa-info-circle';
+    
+    if (type === 'success') {
+        bgColor = 'bg-success';
+        icon = 'fa-check-circle';
+    } else if (type === 'error') {
+        bgColor = 'bg-danger';
+        icon = 'fa-exclamation-triangle';
+    } else if (type === 'warning') {
+        bgColor = 'bg-warning';
+        icon = 'fa-exclamation-triangle';
+    }
+
+    toast.className = `toast align-items-center text-white ${bgColor} border-0`;
     toast.setAttribute('role', 'alert');
     toast.innerHTML = `
         <div class="d-flex">
             <div class="toast-body">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                <i class="fas ${icon} me-2"></i>
                 ${message}
             </div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
@@ -660,8 +940,62 @@ function createToastContainer() {
     return container;
 }
 
-// Limpiar mensajes del modal cuando se cierre
-document.getElementById('modalNuevoCliente').addEventListener('hidden.bs.modal', function () {
-    document.getElementById('formNuevoCliente').reset();
-    document.getElementById('cliente-message').innerHTML = '';
+// Event listeners para modales
+document.addEventListener('DOMContentLoaded', function() {
+    const modalNuevoCliente = document.getElementById('modalNuevoCliente');
+    if (modalNuevoCliente) {
+        modalNuevoCliente.addEventListener('hidden.bs.modal', function () {
+            document.getElementById('formNuevoCliente')?.reset();
+            const clienteMessage = document.getElementById('cliente-message');
+            if (clienteMessage) clienteMessage.innerHTML = '';
+        });
+    }
+});
+
+// Validación antes de enviar el formulario
+document.addEventListener('DOMContentLoaded', function() {
+    const formVenta = document.getElementById('formVenta');
+    if (formVenta) {
+        formVenta.addEventListener('submit', function(e) {
+            if (pagosRegistrados.length === 0) {
+                e.preventDefault();
+                showToast('error', 'Debes registrar al menos un pago');
+                return;
+            }
+            
+            const totalVentaUSD = parseFloat(document.getElementById('total-usd')?.textContent.replace('$', '')) || 0;
+            const totalPagadoUSD = pagosRegistrados.reduce((sum, p) => sum + p.monto_usd, 0);
+            
+            if (totalPagadoUSD < totalVentaUSD - 0.01) {
+                e.preventDefault();
+                showToast('error', 'El total pagado es insuficiente para completar la venta');
+                return;
+            }
+            
+            // Eliminar campos ocultos previos
+            const inputsOcultos = formVenta.querySelectorAll('input[name^="pagos["]');
+            inputsOcultos.forEach(input => input.remove());
+            
+            // Crear campos ocultos para cada pago
+            pagosRegistrados.forEach((pago, index) => {
+                const inputTipoPago = document.createElement('input');
+                inputTipoPago.type = 'hidden';
+                inputTipoPago.name = `pagos[${index}][tipo_pago_id]`;
+                inputTipoPago.value = pago.tipo_pago_id;
+                formVenta.appendChild(inputTipoPago);
+                
+                const inputMontoUSD = document.createElement('input');
+                inputMontoUSD.type = 'hidden';
+                inputMontoUSD.name = `pagos[${index}][monto_usd]`;
+                inputMontoUSD.value = pago.monto_usd.toFixed(2);
+                formVenta.appendChild(inputMontoUSD);
+                
+                const inputMontoBS = document.createElement('input');
+                inputMontoBS.type = 'hidden';
+                inputMontoBS.name = `pagos[${index}][monto_bs]`;
+                inputMontoBS.value = pago.monto_bs.toFixed(2);
+                formVenta.appendChild(inputMontoBS);
+            });
+        });
+    }
 });

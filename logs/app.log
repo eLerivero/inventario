@@ -133,3 +133,81 @@
 [2026-02-24 14:59:54] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
 [2026-02-24 15:00:07] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 397 
 [2026-02-24 19:18:24] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-02-24 19:42:10] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active (started from /opt/homebrew/var/www/inventario/Config/Config.php on line 146) en /opt/homebrew/var/www/inventario/index.php línea 349 
+[2026-02-24 23:42:21] Intento de login - Usuario: admin
+[2026-02-24 23:42:21] Intentando autenticar usuario: admin
+[2026-02-24 23:42:21] AuthController: AuthController inicializado
+[2026-02-24 23:42:21] Username recibido: admin
+[2026-02-24 23:42:21] Password recibido: @ad...
+[2026-02-24 23:42:21] AuthController: Iniciando login para: admin
+[2026-02-24 23:42:21] AuthController: Username recibido: admin
+[2026-02-24 23:42:21] AuthController: Password recibido (primeros 3 chars): @ad...
+[2026-02-24 23:42:21] AuthController: Password completo: @admin123
+[2026-02-24 23:42:21] AuthController: Buscando usuario por username: admin
+[2026-02-24 23:42:21] AuthController: Usuario encontrado: {"id":1,"username":"admin","activo":true,"hash_length":60}
+[2026-02-24 23:42:21] AuthController: Hash en BD: $2y$10$xuyfNI4CNFy1YZ7ECE/jp.NV87gbUuFwBnezJZM2wfdck5pQ1Ufd.
+[2026-02-24 23:42:21] AuthController: Password a verificar: @admin123
+[2026-02-24 23:42:21] AuthController: Verificando contraseña...
+[2026-02-24 23:42:21] AuthController: === PRUEBA DE VERIFICACIÓN ===
+[2026-02-24 23:42:21] AuthController: password_verify resultado: FALSE
+[2026-02-24 23:42:21] AuthController: Hash parece bcrypt pero no verifica, probando verificación manual
+[2026-02-24 23:42:21] AuthController: Hash parts: ["","2y","10","xuyfNI4CNFy1YZ7ECE\/jp.NV87gbUuFwBnezJZM2wfdck5pQ1Ufd."]
+[2026-02-24 23:42:21] AuthController: Test hash generado: $2y$12$.5v5bN4WAigUUaMrZgCFZ.HdVS6ww6nxzBpDb1N8KOOdmzG4Lep6G
+[2026-02-24 23:42:21] AuthController: ✗ Contraseña incorrecta
+[2026-02-24 23:42:21] AuthController: Hash almacenado: $2y$10$xuyfNI4CNFy1YZ7ECE/jp.NV87gbUuFwBnezJZM2wfdck5pQ1Ufd.
+[2026-02-24 23:42:21] AuthController: Password ingresada: @admin123
+[2026-02-24 23:42:21] Resultado del login: {"success":false,"message":"Contrase\u00f1a incorrecta"}
+[2026-02-24 23:42:21] Login fallido: Contraseña incorrecta
+[2026-02-24 23:42:29] Intento de login - Usuario: admin
+[2026-02-24 23:42:29] Intentando autenticar usuario: admin
+[2026-02-24 23:42:29] AuthController: AuthController inicializado
+[2026-02-24 23:42:29] Username recibido: admin
+[2026-02-24 23:42:29] Password recibido: @dm...
+[2026-02-24 23:42:29] AuthController: Iniciando login para: admin
+[2026-02-24 23:42:29] AuthController: Username recibido: admin
+[2026-02-24 23:42:29] AuthController: Password recibido (primeros 3 chars): @dm...
+[2026-02-24 23:42:29] AuthController: Password completo: @dmin123.
+[2026-02-24 23:42:29] AuthController: Buscando usuario por username: admin
+[2026-02-24 23:42:29] AuthController: Usuario encontrado: {"id":1,"username":"admin","activo":true,"hash_length":60}
+[2026-02-24 23:42:29] AuthController: Hash en BD: $2y$10$xuyfNI4CNFy1YZ7ECE/jp.NV87gbUuFwBnezJZM2wfdck5pQ1Ufd.
+[2026-02-24 23:42:29] AuthController: Password a verificar: @dmin123.
+[2026-02-24 23:42:29] AuthController: Verificando contraseña...
+[2026-02-24 23:42:29] AuthController: === PRUEBA DE VERIFICACIÓN ===
+[2026-02-24 23:42:29] AuthController: password_verify resultado: TRUE
+[2026-02-24 23:42:29] AuthController: ✓ Contraseña verificada correctamente
+[2026-02-24 23:42:29] AuthController: Actualizando último login para usuario ID: 1
+[2026-02-24 23:42:29] AuthController: Login exitoso para: admin
+[2026-02-24 23:42:29] Resultado del login: {"success":true,"user":{"id":1,"username":"admin","nombre":"Administrador","email":"admin@inventario.com","rol":"admin"}}
+[2026-02-24 23:42:29] Login exitoso para usuario: admin
+[2026-02-24 19:42:39] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 397 
+[2026-02-24 23:43:05] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-02-24 23:43:06] [INFO] Categorías listadas {"total":4}
+[2026-02-24 19:45:37] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 397 
+[2026-02-24 19:46:03] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 397 
+[2026-02-24 19:46:05] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 397 
+[2026-02-24 19:46:49] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 397 
+[2026-02-24 19:46:59] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 397 
+[2026-02-24 19:47:01] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 397 
+[2026-02-24 19:47:33] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 397 
+[2026-02-24 19:48:14] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 397 
+[2026-02-24 19:48:32] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 397 
+[2026-02-24 23:50:08] [INFO] Categorías listadas {"total":4}
+[2026-02-24 23:50:12] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-02-24 23:50:15] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-02-24 23:50:23] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-02-24 23:50:24] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-02-24 19:51:46] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 397 
+[2026-02-24 20:16:06] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 397 
+[2026-02-24 20:16:06] [ERROR] Excepción no capturada: Call to undefined method VentaController::obtenerDetalles() {"file":"\/opt\/homebrew\/var\/www\/inventario\/Views\/ventas\/index.php","line":688,"trace":"#0 {main}"}
+[2026-02-24 20:18:59] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 397 
+[2026-02-24 20:18:59] [ERROR] Excepción no capturada: Call to undefined method VentaController::obtenerDetalles() {"file":"\/opt\/homebrew\/var\/www\/inventario\/Views\/ventas\/index.php","line":688,"trace":"#0 {main}"}
+[2026-02-24 20:20:34] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 397 
+[2026-02-24 20:20:34] [ERROR] Excepción no capturada: Call to undefined method VentaController::obtenerDetalles() {"file":"\/opt\/homebrew\/var\/www\/inventario\/Views\/ventas\/index.php","line":688,"trace":"#0 {main}"}
+[2026-02-24 20:34:18] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 463 
+[2026-02-24 20:34:47] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 463 
+[2026-02-24 20:35:13] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 463 
+[2026-02-24 20:35:48] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 463 
+[2026-02-24 20:52:32] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 463 
+[2026-02-24 20:52:48] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 463 
+[2026-02-24 20:52:55] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 463 
+[2026-02-24 20:53:18] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 463 
