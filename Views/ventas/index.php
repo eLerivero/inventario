@@ -77,15 +77,15 @@ include __DIR__ . '/../layouts/header.php';
 <!-- ================================================================== -->
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    
+
     * {
         font-family: 'Inter', sans-serif;
     }
-    
+
     body {
         background: #f8fafc;
     }
-    
+
     /* Tarjetas elegantes */
     .card-elegant {
         background: white;
@@ -95,12 +95,12 @@ include __DIR__ . '/../layouts/header.php';
         transition: all 0.2s ease;
         border: 1px solid rgba(203, 213, 225, 0.3);
     }
-    
+
     .card-elegant:hover {
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
         border-color: rgba(148, 163, 184, 0.3);
     }
-    
+
     /* Header limpio */
     .header-limpio {
         background: white;
@@ -108,7 +108,7 @@ include __DIR__ . '/../layouts/header.php';
         padding: 1.5rem 0;
         margin-bottom: 2rem;
     }
-    
+
     /* Reloj minimalista */
     .reloj-minimal {
         background: white;
@@ -119,12 +119,12 @@ include __DIR__ . '/../layouts/header.php';
         align-items: center;
         gap: 1rem;
     }
-    
+
     .reloj-minimal i {
         color: #4f46e5;
         font-size: 1.5rem;
     }
-    
+
     .reloj-minimal .hora {
         font-size: 1.8rem;
         font-weight: 600;
@@ -132,13 +132,13 @@ include __DIR__ . '/../layouts/header.php';
         line-height: 1;
         letter-spacing: 2px;
     }
-    
+
     .reloj-minimal .fecha {
         font-size: 0.9rem;
         color: #64748b;
         margin-top: 0.25rem;
     }
-    
+
     /* Tarjetas de estadísticas */
     .stat-card {
         background: white;
@@ -149,17 +149,28 @@ include __DIR__ . '/../layouts/header.php';
         position: relative;
         overflow: hidden;
     }
-    
+
     .stat-card:hover {
         border-color: #cbd5e1;
         background: #fafcfc;
     }
-    
-    .stat-card-ventas { border-top: 4px solid #4f46e5; }
-    .stat-card-usd { border-top: 4px solid #0d9488; }
-    .stat-card-bs { border-top: 4px solid #b45309; }
-    .stat-card-clientes { border-top: 4px solid #7c3aed; }
-    
+
+    .stat-card-ventas {
+        border-top: 4px solid #4f46e5;
+    }
+
+    .stat-card-usd {
+        border-top: 4px solid #0d9488;
+    }
+
+    .stat-card-bs {
+        border-top: 4px solid #b45309;
+    }
+
+    .stat-card-clientes {
+        border-top: 4px solid #7c3aed;
+    }
+
     .stat-value {
         font-size: 2.2rem;
         font-weight: 700;
@@ -167,7 +178,7 @@ include __DIR__ . '/../layouts/header.php';
         line-height: 1;
         margin: 0.75rem 0 0.5rem;
     }
-    
+
     .stat-label {
         font-size: 0.85rem;
         text-transform: uppercase;
@@ -175,7 +186,7 @@ include __DIR__ . '/../layouts/header.php';
         color: #64748b;
         font-weight: 600;
     }
-    
+
     .stat-detail {
         font-size: 0.85rem;
         color: #475569;
@@ -183,7 +194,7 @@ include __DIR__ . '/../layouts/header.php';
         gap: 0.75rem;
         flex-wrap: wrap;
     }
-    
+
     /* Badges limpios */
     .badge-limpio {
         padding: 0.35rem 0.9rem;
@@ -197,37 +208,37 @@ include __DIR__ . '/../layouts/header.php';
         align-items: center;
         gap: 0.35rem;
     }
-    
+
     .badge-usd {
         background: #e6fffa;
         color: #0d9488;
     }
-    
+
     .badge-bs {
         background: #fff7ed;
         color: #b45309;
     }
-    
+
     .badge-success {
         background: #dcfce7;
         color: #059669;
     }
-    
+
     .badge-warning {
         background: #fef3c7;
         color: #d97706;
     }
-    
+
     .badge-info {
         background: #e0f2fe;
         color: #0284c7;
     }
-    
+
     .badge-multiple {
         background: #f3e8ff;
         color: #7e22ce;
     }
-    
+
     /* Botones limpios */
     .btn-limpio {
         padding: 0.6rem 1.2rem;
@@ -241,46 +252,46 @@ include __DIR__ . '/../layouts/header.php';
         align-items: center;
         justify-content: center;
     }
-    
+
     .btn-limpio-primary {
         background: #4f46e5;
         color: white;
     }
-    
+
     .btn-limpio-primary:hover {
         background: #4338ca;
         color: white;
     }
-    
+
     .btn-limpio-outline {
         background: transparent;
         border: 1px solid #e2e8f0;
         color: #334155;
     }
-    
+
     .btn-limpio-outline:hover {
         background: #f8fafc;
         border-color: #94a3b8;
         color: #1e293b;
     }
-    
+
     .btn-limpio-success {
         background: #0d9488;
         color: white;
     }
-    
+
     .btn-limpio-success:hover {
         background: #0f766e;
         color: white;
     }
-    
+
     /* Tabla limpia */
     .table-limpia {
         width: 100%;
         border-collapse: separate;
         border-spacing: 0 8px;
     }
-    
+
     .table-limpia thead th {
         background: #f8fafc;
         color: #334155;
@@ -291,36 +302,36 @@ include __DIR__ . '/../layouts/header.php';
         padding: 1rem 1rem;
         border-bottom: 2px solid #e2e8f0;
     }
-    
+
     .table-limpia tbody tr {
         background: white;
         border-radius: 16px;
         transition: all 0.2s ease;
     }
-    
+
     .table-limpia tbody tr:hover {
         background: #fafcfc;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
     }
-    
+
     .table-limpia td {
         padding: 1rem;
         vertical-align: middle;
         border-bottom: 1px solid #f1f5f9;
     }
-    
+
     .column-usd {
         background: #f0fdfa;
         color: #0d9488;
         font-weight: 600;
     }
-    
+
     .column-bs {
         background: #fff7ed;
         color: #b45309;
         font-weight: 600;
     }
-    
+
     /* Footer de tabla */
     .table-footer {
         background: #f8fafc;
@@ -328,21 +339,21 @@ include __DIR__ . '/../layouts/header.php';
         padding: 1rem;
         border-radius: 12px;
     }
-    
+
     /* Modal limpio */
     .modal-limpio .modal-content {
         border: none;
         border-radius: 24px;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
     }
-    
+
     .modal-header-limpio {
         background: #f8fafc;
         border-bottom: 1px solid #e2e8f0;
         padding: 1.5rem;
         border-radius: 24px 24px 0 0;
     }
-    
+
     /* Alertas limpias */
     .alert-limpio {
         border: none;
@@ -351,24 +362,24 @@ include __DIR__ . '/../layouts/header.php';
         margin-bottom: 1.5rem;
         background: white;
         border-left: 4px solid;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     }
-    
+
     .alert-success-limpio {
         border-left-color: #10b981;
         background: #f0fdf4;
     }
-    
+
     .alert-info-limpio {
         border-left-color: #3b82f6;
         background: #eff6ff;
     }
-    
+
     .alert-warning-limpio {
         border-left-color: #f59e0b;
         background: #fffbeb;
     }
-    
+
     /* Filtros */
     .filtros-limpios {
         background: white;
@@ -377,7 +388,7 @@ include __DIR__ . '/../layouts/header.php';
         border: 1px solid #e2e8f0;
         display: inline-flex;
     }
-    
+
     .filtro-btn {
         padding: 0.5rem 1.2rem;
         border-radius: 12px;
@@ -388,29 +399,29 @@ include __DIR__ . '/../layouts/header.php';
         text-decoration: none;
         cursor: pointer;
     }
-    
+
     .filtro-btn:hover {
         background: #f1f5f9;
         color: #334155;
     }
-    
+
     .filtro-btn.active {
         background: #4f46e5;
         color: white;
     }
-    
+
     .filtro-btn.active:hover {
         background: #4338ca;
         color: white;
     }
-    
+
     /* Separadores */
     .separator {
         height: 1px;
         background: linear-gradient(to right, transparent, #e2e8f0, transparent);
         margin: 2rem 0;
     }
-    
+
     /* Paginación de pagos */
     .pagos-mini {
         display: flex;
@@ -418,7 +429,7 @@ include __DIR__ . '/../layouts/header.php';
         gap: 0.25rem;
         max-width: 200px;
     }
-    
+
     .pago-mini-item {
         width: 24px;
         height: 24px;
@@ -430,22 +441,30 @@ include __DIR__ . '/../layouts/header.php';
         font-weight: 600;
         cursor: help;
     }
-    
+
     .pago-mini-usd {
         background: #e6fffa;
         color: #0d9488;
     }
-    
+
     .pago-mini-bs {
         background: #fff7ed;
         color: #b45309;
     }
-    
+
     /* Responsive */
     @media (max-width: 768px) {
-        .stat-value { font-size: 1.8rem; }
-        .reloj-minimal .hora { font-size: 1.4rem; }
-        .table-responsive { overflow-x: auto; }
+        .stat-value {
+            font-size: 1.8rem;
+        }
+
+        .reloj-minimal .hora {
+            font-size: 1.4rem;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
     }
 </style>
 
@@ -458,14 +477,14 @@ include __DIR__ . '/../layouts/header.php';
         <div>
             <div class="hora" id="hora-actual"><?php echo date('H:i:s'); ?></div>
             <div class="fecha" id="fecha-actual">
-                <?php 
+                <?php
                 setlocale(LC_TIME, 'spanish');
                 echo strftime('%A, %d de %B de %Y');
                 ?>
             </div>
         </div>
     </div>
-    
+
     <!-- Botón de recargar manual -->
     <button class="btn-limpio btn-limpio-outline" onclick="location.reload()">
         <i class="fas fa-sync-alt me-2"></i>
@@ -491,7 +510,7 @@ include __DIR__ . '/../layouts/header.php';
             <?php endif; ?>
         </p>
     </div>
-    
+
     <div class="d-flex gap-3">
         <!-- Filtros -->
         <div class="filtros-limpios">
@@ -511,7 +530,7 @@ include __DIR__ . '/../layouts/header.php';
                 </a>
             <?php endif; ?>
         </div>
-        
+
         <!-- Botón Nueva Venta -->
         <a href="crear.php" class="btn-limpio btn-limpio-primary text-decoration-none">
             <i class="fas fa-plus-circle me-2"></i>
@@ -557,111 +576,111 @@ include __DIR__ . '/../layouts/header.php';
 <!-- 📊 ESTADÍSTICAS - SOLO VENTAS ACTIVAS -->
 <!-- ================================================================== -->
 <?php if ($filtro_activas): ?>
-<div class="row g-4 mb-5">
-    <!-- Ventas Hoy -->
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card stat-card-ventas">
-            <div class="stat-label">
-                <i class="fas fa-receipt me-1"></i> VENTAS HOY
-            </div>
-            <div class="stat-value"><?php echo $stats_usd['ventas_hoy'] ?? 0; ?></div>
-            <div class="stat-detail">
-                <span class="badge-limpio">
-                    <i class="fas fa-check-circle me-1"></i> Completadas hoy
-                </span>
-            </div>
-        </div>
-    </div>
-    
-    <!-- USD Recibidos -->
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card stat-card-usd">
-            <div class="stat-label">
-                <i class="fas fa-dollar-sign me-1"></i> USD RECIBIDOS
-            </div>
-            <div class="stat-value"><?php echo TasaCambioHelper::formatearUSD($stats_usd['total_usd_hoy'] ?? 0); ?></div>
-            <div class="stat-detail">
-                <?php if (($stats_usd['total_efectivo_usd'] ?? 0) > 0): ?>
-                    <span class="badge-limpio badge-usd">
-                        💵 Efectivo: <?php echo TasaCambioHelper::formatearUSD($stats_usd['total_efectivo_usd']); ?>
+    <div class="row g-4 mb-5">
+        <!-- Ventas Hoy -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-ventas">
+                <div class="stat-label">
+                    <i class="fas fa-receipt me-1"></i> VENTAS HOY
+                </div>
+                <div class="stat-value"><?php echo $stats_usd['ventas_hoy'] ?? 0; ?></div>
+                <div class="stat-detail">
+                    <span class="badge-limpio">
+                        <i class="fas fa-check-circle me-1"></i> Completadas hoy
                     </span>
-                <?php endif; ?>
-                <?php if (($stats_usd['total_divisa'] ?? 0) > 0): ?>
-                    <span class="badge-limpio badge-usd">
-                        💶 Divisa: <?php echo TasaCambioHelper::formatearUSD($stats_usd['total_divisa']); ?>
-                    </span>
-                <?php endif; ?>
+                </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Bs Precio Fijo -->
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card stat-card-bs">
-            <div class="stat-label">
-                <i class="fas fa-lock me-1"></i> BS PRECIO FIJO
-            </div>
-            <div class="stat-value"><?php echo $stats_bs['total_bs_precio_fijo_formateado'] ?? 'Bs 0,00'; ?></div>
-            <div class="stat-detail">
-                <span class="badge-limpio badge-bs">
-                    <i class="fas fa-tag me-1"></i>
-                    <?php echo $stats_bs['ventas_con_precio_fijo'] ?? 0; ?> ventas
-                </span>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Clientes Hoy -->
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card stat-card-clientes">
-            <div class="stat-label">
-                <i class="fas fa-users me-1"></i> CLIENTES HOY
-            </div>
-            <div class="stat-value"><?php echo $stats_usd['clientes_hoy'] ?? 0; ?></div>
-            <div class="stat-detail">
-                <span class="badge-limpio">
-                    <i class="fas fa-user-check me-1"></i> Atendidos hoy
-                </span>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Horario de Ventas -->
-<?php if (!empty($stats_usd['primera_venta_formateada']) || !empty($stats_usd['ultima_venta_formateada'])): ?>
-<div class="card-elegant mb-5">
-    <div class="row g-4">
-        <div class="col-md-6">
-            <div class="d-flex align-items-center gap-4">
-                <div class="bg-light rounded-3 p-3">
-                    <i class="fas fa-sun fa-2x" style="color: #4f46e5;"></i>
+        <!-- USD Recibidos -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-usd">
+                <div class="stat-label">
+                    <i class="fas fa-dollar-sign me-1"></i> USD RECIBIDOS
                 </div>
-                <div>
-                    <small class="text-muted text-uppercase fw-semibold">Primera Venta</small>
-                    <h3 class="fw-bold mb-0" style="color: #0f172a;">
-                        <?php echo $stats_usd['primera_venta_formateada'] ?? '--:--'; ?>
-                    </h3>
-                    <span class="text-muted small">Inicio de operaciones</span>
+                <div class="stat-value"><?php echo TasaCambioHelper::formatearUSD($stats_usd['total_usd_hoy'] ?? 0); ?></div>
+                <div class="stat-detail">
+                    <?php if (($stats_usd['total_efectivo_usd'] ?? 0) > 0): ?>
+                        <span class="badge-limpio badge-usd">
+                            💵 Efectivo: <?php echo TasaCambioHelper::formatearUSD($stats_usd['total_efectivo_usd']); ?>
+                        </span>
+                    <?php endif; ?>
+                    <?php if (($stats_usd['total_divisa'] ?? 0) > 0): ?>
+                        <span class="badge-limpio badge-usd">
+                            💶 Divisa: <?php echo TasaCambioHelper::formatearUSD($stats_usd['total_divisa']); ?>
+                        </span>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="d-flex align-items-center gap-4">
-                <div class="bg-light rounded-3 p-3">
-                    <i class="fas fa-moon fa-2x" style="color: #0d9488;"></i>
+
+        <!-- Bs Precio Fijo -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-bs">
+                <div class="stat-label">
+                    <i class="fas fa-lock me-1"></i> BS PRECIO FIJO
                 </div>
-                <div>
-                    <small class="text-muted text-uppercase fw-semibold">Última Venta</small>
-                    <h3 class="fw-bold mb-0" style="color: #0f172a;">
-                        <?php echo $stats_usd['ultima_venta_formateada'] ?? '--:--'; ?>
-                    </h3>
-                    <span class="text-muted small">Cierre del día</span>
+                <div class="stat-value"><?php echo $stats_bs['total_bs_precio_fijo_formateado'] ?? 'Bs 0,00'; ?></div>
+                <div class="stat-detail">
+                    <span class="badge-limpio badge-bs">
+                        <i class="fas fa-tag me-1"></i>
+                        <?php echo $stats_bs['ventas_con_precio_fijo'] ?? 0; ?> ventas
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clientes Hoy -->
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card stat-card-clientes">
+                <div class="stat-label">
+                    <i class="fas fa-users me-1"></i> CLIENTES HOY
+                </div>
+                <div class="stat-value"><?php echo $stats_usd['clientes_hoy'] ?? 0; ?></div>
+                <div class="stat-detail">
+                    <span class="badge-limpio">
+                        <i class="fas fa-user-check me-1"></i> Atendidos hoy
+                    </span>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<?php endif; ?>
+
+    <!-- Horario de Ventas -->
+    <?php if (!empty($stats_usd['primera_venta_formateada']) || !empty($stats_usd['ultima_venta_formateada'])): ?>
+        <div class="card-elegant mb-5">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="bg-light rounded-3 p-3">
+                            <i class="fas fa-sun fa-2x" style="color: #4f46e5;"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted text-uppercase fw-semibold">Primera Venta</small>
+                            <h3 class="fw-bold mb-0" style="color: #0f172a;">
+                                <?php echo $stats_usd['primera_venta_formateada'] ?? '--:--'; ?>
+                            </h3>
+                            <span class="text-muted small">Inicio de operaciones</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="bg-light rounded-3 p-3">
+                            <i class="fas fa-moon fa-2x" style="color: #0d9488;"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted text-uppercase fw-semibold">Última Venta</small>
+                            <h3 class="fw-bold mb-0" style="color: #0f172a;">
+                                <?php echo $stats_usd['ultima_venta_formateada'] ?? '--:--'; ?>
+                            </h3>
+                            <span class="text-muted small">Cierre del día</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
 <?php endif; ?>
 
 <div class="separator"></div>
@@ -696,7 +715,7 @@ include __DIR__ . '/../layouts/header.php';
             </span>
         </div>
     </div>
-    
+
     <?php if (empty($ventas) && $filtro_activas): ?>
         <!-- Estado vacío - Todas cerradas -->
         <div class="text-center py-5">
@@ -745,38 +764,41 @@ include __DIR__ . '/../layouts/header.php';
                     </tr>
                 </thead>
                 <tbody>
-                    <?php 
+                    <?php
                     $total_usd_recibido = 0;
                     $total_bs_recibido = 0;
                     $ventasActivas = 0;
                     $ventasCerradas = 0;
-                    
+
                     foreach ($ventas as $venta):
                         $cerrada_en_caja = isset($venta['cerrada_en_caja']) && $venta['cerrada_en_caja'];
                         $cantidad_pagos = $venta['cantidad_pagos'] ?? 1;
                         $es_pago_multiple = $cantidad_pagos > 1;
                         $total_pagado_usd = $venta['total_pagado_usd'] ?? $venta['total'] ?? 0;
                         $total_pagado_bs = $venta['total_pagado_bs'] ?? $venta['total_bs'] ?? 0;
-                        
+
                         // Determinar si tiene pagos en USD
                         $tiene_usd = $es_pago_multiple ? true : in_array($venta['tipo_pago_id'] ?? 0, TIPOS_PAGO_USD);
-                        
+
                         // Calcular total de productos con precio fijo (esto debería venir del controlador)
                         $total_bs_precio_fijo_venta = 0;
                         if (isset($venta['detalles']) && is_array($venta['detalles'])) {
                             foreach ($venta['detalles'] as $detalle) {
-                                if (isset($detalle['precio_unitario_bs']) && 
+                                if (
+                                    isset($detalle['precio_unitario_bs']) &&
                                     $detalle['precio_unitario_bs'] > 0 &&
-                                    ($detalle['precio_unitario'] * ($venta['tasa_cambio'] ?? 1)) != $detalle['precio_unitario_bs']) {
+                                    ($detalle['precio_unitario'] * ($venta['tasa_cambio'] ?? 1)) != $detalle['precio_unitario_bs']
+                                ) {
                                     $total_bs_precio_fijo_venta += ($detalle['precio_unitario_bs'] * $detalle['cantidad']);
                                 }
                             }
                         }
-                        
+
                         $tiene_precio_fijo = $total_bs_precio_fijo_venta > 0;
-                        
-                        if ($cerrada_en_caja) $ventasCerradas++; else $ventasActivas++;
-                        
+
+                        if ($cerrada_en_caja) $ventasCerradas++;
+                        else $ventasActivas++;
+
                         if ($tiene_usd) $total_usd_recibido += $total_pagado_usd;
                         $total_bs_recibido += $total_bs_precio_fijo_venta;
                     ?>
@@ -795,7 +817,7 @@ include __DIR__ . '/../layouts/header.php';
                                     <?php echo htmlspecialchars($venta['cliente_nombre'] ?? 'Cliente no especificado'); ?>
                                 </div>
                             </td>
-                            
+
                             <!-- Métodos de Pago -->
                             <td class="text-center">
                                 <?php if ($es_pago_multiple): ?>
@@ -815,7 +837,7 @@ include __DIR__ . '/../layouts/header.php';
                                     <?php endif; ?>
                                 <?php endif; ?>
                             </td>
-                            
+
                             <!-- USD -->
                             <td class="text-center column-usd">
                                 <?php if ($tiene_usd): ?>
@@ -829,7 +851,7 @@ include __DIR__ . '/../layouts/header.php';
                                     <span class="text-muted">—</span>
                                 <?php endif; ?>
                             </td>
-                            
+
                             <!-- Bs (solo precio fijo) -->
                             <td class="text-center column-bs">
                                 <?php if ($tiene_precio_fijo): ?>
@@ -844,15 +866,15 @@ include __DIR__ . '/../layouts/header.php';
                                     <span class="text-muted">—</span>
                                 <?php endif; ?>
                             </td>
-                            
+
                             <td>
                                 <span class="badge-limpio">
-                                    <?php 
+                                    <?php
                                     $tasa = $venta['tasa_cambio'] ?? $venta['tasa_cambio_utilizada'] ?? 0;
                                     echo number_format($tasa, 2); ?> Bs/$
                                 </span>
                             </td>
-                            
+
                             <td>
                                 <?php
                                 $estado = $venta['estado'] ?? 'pendiente';
@@ -870,7 +892,7 @@ include __DIR__ . '/../layouts/header.php';
                                     </span>
                                 <?php endif; ?>
                             </td>
-                            
+
                             <td>
                                 <?php if ($cerrada_en_caja): ?>
                                     <span class="badge-limpio" style="background: #f1f5f9; color: #475569;">
@@ -882,13 +904,12 @@ include __DIR__ . '/../layouts/header.php';
                                     </span>
                                 <?php endif; ?>
                             </td>
-                            
+
                             <td>
                                 <div style="line-height: 1.4;">
                                     <i class="fas fa-calendar-alt me-1" style="color: #64748b;"></i>
-                                    <?php 
-                                    $fecha = !empty($venta['fecha_hora']) ? Ayuda::formatDate($venta['fecha_hora']) : 
-                                             (!empty($venta['created_at']) ? Ayuda::formatDate($venta['created_at']) : 'N/A');
+                                    <?php
+                                    $fecha = !empty($venta['fecha_hora']) ? Ayuda::formatDate($venta['fecha_hora']) : (!empty($venta['created_at']) ? Ayuda::formatDate($venta['created_at']) : 'N/A');
                                     echo $fecha;
                                     ?>
                                     <br>
@@ -897,29 +918,29 @@ include __DIR__ . '/../layouts/header.php';
                                     </small>
                                 </div>
                             </td>
-                            
+
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="ver.php?id=<?php echo $venta['id']; ?>" 
-                                       class="btn btn-sm btn-outline-secondary border-0"
-                                       style="padding: 0.5rem 0.8rem;"
-                                       data-bs-toggle="tooltip" 
-                                       title="Ver detalles">
+                                    <a href="ver.php?id=<?php echo $venta['id']; ?>"
+                                        class="btn btn-sm btn-outline-secondary border-0"
+                                        style="padding: 0.5rem 0.8rem;"
+                                        data-bs-toggle="tooltip"
+                                        title="Ver detalles">
                                         <i class="fas fa-eye" style="color: #4f46e5;"></i>
                                     </a>
-                                    
+
                                     <?php if (($venta['estado'] ?? '') === 'pendiente' && !$cerrada_en_caja): ?>
                                         <button type="button"
-                                                class="btn btn-sm btn-outline-success border-0"
-                                                style="padding: 0.5rem 0.8rem;"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#modalCompletar"
-                                                data-id="<?php echo $venta['id']; ?>"
-                                                data-numero="<?php echo $venta['numero_venta'] ?? ''; ?>"
-                                                data-pagos="<?php echo $cantidad_pagos; ?>"
-                                                <?php echo $tiene_precio_fijo ? 'data-precio-fijo="true"' : ''; ?>
-                                                data-bs-toggle="tooltip"
-                                                title="Completar venta">
+                                            class="btn btn-sm btn-outline-success border-0"
+                                            style="padding: 0.5rem 0.8rem;"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalCompletar"
+                                            data-id="<?php echo $venta['id']; ?>"
+                                            data-numero="<?php echo $venta['numero_venta'] ?? ''; ?>"
+                                            data-pagos="<?php echo $cantidad_pagos; ?>"
+                                            <?php echo $tiene_precio_fijo ? 'data-precio-fijo="true"' : ''; ?>
+                                            data-bs-toggle="tooltip"
+                                            title="Completar venta">
                                             <i class="fas fa-check" style="color: #10b981;"></i>
                                         </button>
                                     <?php endif; ?>
@@ -930,7 +951,7 @@ include __DIR__ . '/../layouts/header.php';
                 </tbody>
             </table>
         </div>
-        
+
         <!-- Totales -->
         <div class="table-footer mt-4 rounded-3">
             <div class="row align-items-center">
@@ -939,6 +960,7 @@ include __DIR__ . '/../layouts/header.php';
                         <div>
                             <small class="text-muted d-block">Total USD Recibidos</small>
                             <span class="fw-bold fs-5" style="color: #0d9488;">
+                                <?php echo TasaCambioHelper::formatearUSD($stats_usd['total_usd_hoy'] ?? 0); ?>
                                 <?php echo TasaCambioHelper::formatearUSD($total_usd_recibido); ?>
                             </span>
                         </div>
@@ -951,7 +973,9 @@ include __DIR__ . '/../layouts/header.php';
                         <div>
                             <small class="text-muted d-block">Ventas con Múltiples Pagos</small>
                             <span class="fw-bold fs-5" style="color: #7e22ce;">
-                                <?php echo count(array_filter($ventas, function($v) { return ($v['cantidad_pagos'] ?? 1) > 1; })); ?>
+                                <?php echo count(array_filter($ventas, function ($v) {
+                                    return ($v['cantidad_pagos'] ?? 1) > 1;
+                                })); ?>
                             </span>
                         </div>
                     </div>
@@ -996,7 +1020,7 @@ include __DIR__ . '/../layouts/header.php';
                     <h5 class="fw-bold mb-2">¿Completar venta <span id="numeroVenta" style="color: #10b981;"></span>?</h5>
                     <p class="text-muted mb-0" id="mensajePagos"></p>
                 </div>
-                
+
                 <div class="alert alert-success-limpio d-flex align-items-center p-3">
                     <i class="fas fa-info-circle me-3" style="color: #10b981;"></i>
                     <div>
@@ -1004,7 +1028,7 @@ include __DIR__ . '/../layouts/header.php';
                         <small>El stock se actualizará y la venta pasará a estado "Completada"</small>
                     </div>
                 </div>
-                
+
                 <div id="precioFijoWarning" class="alert alert-warning-limpio d-flex align-items-center p-3 d-none">
                     <i class="fas fa-lock me-3" style="color: #f59e0b;"></i>
                     <div>
@@ -1012,7 +1036,7 @@ include __DIR__ . '/../layouts/header.php';
                         <small>Esta venta incluye productos con precio fijo en Bolívares</small>
                     </div>
                 </div>
-                
+
                 <div id="pagoMultipleInfo" class="alert alert-info-limpio d-flex align-items-center p-3 d-none">
                     <i class="fas fa-layer-group me-3" style="color: #3b82f6;"></i>
                     <div>
@@ -1037,131 +1061,134 @@ include __DIR__ . '/../layouts/header.php';
 <!-- 🚀 SCRIPTS -->
 <!-- ================================================================== -->
 <script>
-// Reloj en tiempo real
-function actualizarReloj() {
-    const ahora = new Date();
-    const horas = ahora.getHours().toString().padStart(2, '0');
-    const minutos = ahora.getMinutes().toString().padStart(2, '0');
-    const segundos = ahora.getSeconds().toString().padStart(2, '0');
-    
-    const horaElement = document.getElementById('hora-actual');
-    if (horaElement) {
-        horaElement.textContent = `${horas}:${minutos}:${segundos}`;
-    }
-    
-    // Actualizar fecha completa
-    const fechaElement = document.getElementById('fecha-actual');
-    if (fechaElement) {
-        const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-        const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-        fechaElement.textContent = `${dias[ahora.getDay()]}, ${ahora.getDate()} de ${meses[ahora.getMonth()]} de ${ahora.getFullYear()}`;
-    }
-}
+    // Reloj en tiempo real
+    function actualizarReloj() {
+        const ahora = new Date();
+        const horas = ahora.getHours().toString().padStart(2, '0');
+        const minutos = ahora.getMinutes().toString().padStart(2, '0');
+        const segundos = ahora.getSeconds().toString().padStart(2, '0');
 
-actualizarReloj();
-setInterval(actualizarReloj, 1000);
-
-// Inicializar tooltips y DataTables cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar tooltips
-    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-    tooltips.forEach(el => new bootstrap.Tooltip(el));
-    
-    // Inicializar DataTables si existe la tabla
-    const tablaElement = document.getElementById('tablaVentas');
-    if (tablaElement && typeof $.fn !== 'undefined' && $.fn.DataTable) {
-        if ($.fn.DataTable.isDataTable('#tablaVentas')) {
-            $('#tablaVentas').DataTable().destroy();
+        const horaElement = document.getElementById('hora-actual');
+        if (horaElement) {
+            horaElement.textContent = `${horas}:${minutos}:${segundos}`;
         }
-        
-        $('#tablaVentas').DataTable({
-            language: {
-                processing: "Procesando...",
-                lengthMenu: "Mostrar _MENU_ registros",
-                zeroRecords: "No se encontraron resultados",
-                emptyTable: "No hay datos disponibles",
-                infoEmpty: "Mostrando 0 a 0 de 0 registros",
-                infoFiltered: "(filtrado de _MAX_ registros totales)",
-                search: "Buscar:",
-                paginate: {
-                    first: "Primero",
-                    last: "Último",
-                    next: "Siguiente",
-                    previous: "Anterior"
-                },
-                info: "Mostrando _START_ a _END_ de _TOTAL_ registros"
-            },
-            pageLength: 10,
-            order: [[8, 'desc']],
-            columnDefs: [
-                { orderable: false, targets: [1, 2, 9] }
-            ]
-        });
-    }
-    
-    // Modal completar venta
-    const modal = document.getElementById('modalCompletar');
-    if (modal) {
-        modal.addEventListener('show.bs.modal', function(event) {
-            const btn = event.relatedTarget;
-            if (!btn) return;
-            
-            const id = btn.dataset.id;
-            const numero = btn.dataset.numero;
-            const precioFijo = btn.dataset.precioFijo === 'true';
-            const cantidadPagos = btn.dataset.pagos || 1;
-            
-            const numeroEl = document.getElementById('numeroVenta');
-            if (numeroEl) numeroEl.textContent = '#' + (numero || '');
-            
-            const mensajePagosEl = document.getElementById('mensajePagos');
-            if (mensajePagosEl) {
-                if (cantidadPagos > 1) {
-                    mensajePagosEl.textContent = `Esta venta tiene ${cantidadPagos} métodos de pago registrados.`;
-                } else {
-                    mensajePagosEl.textContent = 'Esta acción actualizará el stock de productos automáticamente.';
-                }
-            }
-            
-            const warningEl = document.getElementById('precioFijoWarning');
-            if (warningEl) {
-                if (precioFijo) {
-                    warningEl.classList.remove('d-none');
-                } else {
-                    warningEl.classList.add('d-none');
-                }
-            }
-            
-            const pagoMultipleInfo = document.getElementById('pagoMultipleInfo');
-            const pagoMultipleTexto = document.getElementById('pagoMultipleTexto');
-            if (pagoMultipleInfo && pagoMultipleTexto) {
-                if (cantidadPagos > 1) {
-                    pagoMultipleInfo.classList.remove('d-none');
-                    pagoMultipleTexto.textContent = `La venta fue pagada con ${cantidadPagos} métodos de pago diferentes.`;
-                } else {
-                    pagoMultipleInfo.classList.add('d-none');
-                }
-            }
-            
-            const confirmBtn = document.getElementById('btnCompletarConfirmar');
-            if (confirmBtn && id) {
-                confirmBtn.href = `index.php?action=completar&id=${id}&csrf_token=<?php echo $_SESSION['csrf_token']; ?>`;
-            }
-        });
-    }
-    
-    // Auto-refrescar cada 5 minutos (300000 ms)
-    setTimeout(() => location.reload(), 300000);
-});
 
-// Función para cerrar alertas manualmente
-document.querySelectorAll('.alert .btn-close').forEach(button => {
-    button.addEventListener('click', function() {
-        this.closest('.alert').remove();
+        // Actualizar fecha completa
+        const fechaElement = document.getElementById('fecha-actual');
+        if (fechaElement) {
+            const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+            const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+            fechaElement.textContent = `${dias[ahora.getDay()]}, ${ahora.getDate()} de ${meses[ahora.getMonth()]} de ${ahora.getFullYear()}`;
+        }
+    }
+
+    actualizarReloj();
+    setInterval(actualizarReloj, 1000);
+
+    // Inicializar tooltips y DataTables cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar tooltips
+        const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(el => new bootstrap.Tooltip(el));
+
+        // Inicializar DataTables si existe la tabla
+        const tablaElement = document.getElementById('tablaVentas');
+        if (tablaElement && typeof $.fn !== 'undefined' && $.fn.DataTable) {
+            if ($.fn.DataTable.isDataTable('#tablaVentas')) {
+                $('#tablaVentas').DataTable().destroy();
+            }
+
+            $('#tablaVentas').DataTable({
+                language: {
+                    processing: "Procesando...",
+                    lengthMenu: "Mostrar _MENU_ registros",
+                    zeroRecords: "No se encontraron resultados",
+                    emptyTable: "No hay datos disponibles",
+                    infoEmpty: "Mostrando 0 a 0 de 0 registros",
+                    infoFiltered: "(filtrado de _MAX_ registros totales)",
+                    search: "Buscar:",
+                    paginate: {
+                        first: "Primero",
+                        last: "Último",
+                        next: "Siguiente",
+                        previous: "Anterior"
+                    },
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ registros"
+                },
+                pageLength: 10,
+                order: [
+                    [8, 'desc']
+                ],
+                columnDefs: [{
+                    orderable: false,
+                    targets: [1, 2, 9]
+                }]
+            });
+        }
+
+        // Modal completar venta
+        const modal = document.getElementById('modalCompletar');
+        if (modal) {
+            modal.addEventListener('show.bs.modal', function(event) {
+                const btn = event.relatedTarget;
+                if (!btn) return;
+
+                const id = btn.dataset.id;
+                const numero = btn.dataset.numero;
+                const precioFijo = btn.dataset.precioFijo === 'true';
+                const cantidadPagos = btn.dataset.pagos || 1;
+
+                const numeroEl = document.getElementById('numeroVenta');
+                if (numeroEl) numeroEl.textContent = '#' + (numero || '');
+
+                const mensajePagosEl = document.getElementById('mensajePagos');
+                if (mensajePagosEl) {
+                    if (cantidadPagos > 1) {
+                        mensajePagosEl.textContent = `Esta venta tiene ${cantidadPagos} métodos de pago registrados.`;
+                    } else {
+                        mensajePagosEl.textContent = 'Esta acción actualizará el stock de productos automáticamente.';
+                    }
+                }
+
+                const warningEl = document.getElementById('precioFijoWarning');
+                if (warningEl) {
+                    if (precioFijo) {
+                        warningEl.classList.remove('d-none');
+                    } else {
+                        warningEl.classList.add('d-none');
+                    }
+                }
+
+                const pagoMultipleInfo = document.getElementById('pagoMultipleInfo');
+                const pagoMultipleTexto = document.getElementById('pagoMultipleTexto');
+                if (pagoMultipleInfo && pagoMultipleTexto) {
+                    if (cantidadPagos > 1) {
+                        pagoMultipleInfo.classList.remove('d-none');
+                        pagoMultipleTexto.textContent = `La venta fue pagada con ${cantidadPagos} métodos de pago diferentes.`;
+                    } else {
+                        pagoMultipleInfo.classList.add('d-none');
+                    }
+                }
+
+                const confirmBtn = document.getElementById('btnCompletarConfirmar');
+                if (confirmBtn && id) {
+                    confirmBtn.href = `index.php?action=completar&id=${id}&csrf_token=<?php echo $_SESSION['csrf_token']; ?>`;
+                }
+            });
+        }
+
+        // Auto-refrescar cada 5 minutos (300000 ms)
+        setTimeout(() => location.reload(), 300000);
     });
-});
+
+    // Función para cerrar alertas manualmente
+    document.querySelectorAll('.alert .btn-close').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.alert').remove();
+        });
+    });
 </script>
 
 <!-- <?php
-include __DIR__ . '/../layouts/footer.php';
-?> -->
+        include __DIR__ . '/../layouts/footer.php';
+        ?> -->

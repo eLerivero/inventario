@@ -25,6 +25,9 @@ class VentaController
         $this->pagoVenta = new PagoVenta($db);
     }
 
+    /**
+     * Lista las ventas con opción de filtrar solo activas
+     */
     public function listar($solo_activas = true)
     {
         try {
@@ -35,7 +38,7 @@ class VentaController
                           LEFT JOIN tipos_pago tp ON v.tipo_pago_id = tp.id
                           WHERE v.cerrada_en_caja = FALSE
                           ORDER BY v.created_at DESC";
-                
+
                 $stmt = $this->db->prepare($query);
                 $stmt->execute();
                 $ventas = $stmt->fetchAll();
@@ -49,16 +52,17 @@ class VentaController
                 $venta['total_formateado_usd'] = TasaCambioHelper::formatearUSD($venta['total']);
                 $venta['total_formateado_bs'] = TasaCambioHelper::formatearBS($venta['total_bs']);
                 $venta['tasa_formateada'] = TasaCambioHelper::formatearBS($venta['tasa_cambio'], false);
-                
-                // Obtener información de pagos
+
+                // Obtener información de pagos (solo completados)
                 $pagosInfo = $this->pagoVenta->obtenerResumenPorVenta($venta['id']);
                 $venta['total_pagado_usd'] = $pagosInfo['total_pagado_usd'] ?? 0;
                 $venta['total_pagado_bs'] = $pagosInfo['total_pagado_bs'] ?? 0;
                 $venta['cantidad_pagos'] = $pagosInfo['cantidad_pagos'] ?? 0;
+                $venta['metodos_distintos'] = $pagosInfo['metodos_distintos'] ?? 0;
                 $venta['estado_pago'] = $venta['total_pagado_usd'] >= $venta['total'] ? 'COMPLETADO' : 'PARCIAL';
-                
-                $venta['cerrada_en_caja_texto'] = isset($venta['cerrada_en_caja']) && $venta['cerrada_en_caja'] 
-                    ? 'Cerrada' 
+
+                $venta['cerrada_en_caja_texto'] = isset($venta['cerrada_en_caja']) && $venta['cerrada_en_caja']
+                    ? 'Cerrada'
                     : 'Activa';
             }
 
@@ -76,6 +80,9 @@ class VentaController
         }
     }
 
+    /**
+     * Obtiene una venta por su ID con todos sus detalles y pagos
+     */
     public function obtener($id)
     {
         try {
@@ -83,24 +90,42 @@ class VentaController
 
             if ($venta) {
                 $venta['detalles'] = $this->obtenerDetallesCompletos($id);
-                $venta['pagos'] = $this->pagoVenta->obtenerPorVenta($id);
+                // Usar el método que obtiene SOLO pagos completados
+                $venta['pagos'] = $this->pagoVenta->obtenerCompletadosPorVenta($id);
 
                 // Formatear precios para mostrar
                 $venta['total_formateado_usd'] = TasaCambioHelper::formatearUSD($venta['total']);
                 $venta['total_formateado_bs'] = TasaCambioHelper::formatearBS($venta['total_bs']);
                 $venta['tasa_formateada'] = TasaCambioHelper::formatearBS($venta['tasa_cambio'], false);
 
-                // Calcular total pagado
+                // Calcular total pagado (solo pagos completados)
                 $totalPagadoUSD = 0;
                 $totalPagadoBS = 0;
+                $metodosUtilizados = [];
+
                 foreach ($venta['pagos'] as $pago) {
                     $totalPagadoUSD += $pago['monto_usd'];
                     $totalPagadoBS += $pago['monto_bs'];
+
+                    if (!in_array($pago['tipo_pago_nombre'], $metodosUtilizados)) {
+                        $metodosUtilizados[] = $pago['tipo_pago_nombre'];
+                    }
                 }
+
                 $venta['total_pagado_usd'] = $totalPagadoUSD;
                 $venta['total_pagado_bs'] = $totalPagadoBS;
-                $venta['saldo_pendiente_usd'] = $venta['total'] - $totalPagadoUSD;
-                $venta['saldo_pendiente_bs'] = $venta['total_bs'] - $totalPagadoBS;
+                $venta['cantidad_pagos'] = count($venta['pagos']);
+                $venta['metodos_utilizados'] = $metodosUtilizados;
+                $venta['cantidad_metodos'] = count($metodosUtilizados);
+
+                // Calcular saldo pendiente (solo si la venta no está completada)
+                if ($venta['estado'] !== 'completada') {
+                    $venta['saldo_pendiente_usd'] = max(0, $venta['total'] - $totalPagadoUSD);
+                    $venta['saldo_pendiente_bs'] = max(0, $venta['total_bs'] - $totalPagadoBS);
+                } else {
+                    $venta['saldo_pendiente_usd'] = 0;
+                    $venta['saldo_pendiente_bs'] = 0;
+                }
 
                 foreach ($venta['detalles'] as &$detalle) {
                     $detalle['precio_unitario_formateado_usd'] = TasaCambioHelper::formatearUSD($detalle['precio_unitario']);
@@ -132,6 +157,9 @@ class VentaController
         }
     }
 
+    /**
+     * Obtiene los detalles completos de una venta con información de productos
+     */
     public function obtenerDetallesCompletos($venta_id)
     {
         try {
@@ -161,10 +189,13 @@ class VentaController
         }
     }
 
+    /**
+     * Crea una nueva venta con múltiples pagos
+     */
     public function crear($data)
     {
         $this->setTimeZone();
-        
+
         try {
             $this->db->beginTransaction();
 
@@ -253,15 +284,16 @@ class VentaController
                 ];
             }
 
-            // Validar que los pagos sumen al menos el total (con tolerancia)
+            // Validar que los pagos no excedan el total
+            $validacionPagos = $this->validarPagos($data['pagos'], $total_usd);
+            if (!$validacionPagos['valido']) {
+                throw new Exception($validacionPagos['mensaje']);
+            }
+
+            // Calcular total pagado para referencia
             $total_pagado_usd = 0;
             foreach ($data['pagos'] as $pago) {
                 $total_pagado_usd += floatval($pago['monto_usd']);
-            }
-
-            if ($total_pagado_usd < $total_usd - 0.01) { // Tolerancia de 1 centavo
-                throw new Exception("El total pagado ($" . number_format($total_pagado_usd, 2) . 
-                                   ") es menor que el total de la venta ($" . number_format($total_usd, 2) . ")");
             }
 
             // Crear la venta
@@ -334,12 +366,12 @@ class VentaController
                 "total_pagado_usd" => $resumenPagos['total_pagado_usd'] ?? $total_pagado_usd,
                 "total_pagado_bs" => $resumenPagos['total_pagado_bs'] ?? $total_bs,
                 "cantidad_pagos" => count($data['pagos']),
+                "metodos_distintos" => $resumenPagos['metodos_distintos'] ?? 1,
                 "detalles_procesados" => $detalles_procesados,
                 "fecha_hora" => $fecha_hora_actual,
                 "fecha_formateada" => date('d/m/Y H:i:s'),
                 "redirect_url" => "index.php"
             ];
-
         } catch (Exception $e) {
             $this->db->rollBack();
             error_log("ERROR en VentaController::crear: " . $e->getMessage());
@@ -350,21 +382,83 @@ class VentaController
         }
     }
 
-    private function setTimeZone()
+    /**
+     * Obtiene los pagos completados de una venta específica
+     */
+    public function obtenerPagosCompletadosVenta($venta_id)
     {
-        $timezone = 'America/Caracas';
-        date_default_timezone_set($timezone);
-        
         try {
-            $this->db->exec("SET TIME ZONE 'America/Caracas'");
-            $this->db->exec("SET datestyle TO 'ISO, DMY'");
+            $pagos = $this->pagoVenta->obtenerCompletadosPorVenta($venta_id);
+
+            return [
+                "success" => true,
+                "data" => $pagos,
+                "cantidad" => count($pagos)
+            ];
         } catch (Exception $e) {
-            error_log("Error configurando zona horaria en BD: " . $e->getMessage());
+            error_log("Error en obtenerPagosCompletadosVenta: " . $e->getMessage());
+            return [
+                "success" => false,
+                "message" => "Error al obtener pagos: " . $e->getMessage(),
+                "data" => []
+            ];
         }
-        
-        return $timezone;
     }
 
+    /**
+     * Obtiene los pagos de una venta específica (todos, sin filtrar)
+     */
+    public function obtenerPagosVenta($venta_id)
+    {
+        try {
+            $pagos = $this->pagoVenta->obtenerPorVenta($venta_id);
+            return [
+                "success" => true,
+                "data" => $pagos
+            ];
+        } catch (Exception $e) {
+            error_log("Error en obtenerPagosVenta: " . $e->getMessage());
+            return [
+                "success" => false,
+                "message" => "Error al obtener pagos: " . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Valida que los pagos no excedan el total de la venta
+     */
+    public function validarPagos($pagos, $total_usd)
+    {
+        $total_pagado = 0;
+        foreach ($pagos as $pago) {
+            $total_pagado += floatval($pago['monto_usd']);
+        }
+
+        // Validar que no exceda (con tolerancia de 1 centavo)
+        if ($total_pagado > $total_usd + 0.01) {
+            return [
+                'valido' => false,
+                'mensaje' => "El total pagado ($" . number_format($total_pagado, 2) .
+                    ") excede el total de la venta ($" . number_format($total_usd, 2) . ")"
+            ];
+        }
+
+        // Validar que sea suficiente (con tolerancia de 1 centavo)
+        if ($total_pagado < $total_usd - 0.01) {
+            return [
+                'valido' => false,
+                'mensaje' => "El total pagado ($" . number_format($total_pagado, 2) .
+                    ") es menor que el total de la venta ($" . number_format($total_usd, 2) . ")"
+            ];
+        }
+
+        return ['valido' => true];
+    }
+
+    /**
+     * Actualiza el estado de una venta
+     */
     public function actualizarEstado($id, $estado)
     {
         try {
@@ -400,6 +494,27 @@ class VentaController
         }
     }
 
+    /**
+     * Establece la zona horaria correcta
+     */
+    private function setTimeZone()
+    {
+        $timezone = 'America/Caracas';
+        date_default_timezone_set($timezone);
+
+        try {
+            $this->db->exec("SET TIME ZONE 'America/Caracas'");
+            $this->db->exec("SET datestyle TO 'ISO, DMY'");
+        } catch (Exception $e) {
+            error_log("Error configurando zona horaria en BD: " . $e->getMessage());
+        }
+
+        return $timezone;
+    }
+
+    /**
+     * Obtiene estadísticas generales
+     */
     public function obtenerEstadisticas()
     {
         try {
@@ -423,6 +538,9 @@ class VentaController
         }
     }
 
+    /**
+     * Obtiene ventas por mes
+     */
     public function obtenerVentasPorMes()
     {
         try {
@@ -440,6 +558,9 @@ class VentaController
         }
     }
 
+    /**
+     * Busca ventas por término
+     */
     public function buscar($search)
     {
         try {
@@ -471,6 +592,9 @@ class VentaController
         }
     }
 
+    /**
+     * Obtiene productos con información completa
+     */
     public function obtenerProductosConInfoCompleta()
     {
         try {
@@ -497,6 +621,9 @@ class VentaController
         }
     }
 
+    /**
+     * Obtiene total de ventas completadas en Bs
+     */
     public function obtenerTotalVentasCompletadasBs()
     {
         try {
@@ -524,6 +651,9 @@ class VentaController
         }
     }
 
+    /**
+     * Obtiene ventas activas del día
+     */
     public function obtenerVentasActivasHoy()
     {
         try {
@@ -544,7 +674,7 @@ class VentaController
                 $venta['total_formateado_usd'] = TasaCambioHelper::formatearUSD($venta['total']);
                 $venta['total_formateado_bs'] = TasaCambioHelper::formatearBS($venta['total_bs']);
                 $venta['fecha_formateada'] = date('d/m/Y H:i', strtotime($venta['fecha_hora']));
-                
+
                 // Obtener pagos de la venta
                 $pagos = $this->pagoVenta->obtenerPorVenta($venta['id']);
                 $venta['pagos'] = $pagos;
@@ -564,12 +694,15 @@ class VentaController
         }
     }
 
+    /**
+     * Obtiene resumen del día
+     */
     public function obtenerResumenHoy()
     {
         try {
             $tiposPagoUSD = [2, 7];
             $tiposPagoUSDStr = implode(',', $tiposPagoUSD);
-            
+
             $query = "
                 SELECT 
                     COUNT(*) as ventas_hoy,
@@ -599,14 +732,14 @@ class VentaController
                 $resumen['total_usd_hoy_formateado'] = TasaCambioHelper::formatearUSD($resumen['total_usd_hoy'] ?? 0);
                 $resumen['total_efectivo_usd_formateado'] = TasaCambioHelper::formatearUSD($resumen['total_efectivo_usd'] ?? 0);
                 $resumen['total_divisa_formateado'] = TasaCambioHelper::formatearUSD($resumen['total_divisa'] ?? 0);
-                
+
                 if ($resumen['primera_venta']) {
                     $resumen['primera_venta_formateada'] = date('H:i', strtotime($resumen['primera_venta']));
                 }
                 if ($resumen['ultima_venta']) {
                     $resumen['ultima_venta_formateada'] = date('H:i', strtotime($resumen['ultima_venta']));
                 }
-                
+
                 unset($resumen['total_bs_hoy']);
                 unset($resumen['total_bs_otros']);
             }
@@ -624,6 +757,9 @@ class VentaController
         }
     }
 
+    /**
+     * Obtiene total de precios fijos del día
+     */
     public function obtenerTotalPreciosFijosHoy()
     {
         try {
@@ -639,11 +775,11 @@ class VentaController
                 AND dv.precio_unitario_bs > 0
                 AND (dv.precio_unitario * v.tasa_cambio) != dv.precio_unitario_bs;
             ";
-            
+
             $stmt = $this->db->prepare($query);
             $stmt->execute();
             $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-            
+
             return [
                 'success' => true,
                 'data' => [
@@ -661,6 +797,9 @@ class VentaController
         }
     }
 
+    /**
+     * Verifica si hay ventas activas
+     */
     public function hayVentasActivas()
     {
         try {
@@ -688,6 +827,9 @@ class VentaController
         }
     }
 
+    /**
+     * Obtiene ventas cerradas
+     */
     public function obtenerVentasCerradas($limit = 100)
     {
         try {
@@ -723,26 +865,6 @@ class VentaController
             return [
                 "success" => false,
                 "message" => "Error al obtener ventas cerradas: " . $e->getMessage()
-            ];
-        }
-    }
-
-    /**
-     * Obtiene los pagos de una venta específica
-     */
-    public function obtenerPagosVenta($venta_id)
-    {
-        try {
-            $pagos = $this->pagoVenta->obtenerPorVenta($venta_id);
-            return [
-                "success" => true,
-                "data" => $pagos
-            ];
-        } catch (Exception $e) {
-            error_log("Error en obtenerPagosVenta: " . $e->getMessage());
-            return [
-                "success" => false,
-                "message" => "Error al obtener pagos: " . $e->getMessage()
             ];
         }
     }

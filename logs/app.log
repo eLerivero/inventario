@@ -211,3 +211,120 @@
 [2026-02-24 20:52:48] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 463 
 [2026-02-24 20:52:55] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 463 
 [2026-02-24 20:53:18] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en /opt/homebrew/var/www/inventario/Views/ventas/index.php línea 463 
+[2026-03-02 11:19:34] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 11:21:33] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 11:21:44] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-03-02 15:22:28] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 15:22:30] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 15:22:57] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 15:22:59] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 15:23:04] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 15:23:32] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 15:23:34] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 11:23:35] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 11:23:38] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 11:23:42] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 11:23:44] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 11:55:22] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 11:59:46] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 11:59:50] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 12:04:51] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 12:09:52] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 12:14:53] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 12:19:54] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 12:24:55] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 12:29:56] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 12:34:57] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 12:39:58] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 12:44:59] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 12:50:00] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 12:53:42] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 12:55:01] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 12:58:43] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:00:02] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:03:44] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:05:03] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:08:45] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:10:04] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:13:46] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:15:05] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:18:47] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:20:06] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:21:37] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:21:55] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:22:04] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:22:10] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:22:16] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:25:41] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 435 
+[2026-03-02 13:25:41] [ERROR] Excepción no capturada: Division by zero {"file":"C:\\wamp64\\www\\inventario\\Views\\ventas\\ver.php","line":435,"trace":"#0 {main}"}
+[2026-03-02 13:33:11] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 463 
+[2026-03-02 13:34:57] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 13:35:56] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 13:36:00] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 355 
+[2026-03-02 13:36:00] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 1037 
+[2026-03-02 13:38:02] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 13:38:09] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 13:38:47] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 13:43:48] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 13:48:49] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 13:53:50] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 13:58:51] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 14:03:52] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 14:08:53] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 14:13:55] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 14:18:56] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 14:23:57] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 14:27:31] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 379 
+[2026-03-02 14:27:31] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 1061 
+[2026-03-02 14:28:06] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 14:33:01] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 379 
+[2026-03-02 14:33:01] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 1061 
+[2026-03-02 14:33:44] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 14:38:45] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 14:43:45] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 14:48:46] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 14:53:47] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 14:58:48] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 15:03:49] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 15:08:50] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 15:13:51] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 15:18:52] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 15:23:53] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 15:28:54] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 15:29:24] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 379 
+[2026-03-02 15:29:24] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 1061 
+[2026-03-02 15:29:36] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 329 
+[2026-03-02 15:29:36] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 394 
+[2026-03-02 15:29:49] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 329 
+[2026-03-02 15:29:49] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 394 
+[2026-03-02 15:30:21] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 15:30:34] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 261 
+[2026-03-02 15:30:34] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 326 
+[2026-03-02 15:30:45] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 379 
+[2026-03-02 15:30:45] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 1061 
+[2026-03-02 16:04:37] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 16:04:42] [ERROR] DEPRECATED: htmlspecialchars(): Passing null to parameter #1 ($string) of type string is deprecated en C:\wamp64\www\inventario\Views\tasas-cambio\index.php línea 95 
+[2026-03-02 20:05:11] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 20:06:01] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 20:06:59] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 20:07:01] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 20:07:04] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 20:07:09] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 20:07:31] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 20:07:33] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 20:08:07] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 20:08:47] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 20:08:49] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-02 16:08:59] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 16:09:34] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 16:09:58] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 16:14:58] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 16:18:02] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 16:19:59] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 16:23:03] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 16:25:00] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 16:29:54] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 16:30:01] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 16:30:44] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 482 
+[2026-03-02 16:30:51] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 379 
+[2026-03-02 16:30:51] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en C:\wamp64\www\inventario\Views\ventas\ver.php línea 1061 

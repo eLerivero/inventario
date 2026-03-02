@@ -23,27 +23,51 @@ if (!$result['success']) {
     $venta = null;
 } else {
     $venta = $result['data'];
-    
-    // Obtener pagos específicos de la venta
-    $pagos_result = $controller->obtenerPagosVenta($id);
-    $pagos = $pagos_result['success'] ? $pagos_result['data'] : [];
-    $venta['pagos'] = $pagos;
-    
-    // Calcular totales por moneda
-    $total_usd_pagado = 0;
-    $total_bs_pagado = 0;
-    foreach ($pagos as $pago) {
-        $total_usd_pagado += $pago['monto_usd'];
-        $total_bs_pagado += $pago['monto_bs'];
-    }
-    $venta['total_pagado_usd'] = $total_usd_pagado;
-    $venta['total_pagado_bs'] = $total_bs_pagado;
-    $venta['saldo_pendiente_usd'] = $venta['total'] - $total_usd_pagado;
-    $venta['saldo_pendiente_bs'] = $venta['total_bs'] - $total_bs_pagado;
-}
-?>
 
-<?php
+    // Los pagos ya vienen filtrados como completados desde el controlador
+    $pagos = $venta['pagos'] ?? [];
+
+    // Calcular totales por moneda - mantener precisión exacta
+    $total_usd_pagado = $venta['total_pagado_usd'] ?? 0;
+    $total_bs_pagado = $venta['total_pagado_bs'] ?? 0;
+    $total_pagos = $venta['cantidad_pagos'] ?? 0;
+    $metodos_utilizados = $venta['metodos_utilizados'] ?? [];
+    $cantidad_metodos = $venta['cantidad_metodos'] ?? 0;
+}
+
+/**
+ * Función para formatear números a 2 decimales SIN REDONDEAR (truncando)
+ * Ejemplo: 10.375 -> 10.37, 45.12345678 -> 45.12
+ */
+function formato_2_decimales($numero)
+{
+    if ($numero == 0 || $numero === null) return '0.00';
+
+    // Separar parte entera y decimal
+    $numero_str = (string)$numero;
+    if (strpos($numero_str, '.') === false) {
+        return $numero_str . '.00';
+    }
+
+    list($entero, $decimal) = explode('.', $numero_str);
+
+    // Tomar solo los primeros 2 decimales (sin redondear)
+    $decimal = substr($decimal, 0, 2);
+
+    // Si el decimal tiene menos de 2 dígitos, rellenar con ceros
+    $decimal = str_pad($decimal, 2, '0');
+
+    return $entero . '.' . $decimal;
+}
+
+/**
+ * Función para formatear porcentajes a 2 decimales SIN REDONDEAR
+ */
+function formato_porcentaje_2_decimales($numero)
+{
+    return formato_2_decimales($numero) . '%';
+}
+
 $page_title = "Detalles de Venta";
 include '../layouts/header.php';
 ?>
@@ -56,12 +80,12 @@ include '../layouts/header.php';
         position: relative;
         padding-left: 0;
     }
-    
+
     .timeline li {
         position: relative;
         padding-left: 0;
     }
-    
+
     .timeline li:not(:last-child)::before {
         content: '';
         position: absolute;
@@ -71,7 +95,7 @@ include '../layouts/header.php';
         width: 2px;
         background-color: #e9ecef;
     }
-    
+
     .timeline-icon {
         width: 40px;
         height: 40px;
@@ -79,77 +103,131 @@ include '../layouts/header.php';
         align-items: center;
         justify-content: center;
     }
-    
+
     .table-hover tbody tr:hover {
         background-color: rgba(13, 110, 253, 0.05);
     }
-    
+
     .badge.bg-opacity-10 {
         background-color: rgba(var(--bs-primary-rgb), 0.1);
     }
-    
+
     .card {
         box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         border: 1px solid #e9ecef;
     }
-    
+
     .card-header {
         border-bottom: 1px solid #e9ecef;
     }
-    
+
     .table th {
         font-weight: 600;
         font-size: 0.875rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
-    
+
     /* Estilos para pagos */
     .pago-item {
         border-left: 4px solid transparent;
         transition: all 0.2s ease;
     }
-    
+
     .pago-item.usd {
         border-left-color: #0d9488;
         background: #f0fdfa;
     }
-    
+
     .pago-item.bs {
         border-left-color: #b45309;
         background: #fff7ed;
     }
-    
+
     .pago-item.mixto {
         border-left-color: #7e22ce;
         background: #f3e8ff;
     }
-    
+
     .pago-monto-usd {
         color: #0d9488;
         font-weight: 600;
     }
-    
+
     .pago-monto-bs {
         color: #b45309;
         font-weight: 600;
     }
-    
+
     .resumen-pago {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
         border-radius: 12px;
         padding: 1.5rem;
     }
-    
+
     .badge-multiple {
         background: #f3e8ff;
         color: #7e22ce;
     }
+
+    .badge-completado {
+        background: #dcfce7;
+        color: #059669;
+    }
+
+    .text-success-dark {
+        color: #059669;
+    }
+
+    /* Animaciones */
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Tooltip personalizado */
+    .tooltip-custom {
+        position: relative;
+        display: inline-block;
+        cursor: help;
+    }
+
+    .tooltip-custom:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1e293b;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        z-index: 1000;
+    }
+
+    /* Estilo para montos con 2 decimales fijos */
+    .monto-2dec {
+        font-family: 'Courier New', monospace;
+        font-size: 0.95em;
+    }
 </style>
 
 <!-- Header con Botón de Volver -->
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 fade-in">
     <div>
         <h1 class="h3 mb-0">
             <i class="fas fa-receipt me-2"></i>
@@ -158,10 +236,15 @@ include '../layouts/header.php';
         <p class="text-muted mb-0">
             <?php if ($venta): ?>
                 Información completa de la venta #<?php echo $venta['numero_venta']; ?>
-                <?php if (isset($venta['pagos']) && count($venta['pagos']) > 1): ?>
+                <?php if ($cantidad_metodos > 1): ?>
                     <span class="badge badge-multiple ms-2">
                         <i class="fas fa-layer-group me-1"></i>
-                        <?php echo count($venta['pagos']); ?> métodos de pago
+                        <?php echo $cantidad_metodos; ?> métodos de pago
+                    </span>
+                <?php elseif ($total_pagos == 1): ?>
+                    <span class="badge bg-success bg-opacity-10 text-success ms-2">
+                        <i class="fas fa-check-circle me-1"></i>
+                        Pago único
                     </span>
                 <?php endif; ?>
             <?php else: ?>
@@ -178,11 +261,14 @@ include '../layouts/header.php';
                 <i class="fas fa-check-circle me-1"></i> Completar Venta
             </button>
         <?php endif; ?>
+        <button type="button" class="btn btn-outline-info ms-2" onclick="imprimirRecibo()">
+            <i class="fas fa-print me-1"></i> Imprimir
+        </button>
     </div>
 </div>
 
 <?php if (!$venta): ?>
-    <div class="alert alert-warning">
+    <div class="alert alert-warning fade-in">
         <i class="fas fa-exclamation-triangle me-2"></i>
         No se encontró la venta solicitada.
         <div class="mt-2">
@@ -193,7 +279,7 @@ include '../layouts/header.php';
     </div>
 <?php else: ?>
     <!-- Tarjeta Resumen Principal -->
-    <div class="card mb-4 border-primary">
+    <div class="card mb-4 border-primary fade-in">
         <div class="card-header bg-primary text-white">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
@@ -219,6 +305,13 @@ include '../layouts/header.php';
                         <i class="<?php echo $estado_info[2]; ?> me-1"></i>
                         <?php echo $estado_info[1]; ?>
                     </span>
+
+                    <?php if ($venta['estado'] === 'completada'): ?>
+                        <span class="badge bg-light text-dark ms-2 p-2">
+                            <i class="fas fa-lock me-1"></i>
+                            Cerrada en Caja: <?php echo isset($venta['cerrada_en_caja']) && $venta['cerrada_en_caja'] ? 'Sí' : 'No'; ?>
+                        </span>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -250,14 +343,29 @@ include '../layouts/header.php';
                             <i class="fas fa-credit-card fa-2x text-success"></i>
                         </div>
                         <div>
-                            <h6 class="mb-1 text-muted">Método de Pago Principal</h6>
+                            <h6 class="mb-1 text-muted">
+                                <?php echo $cantidad_metodos > 1 ? 'Métodos de Pago' : 'Método de Pago Principal'; ?>
+                            </h6>
                             <h5 class="mb-0"><?php echo htmlspecialchars($venta['tipo_pago_nombre']); ?></h5>
-                            <?php if (isset($venta['pagos']) && count($venta['pagos']) > 1): ?>
+                            <?php if ($cantidad_metodos > 1): ?>
                                 <small class="text-muted">
                                     <i class="fas fa-layer-group me-1"></i>
-                                    + <?php echo count($venta['pagos']) - 1; ?> método(s) adicional(es)
+                                    <?php echo $cantidad_metodos - 1; ?> método(s) adicional(es)
                                 </small>
+                                <div class="mt-1">
+                                    <span class="badge bg-info bg-opacity-10 text-info">
+                                        <i class="fas fa-list me-1"></i>
+                                        <?php echo implode(', ', array_slice($metodos_utilizados, 0, 3)); ?>
+                                        <?php if (count($metodos_utilizados) > 3): ?> ...<?php endif; ?>
+                                    </span>
+                                </div>
                             <?php endif; ?>
+                            <div class="mt-1">
+                                <span class="badge bg-success bg-opacity-10 text-success">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    <?php echo $total_pagos; ?> pago(s) completado(s)
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -268,7 +376,7 @@ include '../layouts/header.php';
                         </div>
                         <div>
                             <h6 class="mb-1 text-muted">Tasa de Cambio</h6>
-                            <h5 class="mb-0"><?php echo $venta['tasa_formateada'] ?? number_format($venta['tasa_cambio_utilizada'], 2); ?> Bs/$</h5>
+                            <h5 class="mb-0 monto-2dec"><?php echo formato_2_decimales($venta['tasa_cambio_utilizada']); ?> Bs/$</h5>
                             <small class="text-muted">Aplicada al momento de la venta</small>
                         </div>
                     </div>
@@ -287,156 +395,223 @@ include '../layouts/header.php';
     </div>
 
     <!-- ================================================================== -->
-    <!-- NUEVA SECCIÓN: DETALLE DE PAGOS MÚLTIPLES -->
+    <!-- SECCIÓN: DETALLE DE PAGOS COMPLETADOS (CON 2 DECIMALES FIJOS) -->
     <!-- ================================================================== -->
-    <?php if (isset($venta['pagos']) && !empty($venta['pagos'])): ?>
-    <div class="card mb-4 border-success">
-        <div class="card-header bg-success text-white">
-            <h5 class="card-title mb-0">
-                <i class="fas fa-money-bill-wave me-2"></i>
-                Detalle de Pagos
-                <span class="badge bg-light text-dark ms-2"><?php echo count($venta['pagos']); ?> pago(s)</span>
-            </h5>
-        </div>
-        <div class="card-body">
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <div class="resumen-pago">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="mb-0 text-white-50">Resumen de Pagos</h6>
-                            <i class="fas fa-receipt fa-2x opacity-50"></i>
-                        </div>
-                        <div class="row">
-                            <div class="col-6">
-                                <small class="text-white-50 d-block">Total USD</small>
-                                <h3 class="text-white mb-0"><?php echo TasaCambioHelper::formatearUSD($venta['total_pagado_usd'] ?? $venta['total']); ?></h3>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-white-50 d-block">Total Bs</small>
-                                <h3 class="text-white mb-0"><?php echo TasaCambioHelper::formatearBS($venta['total_pagado_bs'] ?? $venta['total_bs']); ?></h3>
-                            </div>
-                        </div>
-                        <?php if (($venta['saldo_pendiente_usd'] ?? 0) > 0.01): ?>
-                        <div class="mt-3 pt-3 border-top border-white-50">
-                            <div class="d-flex justify-content-between">
-                                <span class="text-white-50">Saldo Pendiente:</span>
-                                <span class="text-white fw-bold">
-                                    <?php echo TasaCambioHelper::formatearUSD($venta['saldo_pendiente_usd']); ?> / 
-                                    <?php echo TasaCambioHelper::formatearBS($venta['saldo_pendiente_bs']); ?>
-                                </span>
-                            </div>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="bg-light p-3 rounded-3 h-100 d-flex align-items-center">
-                        <div class="w-100">
-                            <h6 class="text-muted mb-3">Distribución por Moneda</h6>
-                            <?php
-                            $total_usd = $venta['total_pagado_usd'] ?? $venta['total'];
-                            $total_bs = $venta['total_pagado_bs'] ?? $venta['total_bs'];
-                            $porcentaje_usd = $venta['total'] > 0 ? ($total_usd / $venta['total']) * 100 : 0;
-                            $porcentaje_bs = $venta['total'] > 0 ? (($total_bs / $venta['total_bs']) * 100) : 0;
-                            ?>
-                            <div class="mb-2">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span><i class="fas fa-dollar-sign text-success"></i> USD</span>
-                                    <span class="fw-bold"><?php echo number_format($porcentaje_usd, 1); ?>%</span>
-                                </div>
-                                <div class="progress" style="height: 8px;">
-                                    <div class="progress-bar bg-success" style="width: <?php echo $porcentaje_usd; ?>%"></div>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span><i class="fas fa-bolt text-warning"></i> Bs</span>
-                                    <span class="fw-bold"><?php echo number_format($porcentaje_bs, 1); ?>%</span>
-                                </div>
-                                <div class="progress" style="height: 8px;">
-                                    <div class="progress-bar bg-warning" style="width: <?php echo $porcentaje_bs; ?>%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <?php if (!empty($pagos)): ?>
+        <div class="card mb-4 border-success fade-in">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-money-bill-wave me-2"></i>
+                    Detalle de Pagos Completados
+                    <span class="badge bg-light text-dark ms-2"><?php echo $total_pagos; ?> pago(s)</span>
+                    <?php if ($cantidad_metodos > 1): ?>
+                        <span class="badge bg-white text-success ms-2">
+                            <i class="fas fa-layer-group me-1"></i> <?php echo $cantidad_metodos; ?> métodos
+                        </span>
+                    <?php endif; ?>
+                    <?php if ($venta['estado'] === 'completada'): ?>
+                        <span class="badge bg-white text-success ms-2">
+                            <i class="fas fa-check-circle me-1"></i> Venta Completada
+                        </span>
+                    <?php endif; ?>
+                </h5>
             </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="resumen-pago">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0 text-white-50">Resumen de Pagos</h6>
+                                <i class="fas fa-receipt fa-2x opacity-50"></i>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <small class="text-white-50 d-block">Total USD</small>
+                                    <h3 class="text-white mb-0 monto-2dec">$<?php echo formato_2_decimales($total_usd_pagado); ?></h3>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-white-50 d-block">Total Bs</small>
+                                    <h3 class="text-white mb-0 monto-2dec">Bs <?php echo formato_2_decimales($total_bs_pagado); ?></h3>
+                                </div>
+                            </div>
 
-            <!-- Tabla de pagos -->
-            <h6 class="mb-3"><i class="fas fa-list-ul me-2"></i>Detalle por Método de Pago</h6>
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>#</th>
-                            <th>Método de Pago</th>
-                            <th class="text-end">Monto USD</th>
-                            <th class="text-end">Monto Bs</th>
-                            <th class="text-center">Tasa Aplicada</th>
-                            <th class="text-center">Fecha</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php 
-                        $contador_pago = 1;
-                        foreach ($venta['pagos'] as $pago): 
-                            $tasa_aplicada = $pago['monto_usd'] > 0 ? $pago['monto_bs'] / $pago['monto_usd'] : 0;
-                            $clase_pago = $pago['monto_usd'] > 0 && $pago['monto_bs'] > 0 ? 'mixto' : ($pago['monto_usd'] > 0 ? 'usd' : 'bs');
-                        ?>
-                            <tr class="pago-item <?php echo $clase_pago; ?>">
-                                <td><?php echo $contador_pago++; ?></td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <?php if ($pago['monto_usd'] > 0 && $pago['monto_bs'] > 0): ?>
-                                            <i class="fas fa-layer-group me-2 text-purple"></i>
-                                        <?php elseif ($pago['monto_usd'] > 0): ?>
-                                            <i class="fas fa-dollar-sign me-2 text-success"></i>
-                                        <?php else: ?>
-                                            <i class="fas fa-bolt me-2 text-warning"></i>
-                                        <?php endif; ?>
-                                        <div>
-                                            <strong><?php echo htmlspecialchars($pago['tipo_pago_nombre']); ?></strong>
-                                            <?php if ($pago['monto_usd'] > 0 && $pago['monto_bs'] > 0): ?>
-                                                <br><small class="text-muted">Pago mixto</small>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="text-end pago-monto-usd">
-                                    <?php echo TasaCambioHelper::formatearUSD($pago['monto_usd']); ?>
-                                </td>
-                                <td class="text-end pago-monto-bs">
-                                    <?php echo TasaCambioHelper::formatearBS($pago['monto_bs']); ?>
-                                </td>
-                                <td class="text-center">
-                                    <?php if ($tasa_aplicada > 0): ?>
-                                        <span class="badge bg-info bg-opacity-10 text-info">
-                                            <?php echo number_format($tasa_aplicada, 2); ?> Bs/$
+                            <!-- Mostrar comparación con total de venta -->
+                            <div class="mt-3 pt-3 border-top border-white-50">
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-white-50">Total Venta:</span>
+                                    <span class="text-white monto-2dec">
+                                        $<?php echo formato_2_decimales($venta['total']); ?> /
+                                        Bs <?php echo formato_2_decimales($venta['total_bs']); ?>
+                                    </span>
+                                </div>
+
+                                <?php if (($venta['saldo_pendiente_usd'] ?? 0) > 0 && $venta['estado'] !== 'completada'): ?>
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <span class="text-white-50">Saldo Pendiente:</span>
+                                        <span class="text-white fw-bold monto-2dec">
+                                            $<?php echo formato_2_decimales($venta['saldo_pendiente_usd']); ?> /
+                                            Bs <?php echo formato_2_decimales($venta['saldo_pendiente_bs']); ?>
                                         </span>
-                                    <?php else: ?>
-                                        <span class="text-muted">—</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-center">
-                                    <small>
-                                        <?php echo date('d/m/Y H:i', strtotime($pago['fecha_pago'] ?? $pago['created_at'] ?? $venta['fecha_hora'])); ?>
-                                    </small>
-                                </td>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="d-flex justify-content-between mt-2">
+                                        <span class="text-white-50">Estado de Pago:</span>
+                                        <span class="text-white fw-bold">
+                                            <i class="fas fa-check-circle me-1"></i> Completado
+                                        </span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="bg-light p-3 rounded-3 h-100 d-flex align-items-center">
+                            <div class="w-100">
+                                <h6 class="text-muted mb-3">Distribución por Moneda</h6>
+                                <?php
+                                // Mantener todos los valores exactos sin redondeo
+                                $porcentaje_usd = '0';
+                                $porcentaje_bs = '0';
+
+                                // Usar los montos exactos como vienen de la base de datos
+                                $total_usd_exacto = $total_usd_pagado;
+                                $total_bs_exacto = $total_bs_pagado;
+
+                                if ($total_usd_exacto > 0 || $total_bs_exacto > 0) {
+                                    $tasa = isset($venta['tasa_cambio_utilizada']) && $venta['tasa_cambio_utilizada'] > 0
+                                        ? $venta['tasa_cambio_utilizada']
+                                        : 1;
+
+                                    // Calcular Bs convertido a USD con toda la precisión
+                                    $bs_en_usd = $total_bs_exacto / $tasa;
+                                    $total_combinado = $total_usd_exacto + $bs_en_usd;
+
+                                    if ($total_combinado > 0) {
+                                        // Calcular porcentajes con máxima precisión
+                                        $porcentaje_usd = ($total_usd_exacto / $total_combinado) * 100;
+                                        $porcentaje_bs = ($bs_en_usd / $total_combinado) * 100;
+                                    }
+                                }
+                                ?>
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span><i class="fas fa-dollar-sign text-success"></i> USD</span>
+                                        <span class="fw-bold monto-2dec"><?php echo formato_2_decimales($porcentaje_usd); ?>%</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-success" style="width: <?php echo $porcentaje_usd; ?>%"></div>
+                                    </div>
+                                    <small class="text-muted monto-2dec">$<?php echo formato_2_decimales($total_usd_exacto); ?></small>
+                                </div>
+                                <div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span><i class="fas fa-bolt text-warning"></i> Bs</span>
+                                        <span class="fw-bold monto-2dec"><?php echo formato_2_decimales($porcentaje_bs); ?>%</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar bg-warning" style="width: <?php echo $porcentaje_bs; ?>%"></div>
+                                    </div>
+                                    <small class="text-muted monto-2dec">Bs <?php echo formato_2_decimales($total_bs_exacto); ?></small>
+                                </div>
+
+                                <?php if ($cantidad_metodos > 1): ?>
+                                    <div class="mt-3 pt-2 border-top">
+                                        <small class="text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            <strong><?php echo $cantidad_metodos; ?></strong> métodos de pago diferentes
+                                        </small>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de pagos completados (CON 2 DECIMALES FIJOS) -->
+                <h6 class="mb-3"><i class="fas fa-list-ul me-2"></i>Detalle por Método de Pago</h6>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Método de Pago</th>
+                                <th class="text-end">Monto USD</th>
+                                <th class="text-end">Monto Bs</th>
+                                <th class="text-center">Tasa Aplicada</th>
+                                <th class="text-center">Fecha</th>
                             </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                    <tfoot class="table-light">
-                        <tr>
-                            <th colspan="2" class="text-end">Totales:</th>
-                            <th class="text-end pago-monto-usd"><?php echo TasaCambioHelper::formatearUSD($venta['total_pagado_usd']); ?></th>
-                            <th class="text-end pago-monto-bs"><?php echo TasaCambioHelper::formatearBS($venta['total_pagado_bs']); ?></th>
-                            <th colspan="2"></th>
-                        </tr>
-                    </tfoot>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $contador_pago = 1;
+                            foreach ($pagos as $pago):
+                                // Calcular tasa con toda la precisión
+                                $tasa_aplicada = $pago['monto_usd'] > 0 ? $pago['monto_bs'] / $pago['monto_usd'] : 0;
+                                $clase_pago = $pago['monto_usd'] > 0 && $pago['monto_bs'] > 0 ? 'mixto' : ($pago['monto_usd'] > 0 ? 'usd' : 'bs');
+                            ?>
+                                <tr class="pago-item <?php echo $clase_pago; ?>">
+                                    <td><?php echo $contador_pago++; ?></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <?php if ($pago['monto_usd'] > 0 && $pago['monto_bs'] > 0): ?>
+                                                <i class="fas fa-layer-group me-2" style="color: #7e22ce;"></i>
+                                            <?php elseif ($pago['monto_usd'] > 0): ?>
+                                                <i class="fas fa-dollar-sign me-2 text-success"></i>
+                                            <?php else: ?>
+                                                <i class="fas fa-bolt me-2 text-warning"></i>
+                                            <?php endif; ?>
+                                            <div>
+                                                <strong><?php echo htmlspecialchars($pago['tipo_pago_nombre']); ?></strong>
+                                                <?php if ($pago['monto_usd'] > 0 && $pago['monto_bs'] > 0): ?>
+                                                    <br><small class="text-muted">Pago mixto</small>
+                                                <?php endif; ?>
+                                                <span class="badge bg-success bg-opacity-10 text-success ms-2">
+                                                    <i class="fas fa-check-circle"></i> Completado
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end pago-monto-usd monto-2dec">
+                                        $<?php echo formato_2_decimales($pago['monto_usd']); ?>
+                                    </td>
+                                    <td class="text-end pago-monto-bs monto-2dec">
+                                        Bs <?php echo formato_2_decimales($pago['monto_bs']); ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <?php if ($tasa_aplicada > 0): ?>
+                                            <span class="badge bg-info bg-opacity-10 text-info monto-2dec"
+                                                data-bs-toggle="tooltip"
+                                                title="Tasa aplicada para este pago">
+                                                <?php echo formato_2_decimales($tasa_aplicada); ?> Bs/$
+                                            </span>
+                                        <?php else: ?>
+                                            <span class="text-muted">—</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <small class="tooltip-custom" data-tooltip="<?php echo date('H:i:s', strtotime($pago['fecha_pago'] ?? $pago['created_at'] ?? $venta['fecha_hora'])); ?>">
+                                            <?php echo date('d/m/Y H:i', strtotime($pago['fecha_pago'] ?? $pago['created_at'] ?? $venta['fecha_hora'])); ?>
+                                        </small>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                        <tfoot class="table-light">
+                            <tr>
+                                <th colspan="2" class="text-end">Totales:</th>
+                                <th class="text-end pago-monto-usd monto-2dec">
+                                    $<?php echo formato_2_decimales($total_usd_pagado); ?>
+                                </th>
+                                <th class="text-end pago-monto-bs monto-2dec">
+                                    Bs <?php echo formato_2_decimales($total_bs_pagado); ?>
+                                </th>
+                                <th colspan="2"></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
     <?php endif; ?>
 
     <!-- Resumen de Totales -->
@@ -449,8 +624,13 @@ include '../layouts/header.php';
                             <i class="fas fa-dollar-sign fa-2x text-success"></i>
                         </div>
                         <h6 class="text-muted mb-2">Total en Dólares</h6>
-                        <h3 class="text-success mb-0"><?php echo $venta['total_formateado_usd'] ?? '$' . number_format($venta['total'], 2); ?></h3>
-                        <small class="text-muted">Monto total en USD</small>
+                        <h3 class="text-success mb-0 monto-2dec">$<?php echo formato_2_decimales($venta['total']); ?></h3>
+                        <small class="text-muted">Monto total de la venta</small>
+                        <?php if ($total_usd_pagado < $venta['total']): ?>
+                            <span class="badge bg-warning mt-2 monto-2dec">Pagado: $<?php echo formato_2_decimales($total_usd_pagado); ?></span>
+                        <?php else: ?>
+                            <span class="badge bg-success mt-2">Completado</span>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -463,8 +643,13 @@ include '../layouts/header.php';
                             <i class="fas fa-bolt fa-2x text-warning"></i>
                         </div>
                         <h6 class="text-muted mb-2">Total en Bolívares</h6>
-                        <h3 class="text-warning mb-0"><?php echo $venta['total_formateado_bs'] ?? TasaCambioHelper::formatearBS($venta['total_bs']); ?></h3>
-                        <small class="text-muted">Monto total en Bs</small>
+                        <h3 class="text-warning mb-0 monto-2dec">Bs <?php echo formato_2_decimales($venta['total_bs']); ?></h3>
+                        <small class="text-muted">Monto total de la venta</small>
+                        <?php if ($total_bs_pagado < $venta['total_bs']): ?>
+                            <span class="badge bg-warning mt-2 monto-2dec">Pagado: Bs <?php echo formato_2_decimales($total_bs_pagado); ?></span>
+                        <?php else: ?>
+                            <span class="badge bg-success mt-2">Completado</span>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -486,7 +671,7 @@ include '../layouts/header.php';
     </div>
 
     <!-- Detalles de Productos -->
-    <div class="card">
+    <div class="card fade-in">
         <div class="card-header">
             <h5 class="card-title mb-0">
                 <i class="fas fa-shopping-basket me-2"></i>
@@ -561,21 +746,21 @@ include '../layouts/header.php';
                                     </td>
                                     <td class="text-center align-middle">
                                         <div class="d-flex flex-column">
-                                            <strong class="text-primary">
-                                                <?php echo $detalle['precio_unitario_formateado_usd'] ?? '$' . number_format($detalle['precio_unitario'], 2); ?>
+                                            <strong class="text-primary monto-2dec">
+                                                $<?php echo formato_2_decimales($detalle['precio_unitario']); ?>
                                             </strong>
-                                            <small class="text-muted">
-                                                <?php echo $detalle['precio_unitario_formateado_bs'] ?? TasaCambioHelper::formatearBS($detalle['precio_unitario_bs']); ?>
+                                            <small class="text-muted monto-2dec">
+                                                Bs <?php echo formato_2_decimales($detalle['precio_unitario_bs']); ?>
                                             </small>
                                         </div>
                                     </td>
                                     <td class="text-center align-middle">
                                         <div class="d-flex flex-column">
-                                            <strong class="text-success">
-                                                <?php echo $detalle['subtotal_formateado_usd'] ?? '$' . number_format($detalle['subtotal'], 2); ?>
+                                            <strong class="text-success monto-2dec">
+                                                $<?php echo formato_2_decimales($detalle['subtotal']); ?>
                                             </strong>
-                                            <small class="text-muted">
-                                                <?php echo $detalle['subtotal_formateado_bs'] ?? TasaCambioHelper::formatearBS($detalle['subtotal_bs']); ?>
+                                            <small class="text-muted monto-2dec">
+                                                Bs <?php echo formato_2_decimales($detalle['subtotal_bs']); ?>
                                             </small>
                                         </div>
                                     </td>
@@ -589,19 +774,19 @@ include '../layouts/header.php';
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex flex-column pt-3">
-                                        <strong class="text-primary">
-                                            <?php echo '$' . number_format(array_sum(array_column($venta['detalles'], 'precio_unitario')), 2); ?>
+                                        <strong class="text-primary monto-2dec">
+                                            $<?php echo formato_2_decimales(array_sum(array_column($venta['detalles'], 'precio_unitario'))); ?>
                                         </strong>
                                         <small class="text-muted">Precios unitarios</small>
                                     </div>
                                 </td>
                                 <td class="text-center">
                                     <div class="d-flex flex-column pt-3">
-                                        <strong class="text-success fs-5">
-                                            <?php echo $venta['total_formateado_usd'] ?? '$' . number_format($venta['total'], 2); ?>
+                                        <strong class="text-success fs-5 monto-2dec">
+                                            $<?php echo formato_2_decimales($venta['total']); ?>
                                         </strong>
-                                        <span class="text-warning">
-                                            <?php echo $venta['total_formateado_bs'] ?? TasaCambioHelper::formatearBS($venta['total_bs']); ?>
+                                        <span class="text-warning monto-2dec">
+                                            Bs <?php echo formato_2_decimales($venta['total_bs']); ?>
                                         </span>
                                     </div>
                                 </td>
@@ -631,7 +816,11 @@ include '../layouts/header.php';
                         <i class="fas fa-box me-1"></i>
                         <?php echo count($venta['detalles']); ?> productos |
                         <i class="fas fa-dollar-sign me-1 ms-2"></i>
-                        <?php echo $venta['total_formateado_usd'] ?? '$' . number_format($venta['total'], 2); ?>
+                        $<?php echo formato_2_decimales($venta['total']); ?>
+                        <?php if ($total_usd_pagado > 0): ?>
+                            | <i class="fas fa-check-circle text-success me-1"></i>
+                            Pagado: $<?php echo formato_2_decimales($total_usd_pagado); ?>
+                        <?php endif; ?>
                     </small>
                 </div>
             </div>
@@ -641,7 +830,7 @@ include '../layouts/header.php';
     <!-- Información de Sistema -->
     <div class="row mt-4">
         <div class="col-md-6">
-            <div class="card">
+            <div class="card fade-in">
                 <div class="card-header bg-light">
                     <h6 class="card-title mb-0">
                         <i class="fas fa-history me-2"></i>
@@ -663,6 +852,29 @@ include '../layouts/header.php';
                                 </div>
                             </div>
                         </li>
+
+                        <!-- Mostrar eventos de pago -->
+                        <?php if (!empty($pagos)): ?>
+                            <?php foreach ($pagos as $index => $pago): ?>
+                                <li class="mb-3">
+                                    <div class="d-flex">
+                                        <div class="timeline-icon bg-info text-white rounded-circle p-2 me-3">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">Pago #<?php echo $index + 1; ?>: <?php echo htmlspecialchars($pago['tipo_pago_nombre']); ?></h6>
+                                            <p class="text-muted mb-0 small monto-2dec">
+                                                $<?php echo formato_2_decimales($pago['monto_usd']); ?> /
+                                                Bs <?php echo formato_2_decimales($pago['monto_bs']); ?>
+                                                <br>
+                                                <?php echo date('d/m/Y H:i:s', strtotime($pago['fecha_pago'] ?? $pago['created_at'] ?? $venta['fecha_hora'])); ?>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </li>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+
                         <?php if ($venta['estado'] === 'completada'): ?>
                             <li class="mb-3">
                                 <div class="d-flex">
@@ -678,6 +890,7 @@ include '../layouts/header.php';
                                 </div>
                             </li>
                         <?php endif; ?>
+
                         <?php if (!empty($venta['updated_at']) && $venta['updated_at'] !== $venta['created_at']): ?>
                             <li>
                                 <div class="d-flex">
@@ -698,7 +911,7 @@ include '../layouts/header.php';
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card">
+            <div class="card fade-in">
                 <div class="card-header bg-light">
                     <h6 class="card-title mb-0">
                         <i class="fas fa-cogs me-2"></i>
@@ -741,28 +954,43 @@ include '../layouts/header.php';
                             <i class="fas fa-exclamation-triangle me-2"></i>
                             <strong>¡Atención!</strong> Esta acción no se puede deshacer.
                         </div>
-                        <p>¿Estás seguro de que deseas completar esta venta?</p>
-                        <ul class="text-muted">
-                            <li>El estado cambiará a "Completada"</li>
-                            <li>El stock de los productos se actualizará</li>
-                            <li>La venta será registrada como finalizada</li>
-                        </ul>
-                        
-                        <?php if (isset($venta['pagos']) && count($venta['pagos']) > 1): ?>
-                        <div class="alert alert-info mt-3">
-                            <i class="fas fa-layer-group me-2"></i>
-                            <strong>Pagos Múltiples:</strong> Esta venta tiene <?php echo count($venta['pagos']); ?> métodos de pago registrados.
-                        </div>
+
+                        <?php if (($venta['saldo_pendiente_usd'] ?? 0) > 0): ?>
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <strong>Saldo Pendiente:</strong>
+                                $<?php echo formato_2_decimales($venta['saldo_pendiente_usd']); ?> /
+                                Bs <?php echo formato_2_decimales($venta['saldo_pendiente_bs']); ?>
+                                <br>
+                                No se puede completar la venta con saldo pendiente.
+                            </div>
+                        <?php else: ?>
+                            <p>¿Estás seguro de que deseas completar esta venta?</p>
+                            <ul class="text-muted">
+                                <li>El estado cambiará a "Completada"</li>
+                                <li>El stock de los productos se actualizará</li>
+                                <li>La venta será registrada como finalizada</li>
+                            </ul>
+
+                            <?php if ($cantidad_metodos > 1): ?>
+                                <div class="alert alert-info mt-3">
+                                    <i class="fas fa-layer-group me-2"></i>
+                                    <strong>Pagos Múltiples:</strong> Esta venta tiene <?php echo $cantidad_metodos; ?> métodos de pago diferentes (<?php echo $total_pagos; ?> pagos en total).
+                                </div>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <i class="fas fa-times me-1"></i> Cancelar
                         </button>
-                        <a href="index.php?action=completar&id=<?php echo $venta['id']; ?>&csrf_token=<?php echo $_SESSION['csrf_token'] ?? ''; ?>"
-                            class="btn btn-success">
-                            <i class="fas fa-check me-1"></i> Sí, Completar Venta
-                        </a>
+
+                        <?php if (!isset($venta['saldo_pendiente_usd']) || $venta['saldo_pendiente_usd'] <= 0): ?>
+                            <a href="index.php?action=completar&id=<?php echo $venta['id']; ?>&csrf_token=<?php echo $_SESSION['csrf_token'] ?? ''; ?>"
+                                class="btn btn-success">
+                                <i class="fas fa-check me-1"></i> Sí, Completar Venta
+                            </a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -773,6 +1001,29 @@ include '../layouts/header.php';
 <script>
     function imprimirRecibo() {
         // Crear contenido para imprimir con el detalle de pagos
+        <?php
+        // Generar el HTML para los pagos en el recibo
+        $pagos_html = '';
+        if (!empty($pagos)) {
+            foreach ($pagos as $pago) {
+                $tasa_aplicada = $pago['monto_usd'] > 0 ? $pago['monto_bs'] / $pago['monto_usd'] : 0;
+                $pagos_html .= '<div class="pago-row">';
+                $pagos_html .= '<div><strong>' . htmlspecialchars($pago['tipo_pago_nombre']) . '</strong>';
+                if ($pago['monto_usd'] > 0 && $pago['monto_bs'] > 0) {
+                    $pagos_html .= '<br><small>Pago mixto</small>';
+                }
+                $pagos_html .= '</div>';
+                $pagos_html .= '<div class="text-end">';
+                $pagos_html .= '<div>$' . formato_2_decimales($pago['monto_usd']) . '</div>';
+                $pagos_html .= '<div>Bs ' . formato_2_decimales($pago['monto_bs']) . '</div>';
+                if ($tasa_aplicada > 0) {
+                    $pagos_html .= '<small>Tasa: ' . formato_2_decimales($tasa_aplicada) . ' Bs/$</small>';
+                }
+                $pagos_html .= '</div></div>';
+            }
+        }
+        ?>
+
         const printContent = `
             <!DOCTYPE html>
             <html>
@@ -790,10 +1041,8 @@ include '../layouts/header.php';
                     .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
                     .pagos-section { margin: 20px 0; padding: 10px; background: #f8f9fa; border-radius: 5px; }
                     .pago-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #ddd; }
+                    .monto-2dec { font-family: 'Courier New', monospace; }
                     .badge { padding: 3px 8px; border-radius: 3px; font-size: 12px; }
-                    .badge-pendiente { background-color: #ffc107; color: #000; }
-                    .badge-completada { background-color: #198754; color: #fff; }
-                    .badge-cancelada { background-color: #dc3545; color: #fff; }
                 </style>
             </head>
             <body>
@@ -808,42 +1057,19 @@ include '../layouts/header.php';
                     <?php if (!empty($venta['cliente_documento_identidad'])): ?>
                         <div class="info-item"><strong>DNI:</strong> <?php echo htmlspecialchars($venta['cliente_documento_identidad']); ?></div>
                     <?php endif; ?>
-                    <div class="info-item"><strong>Estado:</strong> 
-                        <span class="badge badge-<?php echo $venta['estado']; ?>">
-                            <?php echo ucfirst($venta['estado']); ?>
-                        </span>
-                    </div>
-                    <div class="info-item"><strong>Tasa de Cambio:</strong> <?php echo $venta['tasa_formateada'] ?? number_format($venta['tasa_cambio_utilizada'], 2); ?> Bs/$</div>
+                    <div class="info-item"><strong>Estado:</strong> <?php echo ucfirst($venta['estado']); ?></div>
+                    <div class="info-item"><strong>Tasa de Cambio:</strong> <?php echo formato_2_decimales($venta['tasa_cambio_utilizada']); ?> Bs/$</div>
                 </div>
                 
-                <?php if (isset($venta['pagos']) && !empty($venta['pagos'])): ?>
+                <?php if (!empty($pagos_html)): ?>
                 <div class="pagos-section">
-                    <h4>Detalle de Pagos</h4>
-                    <?php 
-                    foreach ($venta['pagos'] as $pago): 
-                        $tasa_aplicada = $pago['monto_usd'] > 0 ? $pago['monto_bs'] / $pago['monto_usd'] : 0;
-                    ?>
-                    <div class="pago-row">
-                        <div>
-                            <strong><?php echo htmlspecialchars($pago['tipo_pago_nombre']); ?></strong>
-                            <?php if ($pago['monto_usd'] > 0 && $pago['monto_bs'] > 0): ?>
-                                <br><small>Pago mixto</small>
-                            <?php endif; ?>
-                        </div>
-                        <div class="text-end">
-                            <div><?php echo TasaCambioHelper::formatearUSD($pago['monto_usd']); ?></div>
-                            <div><?php echo TasaCambioHelper::formatearBS($pago['monto_bs']); ?></div>
-                            <?php if ($tasa_aplicada > 0): ?>
-                                <small>Tasa: <?php echo number_format($tasa_aplicada, 2); ?> Bs/$</small>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
+                    <h4>Detalle de Pagos Completados</h4>
+                    <?php echo $pagos_html; ?>
                     <div class="pago-row" style="font-weight: bold; border-bottom: 2px solid #000; margin-top: 10px;">
                         <div>TOTAL PAGADO</div>
                         <div class="text-end">
-                            <div><?php echo TasaCambioHelper::formatearUSD($venta['total_pagado_usd'] ?? $venta['total']); ?></div>
-                            <div><?php echo TasaCambioHelper::formatearBS($venta['total_pagado_bs'] ?? $venta['total_bs']); ?></div>
+                            <div>$<?php echo formato_2_decimales($total_usd_pagado); ?></div>
+                            <div>Bs <?php echo formato_2_decimales($total_bs_pagado); ?></div>
                         </div>
                     </div>
                 </div>
@@ -868,22 +1094,25 @@ include '../layouts/header.php';
                                 <td><?php echo $contador++; ?></td>
                                 <td><?php echo htmlspecialchars($detalle['producto_nombre']); ?> (<?php echo htmlspecialchars($detalle['codigo_sku']); ?>)</td>
                                 <td><?php echo $detalle['cantidad']; ?></td>
-                                <td>
-                                    <?php echo $detalle['precio_unitario_formateado_usd'] ?? '$' . number_format($detalle['precio_unitario'], 2); ?><br>
-                                    <small><?php echo $detalle['precio_unitario_formateado_bs'] ?? TasaCambioHelper::formatearBS($detalle['precio_unitario_bs']); ?></small>
+                                <td class="monto-2dec">
+                                    $<?php echo formato_2_decimales($detalle['precio_unitario']); ?><br>
+                                    <small>Bs <?php echo formato_2_decimales($detalle['precio_unitario_bs']); ?></small>
                                 </td>
-                                <td>
-                                    <?php echo $detalle['subtotal_formateado_usd'] ?? '$' . number_format($detalle['subtotal'], 2); ?><br>
-                                    <small><?php echo $detalle['subtotal_formateado_bs'] ?? TasaCambioHelper::formatearBS($detalle['subtotal_bs']); ?></small>
+                                <td class="monto-2dec">
+                                    $<?php echo formato_2_decimales($detalle['subtotal']); ?><br>
+                                    <small>Bs <?php echo formato_2_decimales($detalle['subtotal_bs']); ?></small>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
                 
-                <div class="total">
-                    <div><strong>Total USD:</strong> <?php echo $venta['total_formateado_usd'] ?? '$' . number_format($venta['total'], 2); ?></div>
-                    <div><strong>Total Bs:</strong> <?php echo $venta['total_formateado_bs'] ?? TasaCambioHelper::formatearBS($venta['total_bs']); ?></div>
+                <div class="total monto-2dec">
+                    <div><strong>Total USD:</strong> $<?php echo formato_2_decimales($venta['total']); ?></div>
+                    <div><strong>Total Bs:</strong> Bs <?php echo formato_2_decimales($venta['total_bs']); ?></div>
+                    <?php if ($total_usd_pagado > 0): ?>
+                        <div><strong>Pagado:</strong> $<?php echo formato_2_decimales($total_usd_pagado); ?></div>
+                    <?php endif; ?>
                 </div>
                 
                 <?php if (!empty($venta['observaciones'])): ?>
@@ -900,19 +1129,25 @@ include '../layouts/header.php';
             </body>
             </html>
         `;
-        
+
         // Abrir ventana de impresión
         const printWindow = window.open('', '_blank');
         printWindow.document.write(printContent);
         printWindow.document.close();
         printWindow.focus();
-        
+
         // Esperar a que cargue el contenido
         setTimeout(() => {
             printWindow.print();
             printWindow.close();
         }, 250);
     }
+
+    // Inicializar tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltips.forEach(el => new bootstrap.Tooltip(el));
+    });
 </script>
 
 <!-- <?php include '../layouts/footer.php'; ?> -->

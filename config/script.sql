@@ -1109,6 +1109,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+
+-- nueva tabla para pagos multiples
+CREATE TABLE IF NOT EXISTS pagos_venta (
+    id SERIAL PRIMARY KEY,
+    venta_id INTEGER NOT NULL REFERENCES ventas(id) ON DELETE CASCADE,
+    tipo_pago_id INTEGER NOT NULL REFERENCES tipos_pago(id),
+    monto_usd DECIMAL(10,2) NOT NULL,
+    monto_bs DECIMAL(10,2) NOT NULL,
+    fecha_pago TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_pagos_venta_venta_id ON pagos_venta(venta_id);
+CREATE INDEX idx_pagos_venta_tipo_pago_id ON pagos_venta(tipo_pago_id);
+
 -- Vista para ventas cerradas (solo para reportes históricos)
 CREATE OR REPLACE VIEW vista_ventas_cerradas AS
 SELECT 
