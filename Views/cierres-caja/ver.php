@@ -12,10 +12,14 @@ Auth::requireAccessToCierreCaja();
 // Incluir controladores
 require_once __DIR__ . '/../../Config/Database.php';
 require_once __DIR__ . '/../../Controllers/CierreCajaController.php';
+require_once __DIR__ . '/../../Helpers/TasaCambioHelper.php';
 
 $database = new Database();
 $db = $database->getConnection();
 $cierreController = new CierreCajaController($db);
+
+// IDs de tipos de pago en USD
+define('TIPOS_PAGO_USD', [2, 7]); // Efectivo USD y Divisa
 
 // Obtener ID o fecha del cierre
 $cierre_id = $_GET['id'] ?? null;
@@ -64,47 +68,145 @@ if (is_string($resumen_clientes)) {
     $resumen_clientes = json_decode($resumen_clientes, true) ?? [];
 }
 
-// Si están vacíos, intentar obtener del reporte
-if (empty($resumen_categorias) && !empty($reporte)) {
-    $resumen_categorias = [];
-    foreach ($reporte as $item) {
-        $categoria = $item['categoria_nombre'];
-        if (!isset($resumen_categorias[$categoria])) {
-            $resumen_categorias[$categoria] = [
-                'unidades' => 0,
-                'total_usd' => 0,
-                'total_bs' => 0
-            ];
+// Obtener el detalle de pagos para este cierre
+$pagos_detalle = [];
+$pagos_usd = [];
+$pagos_bs = [];
+
+if (!empty($cierre['ventas_ids'])) {
+    // Convertir ventas_ids a array
+    $ventas_ids = [];
+    if (is_string($cierre['ventas_ids'])) {
+        $ventas_ids = explode(',', trim($cierre['ventas_ids'], '{}'));
+    } elseif (is_array($cierre['ventas_ids'])) {
+        $ventas_ids = $cierre['ventas_ids'];
+    }
+    
+    if (!empty($ventas_ids)) {
+        // Consultar pagos_venta con JOIN a tipos_pago para obtener toda la información
+        $placeholders = implode(',', array_fill(0, count($ventas_ids), '?'));
+        $query_pagos = "SELECT 
+                            pv.*,
+                            tp.id as tipo_pago_id_real,
+                            tp.nombre as tipo_pago_nombre,
+                            tp.descripcion as tipo_pago_descripcion,
+                            v.numero_venta,
+                            v.fecha_hora as venta_fecha
+                        FROM pagos_venta pv
+                        JOIN tipos_pago tp ON pv.tipo_pago_id = tp.id
+                        JOIN ventas v ON pv.venta_id = v.id
+                        WHERE pv.venta_id IN ($placeholders)
+                        ORDER BY v.fecha_hora DESC, pv.fecha_pago ASC";
+        
+        $stmt_pagos = $db->prepare($query_pagos);
+        foreach ($ventas_ids as $index => $id) {
+            $stmt_pagos->bindValue($index + 1, intval($id), PDO::PARAM_INT);
         }
-        $resumen_categorias[$categoria]['unidades'] += $item['cantidad_vendida'];
-        $resumen_categorias[$categoria]['total_usd'] += $item['subtotal_usd'];
-        $resumen_categorias[$categoria]['total_bs'] += $item['subtotal_bs'];
+        $stmt_pagos->execute();
+        $pagos_detalle = $stmt_pagos->fetchAll();
+        
+        // Separar pagos por tipo de moneda
+        foreach ($pagos_detalle as $pago) {
+            if (in_array($pago['tipo_pago_id'], TIPOS_PAGO_USD)) {
+                $pagos_usd[] = $pago;
+            } else {
+                $pagos_bs[] = $pago;
+            }
+        }
     }
 }
 
-if (empty($resumen_clientes) && !empty($reporte)) {
-    $resumen_clientes = [];
-    foreach ($reporte as $item) {
-        $cliente = $item['cliente_nombre'];
-        if (!isset($resumen_clientes[$cliente])) {
-            $resumen_clientes[$cliente] = [
-                'nombre' => $cliente,
-                'ventas' => 0,
-                'total_usd' => 0,
-                'total_bs' => 0
-            ];
-        }
-        $resumen_clientes[$cliente]['ventas']++;
-        $resumen_clientes[$cliente]['total_usd'] += $item['subtotal_usd'];
-        $resumen_clientes[$cliente]['total_bs'] += $item['subtotal_bs'];
+// Calcular totales
+$total_usd_pagos = array_sum(array_column($pagos_usd, 'monto_usd'));
+$total_bs_pagos = array_sum(array_column($pagos_bs, 'monto_bs'));
+
+// Resumen por método de pago en USD
+$resumen_metodos_usd = [];
+foreach ($pagos_usd as $pago) {
+    $metodo = $pago['tipo_pago_nombre'];
+    if (!isset($resumen_metodos_usd[$metodo])) {
+        $resumen_metodos_usd[$metodo] = 0;
     }
-    // Convertir a array indexado
-    $resumen_clientes = array_values($resumen_clientes);
+    $resumen_metodos_usd[$metodo] += $pago['monto_usd'];
+}
+
+// Resumen por método de pago en BS
+$resumen_metodos_bs = [];
+foreach ($pagos_bs as $pago) {
+    $metodo = $pago['tipo_pago_nombre'];
+    if (!isset($resumen_metodos_bs[$metodo])) {
+        $resumen_metodos_bs[$metodo] = 0;
+    }
+    $resumen_metodos_bs[$metodo] += $pago['monto_bs'];
 }
 
 $page_title = "Reporte de Cierre de Caja - " . date('d/m/Y', strtotime($cierre['fecha']));
 require_once '../layouts/header.php';
 ?>
+
+<style>
+    .card-usd {
+        border-left: 5px solid #28a745;
+        border-radius: 8px;
+    }
+    .card-bs {
+        border-left: 5px solid #ffc107;
+        border-radius: 8px;
+    }
+    .badge-usd {
+        background-color: #d4edda;
+        color: #155724;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+    .badge-bs {
+        background-color: #fff3cd;
+        color: #856404;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+    .total-usd {
+        color: #28a745;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+    .total-bs {
+        color: #ffc107;
+        font-weight: bold;
+        font-size: 1.2em;
+    }
+    .table-pagos-usd tbody tr {
+        background-color: #f8fff8;
+    }
+    .table-pagos-usd tbody tr:hover {
+        background-color: #e8f5e8;
+    }
+    .table-pagos-bs tbody tr {
+        background-color: #fffaf0;
+    }
+    .table-pagos-bs tbody tr:hover {
+        background-color: #fff3e0;
+    }
+    .separator-pagos {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 30px 0;
+    }
+    .separator-pagos::before,
+    .separator-pagos::after {
+        content: '';
+        flex: 1;
+        border-bottom: 2px dashed #dee2e6;
+    }
+    .separator-pagos span {
+        padding: 0 15px;
+        font-weight: 600;
+        color: #6c757d;
+    }
+</style>
 
 <div class="content-wrapper">
     <!-- Header con opciones de impresión -->
@@ -116,8 +218,8 @@ require_once '../layouts/header.php';
             </h1>
             <p class="text-muted mb-0">
                 Fecha: <?php echo date('d/m/Y', strtotime($cierre['fecha'])); ?> 
-                | Usuario: <?php echo htmlspecialchars($cierre['usuario_nombre']); ?>
-                | Cierre ID: <?php echo $cierre['id']; ?>
+                | Usuario: <?php echo htmlspecialchars($cierre['usuario_nombre'] ?? 'N/A'); ?>
+                | Cierre #<?php echo $cierre['numero_cierre'] ?? $cierre['id']; ?>
             </p>
         </div>
         <div class="btn-toolbar mb-2 mb-md-0">
@@ -130,294 +232,575 @@ require_once '../layouts/header.php';
         </div>
     </div>
 
-    <!-- Encabezado del Reporte -->
-    <div class="card mb-4">
-        <div class="card-header bg-dark text-white">
-            <h5 class="card-title mb-0">RESUMEN GENERAL</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-3 text-center">
-                    <div class="border rounded p-3 mb-3">
-                        <h6 class="text-muted">VENTAS</h6>
-                        <h2 class="text-primary"><?php echo $cierre['total_ventas']; ?></h2>
-                    </div>
-                </div>
-                <div class="col-md-3 text-center">
-                    <div class="border rounded p-3 mb-3">
-                        <h6 class="text-muted">UNIDADES</h6>
-                        <h2 class="text-success"><?php echo $cierre['total_unidades']; ?></h2>
-                    </div>
-                </div>
-                <div class="col-md-3 text-center">
-                    <div class="border rounded p-3 mb-3">
-                        <h6 class="text-muted">TOTAL USD</h6>
-                        <h2 class="text-warning"><?php echo TasaCambioHelper::formatearUSD($cierre['total_usd']); ?></h2>
-                    </div>
-                </div>
-                <div class="col-md-3 text-center">
-                    <div class="border rounded p-3 mb-3">
-                        <h6 class="text-muted">TOTAL BS</h6>
-                        <h2 class="text-danger"><?php echo TasaCambioHelper::formatearBS($cierre['total_bs']); ?></h2>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Totales por Tipo de Pago -->
+    <!-- RESUMEN GENERAL - Solo números totales -->
     <div class="row mb-4">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="card-title mb-0">TOTALES EN USD POR TIPO DE PAGO</h6>
+            <div class="card card-usd">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-dollar-sign me-2"></i>
+                        TOTAL EN DÓLARES (USD)
+                    </h5>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <tbody>
-                                <tr>
-                                    <td>Efectivo USD</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearUSD($cierre['efectivo_usd']); ?></td>
-                                </tr>
-                                <tr>
-                                    <td>Efectivo BS</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearUSD($cierre['efectivo_bs_usd']); ?></td>
-                                </tr>
-                                <tr>
-                                    <td>Transferencia</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearUSD($cierre['transferencia_usd']); ?></td>
-                                </tr>
-                                <tr>
-                                    <td>Pago Móvil</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearUSD($cierre['pago_movil_usd']); ?></td>
-                                </tr>
-                                <tr>
-                                    <td>Tarjeta Débito</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearUSD($cierre['tarjeta_debito_usd']); ?></td>
-                                </tr>
-                                <tr>
-                                    <td>Tarjeta Crédito</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearUSD($cierre['tarjeta_credito_usd']); ?></td>
-                                </tr>
-                                <tr>
-                                    <td>Divisa</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearUSD($cierre['divisa_usd']); ?></td>
-                                </tr>
-                                <tr>
-                                    <td>Crédito</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearUSD($cierre['credito_usd']); ?></td>
-                                </tr>
-                                <tr class="table-dark">
-                                    <td><strong>TOTAL USD</strong></td>
-                                    <td class="text-end"><strong><?php echo TasaCambioHelper::formatearUSD($cierre['total_usd']); ?></strong></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="card-body text-center">
+                    <h1 class="display-4 total-usd"><?php echo TasaCambioHelper::formatearUSD($total_usd_pagos); ?></h1>
+                    <p class="text-muted">Monto total recibido en efectivo USD y divisas</p>
+                   
                 </div>
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="card-title mb-0">TOTALES EN BS POR TIPO DE PAGO</h6>
+            <div class="card card-bs">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bolt me-2"></i>
+                        TOTAL EN BOLÍVARES (BS)
+                    </h5>
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <tbody>
-                                <tr>
-                                    <td>Efectivo USD</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearBS($cierre['efectivo_bs']); ?></td>
-                                </tr>
-                                <tr>
-                                    <td>Efectivo BS</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearBS($cierre['efectivo_bs_bs']); ?></td>
-                                </tr>
-                                <tr>
-                                    <td>Transferencia</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearBS($cierre['transferencia_bs']); ?></td>
-                                </tr>
-                                <tr>
-                                    <td>Pago Móvil</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearBS($cierre['pago_movil_bs']); ?></td>
-                                </tr>
-                                <tr>
-                                    <td>Tarjeta Débito</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearBS($cierre['tarjeta_debito_bs']); ?></td>
-                                </tr>
-                                <tr>
-                                    <td>Tarjeta Crédito</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearBS($cierre['tarjeta_credito_bs']); ?></td>
-                                </tr>
-                                <tr>
-                                    <td>Divisa</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearBS($cierre['divisa_bs']); ?></td>
-                                </tr>
-                                <tr>
-                                    <td>Crédito</td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearBS($cierre['credito_bs']); ?></td>
-                                </tr>
-                                <tr class="table-dark">
-                                    <td><strong>TOTAL BS</strong></td>
-                                    <td class="text-end"><strong><?php echo TasaCambioHelper::formatearBS($cierre['total_bs']); ?></strong></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="card-body text-center">
+                    <h1 class="display-4 total-bs"><?php echo TasaCambioHelper::formatearBS($total_bs_pagos); ?></h1>
+                    <p class="text-muted">Monto total recibido en bolívares</p>
+                    
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Reporte Detallado -->
-    <div class="card mb-4">
-        <div class="card-header">
+    <!-- SECCIÓN: PAGOS EN DÓLARES (USD) -->
+    <div class="card mb-4 card-usd">
+        <div class="card-header bg-success text-white">
             <h5 class="card-title mb-0">
-                <i class="fas fa-list-alt me-2"></i>
-                REPORTE DETALLADO DE VENTAS
+                <i class="fas fa-dollar-sign me-2"></i>
+                PAGOS EN DÓLARES (USD) - Efectivo USD y Divisa
             </h5>
         </div>
         <div class="card-body">
-            <?php if (!empty($reporte)): ?>
+            <?php if (!empty($pagos_usd)): ?>
+                <!-- Resumen por método USD -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h6 class="mb-3">Resumen por método de pago USD:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-success">
+                                    <tr>
+                                        <th>Método de Pago</th>
+                                        <th class="text-end">Cantidad de Pagos</th>
+                                        <th class="text-end">Total USD</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($resumen_metodos_usd as $metodo => $total): 
+                                        $cantidad = count(array_filter($pagos_usd, function($p) use ($metodo) {
+                                            return $p['tipo_pago_nombre'] == $metodo;
+                                        }));
+                                    ?>
+                                    <tr>
+                                        <td>
+                                            <span class="badge badge-usd">
+                                                <i class="fas fa-dollar-sign me-1"></i>
+                                                <?php echo htmlspecialchars($metodo); ?>
+                                            </span>
+                                        </td>
+                                        <td class="text-end"><?php echo $cantidad; ?></td>
+                                        <td class="text-end fw-bold text-success"><?php echo TasaCambioHelper::formatearUSD($total); ?></td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                    <tr class="table-success fw-bold">
+                                        <td>TOTAL USD</td>
+                                        <td class="text-end"><?php echo count($pagos_usd); ?></td>
+                                        <td class="text-end"><?php echo TasaCambioHelper::formatearUSD($total_usd_pagos); ?></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalle de pagos USD -->
+                <h6 class="mb-3">Detalle de pagos en USD:</h6>
                 <div class="table-responsive">
-                    <table class="table table-striped table-bordered" id="tablaReporte">
-                        <thead class="table-dark">
+                    <table class="table table-sm table-striped table-bordered table-pagos-usd">
+                        <thead class="table-success">
                             <tr>
-                                <th>Categoría</th>
-                                <th>Producto</th>
-                                <th class="text-center">Cantidad</th>
-                                <th class="text-end">Precio Unitario USD</th>
-                                <th class="text-end">Subtotal USD</th>
-                                <th class="text-end">Precio Unitario BS</th>
-                                <th class="text-end">Subtotal BS</th>
-                                <th>Tipo de Pago</th>
-                                <th>Cliente</th>
+                                <th># Venta</th>
+                                <th>Fecha/Hora</th>
+                                <th>Método de Pago</th>
+                                <th class="text-end">Monto USD</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php 
-                            $total_unidades = 0;
-                            $total_usd = 0;
-                            $total_bs = 0;
-                            ?>
-                            <?php foreach ($reporte as $item): ?>
-                                <?php 
-                                $total_unidades += $item['cantidad_vendida'];
-                                $total_usd += $item['subtotal_usd'];
-                                $total_bs += $item['subtotal_bs'];
-                                ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($item['categoria_nombre']); ?></td>
-                                    <td><?php echo htmlspecialchars($item['producto_nombre']); ?></td>
-                                    <td class="text-center"><?php echo $item['cantidad_vendida']; ?></td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearUSD($item['precio_unitario_usd']); ?></td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearUSD($item['subtotal_usd']); ?></td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearBS($item['precio_unitario_bs']); ?></td>
-                                    <td class="text-end"><?php echo TasaCambioHelper::formatearBS($item['subtotal_bs']); ?></td>
-                                    <td><?php echo htmlspecialchars($item['tipo_pago']); ?></td>
-                                    <td><?php echo htmlspecialchars($item['cliente_nombre']); ?></td>
-                                </tr>
+                            <?php foreach ($pagos_usd as $pago): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($pago['numero_venta'] ?? 'N/A'); ?></td>
+                                <td><?php echo date('d/m/Y H:i', strtotime($pago['fecha_pago'] ?? $pago['venta_fecha'])); ?></td>
+                                <td>
+                                    <span class="badge badge-usd">
+                                        <i class="fas fa-dollar-sign me-1"></i>
+                                        <?php echo htmlspecialchars($pago['tipo_pago_nombre']); ?>
+                                    </span>
+                                </td>
+                                <td class="text-end fw-bold text-success"><?php echo TasaCambioHelper::formatearUSD($pago['monto_usd']); ?></td>
+                            </tr>
                             <?php endforeach; ?>
                         </tbody>
-                        <tfoot class="table-dark">
+                        <tfoot class="table-success">
                             <tr>
-                                <td colspan="2"><strong>TOTALES</strong></td>
-                                <td class="text-center"><strong><?php echo $total_unidades; ?></strong></td>
-                                <td colspan="2" class="text-end"><strong><?php echo TasaCambioHelper::formatearUSD($total_usd); ?></strong></td>
-                                <td colspan="2" class="text-end"><strong><?php echo TasaCambioHelper::formatearBS($total_bs); ?></strong></td>
-                                <td colspan="2"></td>
+                                <th colspan="3" class="text-end">TOTAL USD:</th>
+                                <th class="text-end"><?php echo TasaCambioHelper::formatearUSD($total_usd_pagos); ?></th>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
             <?php else: ?>
-                <div class="text-center py-5">
-                    <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
-                    <h5 class="text-muted">No hay detalles de ventas para mostrar</h5>
+                <div class="alert alert-success">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay pagos en dólares en este cierre.
                 </div>
             <?php endif; ?>
         </div>
     </div>
 
-    <!-- Resumen por Categoría -->
-    <?php if (!empty($resumen_categorias)): ?>
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="card-title mb-0">
-                        <i class="fas fa-tags me-2"></i>
-                        RESUMEN POR CATEGORÍA
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Categoría</th>
-                                    <th class="text-center">Unidades</th>
-                                    <th class="text-end">Total USD</th>
-                                    <th class="text-end">Total BS</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($resumen_categorias as $categoria => $datos): ?>
-                                    <tr>
-                                        <td><?php echo htmlspecialchars($categoria); ?></td>
-                                        <td class="text-center"><?php echo $datos['unidades']; ?></td>
-                                        <td class="text-end"><?php echo TasaCambioHelper::formatearUSD($datos['total_usd']); ?></td>
-                                        <td class="text-end"><?php echo TasaCambioHelper::formatearBS($datos['total_bs']); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+    <!-- Separador visual -->
+    <div class="separator-pagos">
+        <span><i class="fas fa-arrow-down"></i> PAGOS EN BOLÍVARES <i class="fas fa-arrow-down"></i></span>
+    </div>
+
+    <!-- SECCIÓN: PAGOS EN BOLÍVARES (BS) -->
+    <div class="card mb-4 card-bs">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-bolt me-2"></i>
+                PAGOS EN BOLÍVARES (BS)
+            </h5>
         </div>
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="card-title mb-0">
-                        <i class="fas fa-users me-2"></i>
-                        RESUMEN POR CLIENTE
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Cliente</th>
-                                    <th class="text-center">Ventas</th>
-                                    <th class="text-end">Total USD</th>
-                                    <th class="text-end">Total BS</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($resumen_clientes as $cliente): ?>
+        <div class="card-body">
+            <?php if (!empty($pagos_bs)): ?>
+                <!-- Resumen por método BS -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <h6 class="mb-3">Resumen por método de pago BS:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-warning">
                                     <tr>
-                                        <td><?php echo htmlspecialchars($cliente['nombre']); ?></td>
-                                        <td class="text-center"><?php echo $cliente['ventas']; ?></td>
-                                        <td class="text-end"><?php echo TasaCambioHelper::formatearUSD($cliente['total_usd']); ?></td>
-                                        <td class="text-end"><?php echo TasaCambioHelper::formatearBS($cliente['total_bs']); ?></td>
+                                        <th>Método de Pago</th>
+                                        <th class="text-end">Cantidad de Pagos</th>
+                                        <th class="text-end">Total BS</th>
                                     </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($resumen_metodos_bs as $metodo => $total): 
+                                        $cantidad = count(array_filter($pagos_bs, function($p) use ($metodo) {
+                                            return $p['tipo_pago_nombre'] == $metodo;
+                                        }));
+                                    ?>
+                                    <tr>
+                                        <td>
+                                            <span class="badge badge-bs">
+                                                <i class="fas fa-bolt me-1"></i>
+                                                <?php echo htmlspecialchars($metodo); ?>
+                                            </span>
+                                        </td>
+                                        <td class="text-end"><?php echo $cantidad; ?></td>
+                                        <td class="text-end fw-bold text-warning"><?php echo TasaCambioHelper::formatearBS($total); ?></td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                    <tr class="table-warning fw-bold">
+                                        <td>TOTAL BS</td>
+                                        <td class="text-end"><?php echo count($pagos_bs); ?></td>
+                                        <td class="text-end"><?php echo TasaCambioHelper::formatearBS($total_bs_pagos); ?></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+                <!-- Detalle de pagos BS -->
+                <h6 class="mb-3">Detalle de pagos en BS:</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped table-bordered table-pagos-bs">
+                        <thead class="table-warning">
+                            <tr>
+                                <th># Venta</th>
+                                <th>Fecha/Hora</th>
+                                <th>Método de Pago</th>
+                                <th class="text-end">Monto BS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($pagos_bs as $pago): ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($pago['numero_venta'] ?? 'N/A'); ?></td>
+                                <td><?php echo date('d/m/Y H:i', strtotime($pago['fecha_pago'] ?? $pago['venta_fecha'])); ?></td>
+                                <td>
+                                    <span class="badge badge-bs">
+                                        <i class="fas fa-bolt me-1"></i>
+                                        <?php echo htmlspecialchars($pago['tipo_pago_nombre']); ?>
+                                    </span>
+                                </td>
+                                <td class="text-end fw-bold text-warning"><?php echo TasaCambioHelper::formatearBS($pago['monto_bs']); ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                        <tfoot class="table-warning">
+                            <tr>
+                                <th colspan="3" class="text-end">TOTAL BS:</th>
+                                <th class="text-end"><?php echo TasaCambioHelper::formatearBS($total_bs_pagos); ?></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            <?php else: ?>
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay pagos en bolívares en este cierre.
+                </div>
+            <?php endif; ?>
         </div>
     </div>
-    <?php endif; ?>
+
+<!-- Reporte Detallado de Productos - MEJORADO -->
+<div class="card mt-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-boxes me-2"></i>
+            DETALLE DE PRODUCTOS VENDIDOS POR TIPO DE PAGO
+        </h5>
+    </div>
+    <div class="card-body">
+        <?php if (!empty($reporte)): ?>
+            
+            <?php
+            // Obtener los pagos por venta para asociarlos con los productos
+            $pagos_por_venta = [];
+            foreach ($pagos_detalle as $pago) {
+                $venta_id = $pago['venta_id'];
+                if (!isset($pagos_por_venta[$venta_id])) {
+                    $pagos_por_venta[$venta_id] = [];
+                }
+                $pagos_por_venta[$venta_id][] = $pago;
+            }
+            
+            // Reorganizar el reporte por venta para mostrar los pagos asociados
+            $ventas_con_productos = [];
+            foreach ($reporte as $item) {
+                $venta_id = null; // Necesitamos obtener el venta_id de alguna manera
+                // Por ahora, usaremos el número de venta del reporte si está disponible
+                $numero_venta = $item['numero_venta'] ?? 'N/A';
+                
+                if (!isset($ventas_con_productos[$numero_venta])) {
+                    $ventas_con_productos[$numero_venta] = [
+                        'productos' => [],
+                        'pagos' => []
+                    ];
+                }
+                $ventas_con_productos[$numero_venta]['productos'][] = $item;
+            }
+            
+            // Asociar pagos a las ventas
+            foreach ($pagos_por_venta as $venta_id => $pagos) {
+                // Buscar el número de venta correspondiente
+                $numero_venta = 'N/A';
+                foreach ($pagos as $pago) {
+                    if (isset($pago['numero_venta'])) {
+                        $numero_venta = $pago['numero_venta'];
+                        break;
+                    }
+                }
+                
+                if (isset($ventas_con_productos[$numero_venta])) {
+                    $ventas_con_productos[$numero_venta]['pagos'] = $pagos;
+                }
+            }
+            ?>
+            
+            <div class="accordion" id="accordionProductos">
+                <?php 
+                $total_unidades = 0;
+                $total_usd_por_tipo = [];
+                $total_bs_por_tipo = [];
+                $venta_index = 0;
+                
+                foreach ($ventas_con_productos as $numero_venta => $data): 
+                    if (empty($data['productos'])) continue;
+                    
+                    $venta_index++;
+                    $total_venta_usd = 0;
+                    $total_venta_bs = 0;
+                    $metodos_pago_venta = [];
+                    
+                    // Calcular totales de la venta y métodos de pago
+                    foreach ($data['pagos'] as $pago) {
+                        if (in_array($pago['tipo_pago_id'], TIPOS_PAGO_USD)) {
+                            $total_venta_usd += $pago['monto_usd'];
+                            $metodo = $pago['tipo_pago_nombre'];
+                            if (!isset($metodos_pago_venta[$metodo])) {
+                                $metodos_pago_venta[$metodo] = ['usd' => 0, 'bs' => 0];
+                            }
+                            $metodos_pago_venta[$metodo]['usd'] += $pago['monto_usd'];
+                            
+                            // Acumular totales por tipo
+                            if (!isset($total_usd_por_tipo[$metodo])) {
+                                $total_usd_por_tipo[$metodo] = 0;
+                            }
+                            $total_usd_por_tipo[$metodo] += $pago['monto_usd'];
+                            
+                        } else {
+                            $total_venta_bs += $pago['monto_bs'];
+                            $metodo = $pago['tipo_pago_nombre'];
+                            if (!isset($metodos_pago_venta[$metodo])) {
+                                $metodos_pago_venta[$metodo] = ['usd' => 0, 'bs' => 0];
+                            }
+                            $metodos_pago_venta[$metodo]['bs'] += $pago['monto_bs'];
+                            
+                            // Acumular totales por tipo
+                            if (!isset($total_bs_por_tipo[$metodo])) {
+                                $total_bs_por_tipo[$metodo] = 0;
+                            }
+                            $total_bs_por_tipo[$metodo] += $pago['monto_bs'];
+                        }
+                    }
+                ?>
+                
+                <div class="accordion-item mb-3 border rounded">
+                    <h2 class="accordion-header" id="heading<?php echo $venta_index; ?>">
+                        <button class="accordion-button <?php echo $venta_index > 1 ? 'collapsed' : ''; ?>" 
+                                type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#collapse<?php echo $venta_index; ?>" 
+                                aria-expanded="<?php echo $venta_index == 1 ? 'true' : 'false'; ?>" 
+                                aria-controls="collapse<?php echo $venta_index; ?>">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-receipt me-2"></i>
+                                    <strong>Venta: <?php echo htmlspecialchars($numero_venta); ?></strong>
+                                    <span class="badge bg-secondary ms-2"><?php echo count($data['productos']); ?> producto(s)</span>
+                                </div>
+                                <div class="me-3">
+                                    <?php if ($total_venta_usd > 0): ?>
+                                        <span class="badge bg-success me-2">
+                                            <i class="fas fa-dollar-sign"></i> <?php echo TasaCambioHelper::formatearUSD($total_venta_usd); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                    <?php if ($total_venta_bs > 0): ?>
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-bolt"></i> <?php echo TasaCambioHelper::formatearBS($total_venta_bs); ?>
+                                        </span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </button>
+                    </h2>
+                    <div id="collapse<?php echo $venta_index; ?>" 
+                         class="accordion-collapse collapse <?php echo $venta_index == 1 ? 'show' : ''; ?>" 
+                         aria-labelledby="heading<?php echo $venta_index; ?>" 
+                         data-bs-parent="#accordionProductos">
+                        <div class="accordion-body p-0">
+                            <!-- Métodos de pago de esta venta -->
+                            <?php if (!empty($metodos_pago_venta)): ?>
+                            <div class="bg-light p-3 border-bottom">
+                                <h6 class="mb-2"><i class="fas fa-credit-card me-2"></i>Métodos de pago utilizados:</h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <?php foreach ($metodos_pago_venta as $metodo => $montos): ?>
+                                        <div class="p-2 rounded <?php echo $montos['usd'] > 0 ? 'bg-success text-white' : 'bg-warning'; ?>">
+                                            <span class="fw-bold"><?php echo htmlspecialchars($metodo); ?>:</span>
+                                            <?php if ($montos['usd'] > 0): ?>
+                                                <span class="ms-1"><?php echo TasaCambioHelper::formatearUSD($montos['usd']); ?></span>
+                                            <?php endif; ?>
+                                            <?php if ($montos['bs'] > 0): ?>
+                                                <span class="ms-1"><?php echo TasaCambioHelper::formatearBS($montos['bs']); ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <!-- Tabla de productos de esta venta -->
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Categoría</th>
+                                            <th>Producto</th>
+                                            <th class="text-center">Cantidad</th>
+                                            <th class="text-end">Precio Unitario</th>
+                                            <th class="text-end">Subtotal</th>
+                                            <th>Cliente</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($data['productos'] as $item): 
+                                            $total_unidades += $item['cantidad_vendida'];
+                                            $precio_unitario = $item['precio_unitario_usd'] ?? 0;
+                                            $subtotal = $item['subtotal_usd'] ?? 0;
+                                            $moneda = 'USD';
+                                            $clase_moneda = 'text-success';
+                                            
+                                            // Determinar si el producto se pagó en BS (por el contexto de la venta)
+                                            $producto_en_bs = false;
+                                            foreach ($data['pagos'] as $pago) {
+                                                if (!in_array($pago['tipo_pago_id'], TIPOS_PAGO_USD)) {
+                                                    $producto_en_bs = true;
+                                                    break;
+                                                }
+                                            }
+                                            
+                                            // Si la venta tiene pagos en BS y el producto tiene precio en BS
+                                            if ($producto_en_bs && ($item['precio_unitario_bs'] ?? 0) > 0) {
+                                                $precio_unitario = $item['precio_unitario_bs'];
+                                                $subtotal = $item['subtotal_bs'];
+                                                $moneda = 'BS';
+                                                $clase_moneda = 'text-warning';
+                                            }
+                                        ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($item['categoria_nombre'] ?? 'Sin categoría'); ?></td>
+                                            <td><?php echo htmlspecialchars($item['producto_nombre']); ?></td>
+                                            <td class="text-center"><?php echo $item['cantidad_vendida']; ?></td>
+                                            <td class="text-end <?php echo $clase_moneda; ?>">
+                                                <?php if ($moneda == 'USD'): ?>
+                                                    <span class="fw-bold"><?php echo TasaCambioHelper::formatearUSD($precio_unitario); ?></span>
+                                                <?php else: ?>
+                                                    <span class="fw-bold"><?php echo TasaCambioHelper::formatearBS($precio_unitario); ?></span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td class="text-end <?php echo $clase_moneda; ?>">
+                                                <?php if ($moneda == 'USD'): ?>
+                                                    <span class="fw-bold"><?php echo TasaCambioHelper::formatearUSD($subtotal); ?></span>
+                                                <?php else: ?>
+                                                    <span class="fw-bold"><?php echo TasaCambioHelper::formatearBS($subtotal); ?></span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td><?php echo htmlspecialchars($item['cliente_nombre'] ?? 'N/A'); ?></td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                    <tfoot class="table-light">
+                                        <tr>
+                                            <td colspan="3" class="text-end"><strong>Total Venta:</strong></td>
+                                            <td colspan="2" class="text-end">
+                                                <?php if ($total_venta_usd > 0): ?>
+                                                    <span class="text-success fw-bold me-3"><?php echo TasaCambioHelper::formatearUSD($total_venta_usd); ?></span>
+                                                <?php endif; ?>
+                                                <?php if ($total_venta_bs > 0): ?>
+                                                    <span class="text-warning fw-bold"><?php echo TasaCambioHelper::formatearBS($total_venta_bs); ?></span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            
+            <!-- Resumen Global por Tipo de Pago -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="card-title mb-0">
+                                <i class="fas fa-chart-pie me-2"></i>
+                                RESUMEN GLOBAL POR TIPO DE PAGO
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-success"><i class="fas fa-dollar-sign me-2"></i>PAGOS EN USD</h6>
+                                    <table class="table table-sm table-bordered">
+                                        <thead class="table-success">
+                                            <tr>
+                                                <th>Método de Pago</th>
+                                                <th class="text-end">Total USD</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php 
+                                            $total_usd_global = 0;
+                                            foreach ($total_usd_por_tipo as $metodo => $total): 
+                                                $total_usd_global += $total;
+                                            ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($metodo); ?></td>
+                                                <td class="text-end fw-bold text-success"><?php echo TasaCambioHelper::formatearUSD($total); ?></td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                            <?php if (empty($total_usd_por_tipo)): ?>
+                                            <tr>
+                                                <td colspan="2" class="text-center">No hay pagos en USD</td>
+                                            </tr>
+                                            <?php endif; ?>
+                                        </tbody>
+                                        <?php if (!empty($total_usd_por_tipo)): ?>
+                                        <tfoot class="table-success">
+                                            <tr>
+                                                <th>TOTAL USD</th>
+                                                <th class="text-end"><?php echo TasaCambioHelper::formatearUSD($total_usd_global); ?></th>
+                                            </tr>
+                                        </tfoot>
+                                        <?php endif; ?>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-warning"><i class="fas fa-bolt me-2"></i>PAGOS EN BS</h6>
+                                    <table class="table table-sm table-bordered">
+                                        <thead class="table-warning">
+                                            <tr>
+                                                <th>Método de Pago</th>
+                                                <th class="text-end">Total BS</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php 
+                                            $total_bs_global = 0;
+                                            foreach ($total_bs_por_tipo as $metodo => $total): 
+                                                $total_bs_global += $total;
+                                            ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($metodo); ?></td>
+                                                <td class="text-end fw-bold text-warning"><?php echo TasaCambioHelper::formatearBS($total); ?></td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                            <?php if (empty($total_bs_por_tipo)): ?>
+                                            <tr>
+                                                <td colspan="2" class="text-center">No hay pagos en BS</td>
+                                            </tr>
+                                            <?php endif; ?>
+                                        </tbody>
+                                        <?php if (!empty($total_bs_por_tipo)): ?>
+                                        <tfoot class="table-warning">
+                                            <tr>
+                                                <th>TOTAL BS</th>
+                                                <th class="text-end"><?php echo TasaCambioHelper::formatearBS($total_bs_global); ?></th>
+                                            </tr>
+                                        </tfoot>
+                                        <?php endif; ?>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        <?php else: ?>
+            <div class="text-center py-5">
+                <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No hay productos vendidos en este cierre</h5>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
 
     <!-- Observaciones -->
     <?php if (!empty($cierre['observaciones'])): ?>
-    <div class="card">
+    <div class="card mt-4">
         <div class="card-header bg-light">
             <h6 class="card-title mb-0">
                 <i class="fas fa-sticky-note me-2"></i>
@@ -437,7 +820,7 @@ require_once '../layouts/header.php';
                 <div class="card-body text-center">
                     <h6>REALIZADO POR</h6>
                     <p class="mb-0">________________________________</p>
-                    <p class="mb-0"><?php echo htmlspecialchars($cierre['usuario_nombre']); ?></p>
+                    <p class="mb-0"><?php echo htmlspecialchars($cierre['usuario_nombre'] ?? ''); ?></p>
                     <p class="text-muted">Usuario del Sistema</p>
                 </div>
             </div>
@@ -447,7 +830,7 @@ require_once '../layouts/header.php';
                 <div class="card-body text-center">
                     <h6>FECHA Y HORA</h6>
                     <p class="mb-0">________________________________</p>
-                    <p class="mb-0"><?php echo date('d/m/Y H:i:s', strtotime($cierre['created_at'])); ?></p>
+                    <p class="mb-0"><?php echo isset($cierre['created_at']) ? date('d/m/Y H:i:s', strtotime($cierre['created_at'])) : date('d/m/Y H:i:s'); ?></p>
                     <p class="text-muted">Fecha del Cierre</p>
                 </div>
             </div>
@@ -455,21 +838,27 @@ require_once '../layouts/header.php';
     </div>
 </div>
 
+<!-- DataTables CSS y JS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Configurar DataTables para el reporte
-        $('#tablaReporte').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
-            },
-            order: [[0, 'asc']],
-            pageLength: 20,
-            responsive: true,
-            dom: 'Bfrtip',
-            buttons: [
-                'copy', 'csv', 'excel', 'pdf', 'print'
-            ]
-        });
+        // Configurar DataTables para el reporte de productos (opcional)
+        if (typeof $.fn.DataTable !== 'undefined' && $('#tablaReporte').length) {
+            $('#tablaReporte').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                },
+                order: [[0, 'asc']],
+                pageLength: 20,
+                responsive: true,
+                paging: true,
+                searching: true
+            });
+        }
 
         // Estilos para impresión
         const printStyles = `
@@ -480,6 +869,8 @@ require_once '../layouts/header.php';
                 }
                 .card {
                     border: 1px solid #000 !important;
+                    break-inside: avoid;
+                    page-break-inside: avoid;
                 }
                 .table-bordered th, .table-bordered td {
                     border: 1px solid #000 !important;
@@ -487,6 +878,36 @@ require_once '../layouts/header.php';
                 .content-wrapper {
                     margin: 0 !important;
                     padding: 0 !important;
+                }
+                .badge-usd {
+                    background-color: #d4edda !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+                .badge-bs {
+                    background-color: #fff3cd !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+                .table-success {
+                    background-color: #d4edda !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+                .table-warning {
+                    background-color: #fff3cd !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+                h1, h2, h3, h4, h5, h6 {
+                    page-break-after: avoid;
+                }
+                table {
+                    page-break-inside: auto;
+                }
+                tr {
+                    page-break-inside: avoid;
+                    page-break-after: auto;
                 }
             }
         `;

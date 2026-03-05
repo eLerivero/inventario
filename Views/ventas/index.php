@@ -852,20 +852,34 @@ include __DIR__ . '/../layouts/header.php';
                                 <?php endif; ?>
                             </td>
 
-                            <!-- Bs (solo precio fijo) -->
-                            <td class="text-center column-bs">
-                                <?php if ($tiene_precio_fijo): ?>
-                                    <span class="fw-semibold">
-                                        <?php echo TasaCambioHelper::formatearBS($total_bs_precio_fijo_venta); ?>
-                                    </span>
-                                    <br>
-                                    <small class="text-muted">
-                                        <i class="fas fa-lock"></i> Precio fijo
-                                    </small>
-                                <?php else: ?>
-                                    <span class="text-muted">—</span>
-                                <?php endif; ?>
-                            </td>
+                           <!-- Bs (solo precio fijo) -->
+<td class="text-center column-bs">
+    <?php 
+    // Calcular total de productos con precio fijo en BS
+    $total_bs_precio_fijo_venta = 0;
+    if (isset($venta['pagos_detalle']) && is_array($venta['pagos_detalle'])) {
+        foreach ($venta['pagos_detalle'] as $pago) {
+            // Si el pago es en BS (tipo_pago_id = 1 generalmente) o tiene monto_bs > 0
+            if ($pago['monto_bs'] > 0) {
+                $total_bs_precio_fijo_venta += $pago['monto_bs'];
+            }
+        }
+    }
+    $tiene_precio_fijo = $total_bs_precio_fijo_venta > 0;
+    ?>
+    
+    <?php if ($tiene_precio_fijo): ?>
+        <span class="fw-semibold">
+            <?php echo TasaCambioHelper::formatearBS($total_bs_precio_fijo_venta); ?>
+        </span>
+        <br>
+        <small class="text-muted">
+            <i class="fas fa-lock"></i> En BS
+        </small>
+    <?php else: ?>
+        <span class="text-muted">—</span>
+    <?php endif; ?>
+</td>
 
                             <td>
                                 <span class="badge-limpio">
@@ -961,13 +975,13 @@ include __DIR__ . '/../layouts/header.php';
                             <small class="text-muted d-block">Total USD Recibidos</small>
                             <span class="fw-bold fs-5" style="color: #0d9488;">
                                 <?php echo TasaCambioHelper::formatearUSD($stats_usd['total_usd_hoy'] ?? 0); ?>
-                                <?php echo TasaCambioHelper::formatearUSD($total_usd_recibido); ?>
+        
                             </span>
                         </div>
                         <div>
                             <small class="text-muted d-block">Total Bs Precio Fijo</small>
                             <span class="fw-bold fs-5" style="color: #b45309;">
-                                <?php echo TasaCambioHelper::formatearBS($total_bs_recibido); ?>
+                               <?php echo $stats_bs['total_bs_precio_fijo_formateado'] ?? 'Bs 0,00'; ?>
                             </span>
                         </div>
                         <div>

@@ -1,4 +1,5 @@
 <?php
+// Controllers/CierreCajaController.php
 require_once __DIR__ . '/../Models/CierreCaja.php';
 require_once __DIR__ . '/../Models/Venta.php';
 require_once __DIR__ . '/../Models/TipoPago.php';
@@ -20,12 +21,197 @@ class CierreCajaController
     }
 
     /**
-     * Obtener todas las ventas pendientes de cierre (cerrada_en_caja = FALSE)
+     * Versión SEGURA de existeCierreHoy - SIEMPRE devuelve un número
      */
+    public function existeCierreHoy()
+    {
+        try {
+            $query = "SELECT COUNT(*) as total 
+                      FROM cierres_caja 
+                      WHERE fecha = CURRENT_DATE 
+                      AND estado = 'completado'";
+            
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // SIEMPRE devolver un número, nunca null
+            return ($result && isset($result['total'])) ? (int)$result['total'] : 0;
+            
+        } catch (Exception $e) {
+            error_log("Error en existeCierreHoy: " . $e->getMessage());
+            return 0; // En caso de error, devolver 0
+        }
+    }
+
+    /**
+     * Versión SEGURA de obtenerUltimoCierreHoy - SIEMPRE devuelve un array
+     */
+    public function obtenerUltimoCierreHoy()
+    {
+        try {
+            $query = "SELECT cc.*, u.nombre as usuario_nombre 
+                      FROM cierres_caja cc
+                      JOIN usuarios u ON cc.usuario_id = u.id
+                      WHERE cc.fecha = CURRENT_DATE 
+                      AND cc.estado = 'completado'
+                      ORDER BY cc.created_at DESC 
+                      LIMIT 1";
+
+            $stmt = $this->db->prepare($query);
+            $stmt->execute();
+
+            if ($stmt->rowCount() > 0) {
+                return $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+            
+            // Si no hay resultados, devolver array vacío (NO null)
+            return [];
+            
+        } catch (Exception $e) {
+            error_log("Error en obtenerUltimoCierreHoy: " . $e->getMessage());
+            return []; // En caso de error, devolver array vacío
+        }
+    }
+
+    /**
+     * Versión SEGURA de obtenerResumenPendientes - SIEMPRE devuelve estructura completa
+     */
+    public function obtenerResumenPendientes()
+    {
+        // Estructura por defecto (nunca null)
+        $default_data = [
+            'success' => true,
+            'data' => [
+                'total_ventas' => 0,
+                'total_unidades' => 0,
+                'total_usd' => '$0.00',
+                'total_bs' => 'Bs 0,00',
+                'totales_por_tipo' => [],
+                'ventas_lista' => []
+            ]
+        ];
+
+        try {
+            $datos_ventas = $this->obtenerVentasPendientes();
+
+            if (!$datos_ventas['success']) {
+                return $default_data;
+            }
+
+            if (!isset($datos_ventas['data']) || !is_array($datos_ventas['data'])) {
+                return $default_data;
+            }
+
+            $data = $datos_ventas['data'];
+
+            // Construir resumen con valores por defecto
+            $resumen = [
+                'total_ventas' => isset($data['total_ventas']) ? (int)$data['total_ventas'] : 0,
+                'total_unidades' => isset($data['total_unidades']) ? (int)$data['total_unidades'] : 0,
+                'total_usd' => isset($data['total_usd']) ? TasaCambioHelper::formatearUSD($data['total_usd']) : '$0.00',
+                'total_bs' => isset($data['total_bs']) ? TasaCambioHelper::formatearBS($data['total_bs']) : 'Bs 0,00',
+                'totales_por_tipo' => [],
+                'ventas_lista' => []
+            ];
+
+            // Agregar totales por tipo de pago
+            if (isset($data['totales_por_tipo_usd']) && is_array($data['totales_por_tipo_usd'])) {
+                foreach ($data['totales_por_tipo_usd'] as $tipo => $total_usd) {
+                    $total_bs = isset($data['totales_por_tipo_bs'][$tipo]) ? $data['totales_por_tipo_bs'][$tipo] : 0;
+                    if ($total_usd > 0 || $total_bs > 0) {
+                        $resumen['totales_por_tipo'][] = [
+                            'tipo' => ucwords(str_replace('_', ' ', $tipo)),
+                            'total_usd' => TasaCambioHelper::formatearUSD($total_usd),
+                            'total_bs' => TasaCambioHelper::formatearBS($total_bs)
+                        ];
+                    }
+                }
+            }
+
+            // Agregar lista simplificada de ventas
+            if (isset($data['ventas']) && is_array($data['ventas'])) {
+                foreach ($data['ventas'] as $venta) {
+                    $resumen['ventas_lista'][] = [
+                        'id' => isset($venta['id']) ? (int)$venta['id'] : 0,
+                        'numero_venta' => isset($venta['numero_venta']) ? $venta['numero_venta'] : 'N/A',
+                        'fecha_hora' => isset($venta['fecha_hora']) ? date('d/m/Y H:i', strtotime($venta['fecha_hora'])) : 'N/A',
+                        'cliente' => isset($venta['cliente_nombre']) ? $venta['cliente_nombre'] : 'Cliente no identificado',
+                        'total_usd' => isset($venta['total']) ? TasaCambioHelper::formatearUSD($venta['total']) : '$0.00',
+                        'total_bs' => isset($venta['total_bs']) ? TasaCambioHelper::formatearBS($venta['total_bs']) : 'Bs 0,00'
+                    ];
+                }
+            }
+
+            return [
+                "success" => true,
+                "data" => $resumen
+            ];
+
+        } catch (Exception $e) {
+            error_log("Error en obtenerResumenPendientes: " . $e->getMessage());
+            return $default_data;
+        }
+    }
+
+    /**
+     * Versión SEGURA de listarCierres
+     */
+    public function listarCierres($limit = 30)
+    {
+        try {
+            $stmt = $this->cierreCaja->listar($limit);
+            $cierres = $stmt->fetchAll();
+
+            // Si no hay resultados, devolver array vacío
+            if (!$cierres) {
+                return [
+                    "success" => true,
+                    "data" => []
+                ];
+            }
+
+            // Formatear datos para mostrar
+            foreach ($cierres as &$cierre) {
+                $cierre['total_general_usd'] = isset($cierre['total_usd']) ? 
+                    TasaCambioHelper::formatearUSD($cierre['total_usd']) : '$0.00';
+                    
+                $cierre['total_general_bs'] = isset($cierre['total_bs']) ? 
+                    TasaCambioHelper::formatearBS($cierre['total_bs']) : 'Bs 0,00';
+                    
+                $cierre['fecha_formateada'] = isset($cierre['fecha']) ? 
+                    date('d/m/Y', strtotime($cierre['fecha'])) : 'N/A';
+
+                // Calcular total general con valores por defecto
+                $efectivo_usd = isset($cierre['efectivo_usd']) ? $cierre['efectivo_usd'] : 0;
+                $efectivo_bs_usd = isset($cierre['efectivo_bs_usd']) ? $cierre['efectivo_bs_usd'] : 0;
+                $efectivo_bs = isset($cierre['efectivo_bs']) ? $cierre['efectivo_bs'] : 0;
+                $efectivo_bs_bs = isset($cierre['efectivo_bs_bs']) ? $cierre['efectivo_bs_bs'] : 0;
+                
+                $cierre['total_efectivo_usd'] = $efectivo_usd + $efectivo_bs_usd;
+                $cierre['total_efectivo_bs'] = $efectivo_bs + $efectivo_bs_bs;
+            }
+
+            return [
+                "success" => true,
+                "data" => $cierres
+            ];
+            
+        } catch (Exception $e) {
+            error_log("Error al listar cierres de caja: " . $e->getMessage());
+            return [
+                "success" => false,
+                "message" => "Error al listar cierres de caja: " . $e->getMessage(),
+                "data" => []
+            ];
+        }
+    }
+
+    // ... (resto de métodos, asegurándote de que NUNCA devuelvan null)
+    
     public function obtenerVentasPendientes()
     {
         try {
-            // Obtener todas las ventas completadas que no están cerradas en caja
             $query = "SELECT v.*, c.nombre as cliente_nombre, c.numero_documento as cliente_documento,
                              u.nombre as vendedor_nombre, tp.nombre as tipo_pago_nombre
                       FROM ventas v
@@ -60,106 +246,94 @@ class CierreCajaController
                 ];
             }
 
-            // Obtener todos los tipos de pago
-            $tipos_pago = $this->tipoPago->leer();
-            $tipos_pago_map = [];
-            foreach ($tipos_pago as $tp) {
-                $tipos_pago_map[$tp['id']] = $tp['nombre'];
+            $ventas_ids = array_column($ventas, 'id');
+            
+            require_once __DIR__ . '/../Models/PagoVenta.php';
+            $pagoVentaModel = new PagoVenta($this->db);
+            $totales_por_tipo = $pagoVentaModel->obtenerTotalesPorTipoPago($ventas_ids);
+
+            // Asegurar que totes_por_tipo tenga la estructura correcta
+            if (!isset($totales_por_tipo['totales_usd']) || !is_array($totales_por_tipo['totales_usd'])) {
+                $totales_por_tipo['totales_usd'] = [];
+            }
+            if (!isset($totales_por_tipo['totales_bs']) || !is_array($totales_por_tipo['totales_bs'])) {
+                $totales_por_tipo['totales_bs'] = [];
             }
 
             // Inicializar arrays para resúmenes
             $resumen_categorias = [];
             $resumen_productos = [];
             $resumen_clientes = [];
-            $ventas_ids = [];
-
-            // Inicializar totales
-            $total_ventas = 0;
+            $total_ventas = count($ventas);
             $total_unidades = 0;
             $total_usd = 0;
             $total_bs = 0;
 
-            // Inicializar totales por tipo de pago
-            $totales_por_tipo_usd = [];
-            $totales_por_tipo_bs = [];
-
-            foreach ($tipos_pago as $tp) {
-                $nombre_normalizado = strtolower(str_replace(' ', '_', $tp['nombre']));
-                $totales_por_tipo_usd[$nombre_normalizado] = 0;
-                $totales_por_tipo_bs[$nombre_normalizado] = 0;
-            }
-
+            // Calcular totales generales y resúmenes
             foreach ($ventas as $venta) {
-                $total_ventas++;
-                $ventas_ids[] = $venta['id'];
-                $total_usd += $venta['total'];
-                $total_bs += $venta['total_bs'];
-
-                // Acumular por tipo de pago
-                if (isset($venta['tipo_pago_id']) && isset($tipos_pago_map[$venta['tipo_pago_id']])) {
-                    $tipo_pago_nombre = $tipos_pago_map[$venta['tipo_pago_id']];
-                    $nombre_normalizado = strtolower(str_replace(' ', '_', $tipo_pago_nombre));
-
-                    $totales_por_tipo_usd[$nombre_normalizado] += $venta['total'];
-                    $totales_por_tipo_bs[$nombre_normalizado] += $venta['total_bs'];
-                }
+                $total_usd += isset($venta['total']) ? floatval($venta['total']) : 0;
+                $total_bs += isset($venta['total_bs']) ? floatval($venta['total_bs']) : 0;
 
                 // Obtener detalles para resúmenes
                 $detalles = $this->venta->obtenerDetalles($venta['id']);
 
-                foreach ($detalles as $detalle) {
-                    $total_unidades += $detalle['cantidad'];
+                if (is_array($detalles)) {
+                    foreach ($detalles as $detalle) {
+                        $cantidad = isset($detalle['cantidad']) ? intval($detalle['cantidad']) : 0;
+                        $subtotal = isset($detalle['subtotal']) ? floatval($detalle['subtotal']) : 0;
+                        $subtotal_bs = isset($detalle['subtotal_bs']) ? floatval($detalle['subtotal_bs']) : 0;
+                        
+                        $total_unidades += $cantidad;
 
-                    // Resumen por categoría
-                    $categoria_id = $detalle['categoria_id'] ?? 0;
-                    $categoria_nombre = $detalle['categoria_nombre'] ?? 'Sin categoría';
+                        // Resumen por categoría
+                        $categoria_nombre = isset($detalle['categoria_nombre']) ? $detalle['categoria_nombre'] : 'Sin categoría';
+                        if (!isset($resumen_categorias[$categoria_nombre])) {
+                            $resumen_categorias[$categoria_nombre] = [
+                                'unidades' => 0,
+                                'total_usd' => 0,
+                                'total_bs' => 0
+                            ];
+                        }
+                        $resumen_categorias[$categoria_nombre]['unidades'] += $cantidad;
+                        $resumen_categorias[$categoria_nombre]['total_usd'] += $subtotal;
+                        $resumen_categorias[$categoria_nombre]['total_bs'] += $subtotal_bs;
 
-                    if (!isset($resumen_categorias[$categoria_nombre])) {
-                        $resumen_categorias[$categoria_nombre] = [
-                            'unidades' => 0,
-                            'total_usd' => 0,
-                            'total_bs' => 0
-                        ];
+                        // Resumen por producto
+                        $producto_id = isset($detalle['producto_id']) ? $detalle['producto_id'] : 0;
+                        if ($producto_id > 0) {
+                            if (!isset($resumen_productos[$producto_id])) {
+                                $resumen_productos[$producto_id] = [
+                                    'nombre' => isset($detalle['producto_nombre']) ? $detalle['producto_nombre'] : 'Producto',
+                                    'sku' => isset($detalle['codigo_sku']) ? $detalle['codigo_sku'] : '',
+                                    'categoria' => $categoria_nombre,
+                                    'unidades' => 0,
+                                    'total_usd' => 0,
+                                    'total_bs' => 0
+                                ];
+                            }
+                            $resumen_productos[$producto_id]['unidades'] += $cantidad;
+                            $resumen_productos[$producto_id]['total_usd'] += $subtotal;
+                            $resumen_productos[$producto_id]['total_bs'] += $subtotal_bs;
+                        }
                     }
-                    $resumen_categorias[$categoria_nombre]['unidades'] += $detalle['cantidad'];
-                    $resumen_categorias[$categoria_nombre]['total_usd'] += $detalle['subtotal'];
-                    $resumen_categorias[$categoria_nombre]['total_bs'] += $detalle['subtotal_bs'];
-
-                    // Resumen por producto
-                    $producto_id = $detalle['producto_id'];
-                    $producto_nombre = $detalle['producto_nombre'];
-
-                    if (!isset($resumen_productos[$producto_id])) {
-                        $resumen_productos[$producto_id] = [
-                            'nombre' => $producto_nombre,
-                            'sku' => $detalle['codigo_sku'] ?? '',
-                            'categoria' => $categoria_nombre,
-                            'unidades' => 0,
-                            'total_usd' => 0,
-                            'total_bs' => 0
-                        ];
-                    }
-                    $resumen_productos[$producto_id]['unidades'] += $detalle['cantidad'];
-                    $resumen_productos[$producto_id]['total_usd'] += $detalle['subtotal'];
-                    $resumen_productos[$producto_id]['total_bs'] += $detalle['subtotal_bs'];
                 }
 
                 // Resumen por cliente
-                $cliente_id = $venta['cliente_id'];
-                $cliente_nombre = $venta['cliente_nombre'] ?? 'Cliente no identificado';
-
+                $cliente_id = isset($venta['cliente_id']) ? $venta['cliente_id'] : 0;
+                $cliente_nombre = isset($venta['cliente_nombre']) ? $venta['cliente_nombre'] : 'Cliente no identificado';
+                
                 if (!isset($resumen_clientes[$cliente_id])) {
                     $resumen_clientes[$cliente_id] = [
                         'nombre' => $cliente_nombre,
-                        'documento' => $venta['cliente_documento'] ?? '',
+                        'documento' => isset($venta['cliente_documento']) ? $venta['cliente_documento'] : '',
                         'ventas' => 0,
                         'total_usd' => 0,
                         'total_bs' => 0
                     ];
                 }
                 $resumen_clientes[$cliente_id]['ventas']++;
-                $resumen_clientes[$cliente_id]['total_usd'] += $venta['total'];
-                $resumen_clientes[$cliente_id]['total_bs'] += $venta['total_bs'];
+                $resumen_clientes[$cliente_id]['total_usd'] += isset($venta['total']) ? floatval($venta['total']) : 0;
+                $resumen_clientes[$cliente_id]['total_bs'] += isset($venta['total_bs']) ? floatval($venta['total_bs']) : 0;
             }
 
             // Preparar datos para respuesta
@@ -169,8 +343,8 @@ class CierreCajaController
                 'total_unidades' => $total_unidades,
                 'total_usd' => $total_usd,
                 'total_bs' => $total_bs,
-                'totales_por_tipo_usd' => $totales_por_tipo_usd,
-                'totales_por_tipo_bs' => $totales_por_tipo_bs,
+                'totales_por_tipo_usd' => $totales_por_tipo['totales_usd'],
+                'totales_por_tipo_bs' => $totales_por_tipo['totales_bs'],
                 'resumen_categorias' => $resumen_categorias,
                 'resumen_productos' => array_values($resumen_productos),
                 'resumen_clientes' => array_values($resumen_clientes),
@@ -182,18 +356,29 @@ class CierreCajaController
                 "message" => "Ventas pendientes obtenidas correctamente",
                 "data" => $datos
             ];
+            
         } catch (Exception $e) {
+            error_log("Error en obtenerVentasPendientes: " . $e->getMessage());
             return [
                 "success" => false,
-                "message" => "Error al obtener ventas pendientes: " . $e->getMessage()
+                "message" => "Error al obtener ventas pendientes: " . $e->getMessage(),
+                "data" => [
+                    'ventas' => [],
+                    'total_ventas' => 0,
+                    'total_unidades' => 0,
+                    'total_usd' => 0,
+                    'total_bs' => 0,
+                    'totales_por_tipo_usd' => [],
+                    'totales_por_tipo_bs' => [],
+                    'resumen_categorias' => [],
+                    'resumen_productos' => [],
+                    'resumen_clientes' => [],
+                    'ventas_ids' => []
+                ]
             ];
         }
     }
 
-    /**
-    /**
-     * Crear cierre automáticamente con TODAS las ventas pendientes
-     */
     public function crearCierreAutomatico($usuario_id, $observaciones = '')
     {
         try {
@@ -202,9 +387,8 @@ class CierreCajaController
             $fecha = date('Y-m-d');
             $hora = date('H:i:s');
 
-            // Obtener todas las ventas pendientes automáticamente
             $datos_ventas = $this->obtenerVentasPendientes();
-            
+
             if (!$datos_ventas['success']) {
                 throw new Exception($datos_ventas['message']);
             }
@@ -215,7 +399,6 @@ class CierreCajaController
                 throw new Exception("No hay ventas pendientes para cerrar");
             }
 
-            // Preparar datos para el cierre - AHORA COMPLETOS
             $cierre_data = [
                 'fecha' => $fecha,
                 'usuario_id' => $usuario_id,
@@ -227,7 +410,7 @@ class CierreCajaController
                 'estado' => 'completado'
             ];
 
-            // Asignar totales por tipo de pago - INICIALIZAR TODOS LOS CAMPOS
+            // Inicializar todos los tipos de pago a 0
             $tipos_pago = [
                 'efectivo' => ['usd' => 0, 'bs' => 0],
                 'efectivo_usd' => ['usd' => 0, 'bs' => 0],
@@ -239,15 +422,16 @@ class CierreCajaController
                 'crédito' => ['usd' => 0, 'bs' => 0]
             ];
 
-            // Asignar valores de los tipos de pago que existen
-            foreach ($data['totales_por_tipo_usd'] as $tipo => $total_usd) {
-                if (isset($tipos_pago[$tipo])) {
-                    $tipos_pago[$tipo]['usd'] = $total_usd;
-                    $tipos_pago[$tipo]['bs'] = $data['totales_por_tipo_bs'][$tipo] ?? 0;
+            // Asignar valores de los tipos de pago
+            foreach ($data['totales_por_tipo_usd'] as $tipo_normalizado => $total_usd) {
+                if (isset($tipos_pago[$tipo_normalizado])) {
+                    $tipos_pago[$tipo_normalizado]['usd'] = $total_usd;
+                    $tipos_pago[$tipo_normalizado]['bs'] = isset($data['totales_por_tipo_bs'][$tipo_normalizado]) ? 
+                        $data['totales_por_tipo_bs'][$tipo_normalizado] : 0;
                 }
             }
 
-            // Asignar a cierre_data - TODOS LOS CAMPOS REQUERIDOS
+            // Asignar a cierre_data
             $cierre_data['efectivo_usd'] = $tipos_pago['efectivo']['usd'];
             $cierre_data['efectivo_bs'] = $tipos_pago['efectivo']['bs'];
             $cierre_data['efectivo_bs_usd'] = $tipos_pago['efectivo_usd']['usd'];
@@ -265,26 +449,19 @@ class CierreCajaController
             $cierre_data['credito_usd'] = $tipos_pago['crédito']['usd'];
             $cierre_data['credito_bs'] = $tipos_pago['crédito']['bs'];
 
-            // Convertir resúmenes a JSON
             $cierre_data['resumen_categorias'] = json_encode($data['resumen_categorias']);
             $cierre_data['resumen_productos'] = json_encode($data['resumen_productos']);
             $cierre_data['resumen_clientes'] = json_encode($data['resumen_clientes']);
             $cierre_data['ventas_ids'] = '{' . implode(',', $data['ventas_ids']) . '}';
 
-            // Log para debug
-            error_log("Datos del cierre a insertar: " . print_r($cierre_data, true));
-
-            // Crear el cierre
             $cierre_id = $this->cierreCaja->crear($cierre_data);
 
             if (!$cierre_id) {
                 throw new Exception("Error al crear el cierre de caja");
             }
 
-            // Marcar TODAS las ventas pendientes como cerradas
+            // Marcar ventas como cerradas
             $ventas_cerradas = $this->marcarTodasVentasPendientesComoCerradas();
-
-            error_log("Cierre de caja automático #$cierre_id creado a las $hora: Marcadas $ventas_cerradas ventas como cerradas");
 
             $this->db->commit();
 
@@ -295,6 +472,7 @@ class CierreCajaController
                 "ventas_cerradas" => $ventas_cerradas,
                 "data" => $cierre_data
             ];
+            
         } catch (Exception $e) {
             $this->db->rollBack();
             error_log("Error en crearCierreAutomatico: " . $e->getMessage());
@@ -305,222 +483,67 @@ class CierreCajaController
         }
     }
 
-    /**
-     * Obtener número de cierre
-     */
-    private function obtenerNumeroCierre($cierre_id)
-    {
-        $query = "SELECT numero_cierre FROM cierres_caja WHERE id = :id";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(":id", $cierre_id);
-        $stmt->execute();
-        
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result['numero_cierre'] ?? $cierre_id;
-    }
-
-    /**
-     * Modificar método para verificar si hay cierre hoy
-     * Ahora solo verifica el último cierre, pero permite múltiples
-     */
-    public function existeCierreHoy()
-    {
-        // Solo verifica si hay ALGÚN cierre hoy, pero permite múltiples
-        $query = "SELECT COUNT(*) as total 
-                  FROM cierres_caja 
-                  WHERE fecha = CURRENT_DATE 
-                  AND estado = 'completado'";
-        
-        $stmt = $this->db->prepare($query);
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        return $result['total'] > 0;
-    }
-
-    /**
-     * Obtener el último cierre del día
-     */
-    public function obtenerUltimoCierreHoy()
-    {
-        $query = "SELECT cc.*, u.nombre as usuario_nombre 
-                  FROM cierres_caja cc
-                  JOIN usuarios u ON cc.usuario_id = u.id
-                  WHERE cc.fecha = CURRENT_DATE 
-                  AND cc.estado = 'completado'
-                  ORDER BY cc.created_at DESC 
-                  LIMIT 1";
-
-        $stmt = $this->db->prepare($query);
-        $stmt->execute();
-
-        if ($stmt->rowCount() > 0) {
-            return $stmt->fetch(PDO::FETCH_ASSOC);
-        }
-        return false;
-    }
-
-
-    /**
-     * Marcar TODAS las ventas pendientes como cerradas
-     */
     private function marcarTodasVentasPendientesComoCerradas()
     {
-        $query = "UPDATE ventas 
-                  SET cerrada_en_caja = TRUE 
-                  WHERE estado = 'completada'
-                  AND cerrada_en_caja = FALSE
-                  RETURNING id";
-
-        $stmt = $this->db->prepare($query);
-        $stmt->execute();
-
-        return $stmt->rowCount();
-    }
-
-    /**
-     * Método original para compatibilidad (ahora usa el automático)
-     */
-    public function crearCierre($usuario_id, $observaciones = '')
-    {
-        return $this->crearCierreAutomatico($usuario_id, $observaciones);
-    }
-
-    /**
-     * Verificar si hay ventas pendientes
-     */
-    public function hayVentasPendientes()
-    {
         try {
-            $query = "SELECT COUNT(*) as total 
-                      FROM ventas 
+            $query = "UPDATE ventas 
+                      SET cerrada_en_caja = TRUE 
                       WHERE estado = 'completada'
-                      AND cerrada_en_caja = FALSE";
+                      AND cerrada_en_caja = FALSE
+                      RETURNING id";
 
             $stmt = $this->db->prepare($query);
             $stmt->execute();
-            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            return $resultado['total'] > 0;
+            return $stmt->rowCount();
+            
         } catch (Exception $e) {
-            error_log("Error al verificar ventas pendientes: " . $e->getMessage());
-            return false;
+            error_log("Error al marcar ventas como cerradas: " . $e->getMessage());
+            return 0;
         }
     }
 
-    /**
-     * Obtener resumen de ventas pendientes
-     */
-    public function obtenerResumenPendientes()
-    {
-        try {
-            $datos_ventas = $this->obtenerVentasPendientes();
-
-            if (!$datos_ventas['success']) {
-                return $datos_ventas;
-            }
-
-            $data = $datos_ventas['data'];
-
-            // Formatear para mostrar
-            $resumen = [
-                'total_ventas' => $data['total_ventas'],
-                'total_unidades' => $data['total_unidades'],
-                'total_usd' => TasaCambioHelper::formatearUSD($data['total_usd']),
-                'total_bs' => TasaCambioHelper::formatearBS($data['total_bs']),
-                'totales_por_tipo' => [],
-                'ventas_lista' => []
-            ];
-
-            // Agregar totales por tipo de pago
-            foreach ($data['totales_por_tipo_usd'] as $tipo => $total_usd) {
-                $total_bs = $data['totales_por_tipo_bs'][$tipo] ?? 0;
-                if ($total_usd > 0 || $total_bs > 0) {
-                    $resumen['totales_por_tipo'][] = [
-                        'tipo' => ucwords(str_replace('_', ' ', $tipo)),
-                        'total_usd' => TasaCambioHelper::formatearUSD($total_usd),
-                        'total_bs' => TasaCambioHelper::formatearBS($total_bs)
-                    ];
-                }
-            }
-
-            // Agregar lista simplificada de ventas
-            foreach ($data['ventas'] as $venta) {
-                $resumen['ventas_lista'][] = [
-                    'id' => $venta['id'],
-                    'numero_venta' => $venta['numero_venta'],
-                    'fecha_hora' => date('d/m/Y H:i', strtotime($venta['fecha_hora'])),
-                    'cliente' => $venta['cliente_nombre'] ?? 'Cliente no identificado',
-                    'total_usd' => TasaCambioHelper::formatearUSD($venta['total']),
-                    'total_bs' => TasaCambioHelper::formatearBS($venta['total_bs'])
-                ];
-            }
-
-            return [
-                "success" => true,
-                "data" => $resumen
-            ];
-        } catch (Exception $e) {
-            return [
-                "success" => false,
-                "message" => "Error al obtener resumen pendiente: " . $e->getMessage()
-            ];
-        }
-    }
-
-    // Métodos existentes que se mantienen...
-    public function listarCierres($limit = 30)
-    {
-        try {
-            $stmt = $this->cierreCaja->listar($limit);
-            $cierres = $stmt->fetchAll();
-
-            // Formatear datos para mostrar
-            foreach ($cierres as &$cierre) {
-                $cierre['total_general_usd'] = TasaCambioHelper::formatearUSD(
-                    $cierre['total_usd']
-                );
-                $cierre['total_general_bs'] = TasaCambioHelper::formatearBS(
-                    $cierre['total_bs']
-                );
-                $cierre['fecha_formateada'] = date('d/m/Y', strtotime($cierre['fecha']));
-
-                // Calcular total general
-                $cierre['total_efectivo_usd'] = $cierre['efectivo_usd'] + $cierre['efectivo_bs_usd'];
-                $cierre['total_efectivo_bs'] = $cierre['efectivo_bs'] + $cierre['efectivo_bs_bs'];
-            }
-
-            return [
-                "success" => true,
-                "data" => $cierres
-            ];
-        } catch (Exception $e) {
-            return [
-                "success" => false,
-                "message" => "Error al listar cierres de caja: " . $e->getMessage()
-            ];
-        }
-    }
 
     public function obtenerDetalleCierre($id)
     {
         try {
+            // Validar que el ID sea válido
+            $id = intval($id);
+            if ($id <= 0) {
+                return [
+                    "success" => false,
+                    "message" => "ID de cierre inválido"
+                ];
+            }
+
+            // Obtener el cierre por ID
             $cierre = $this->cierreCaja->obtenerPorId($id);
 
-            if (!$cierre) {
+            if (!$cierre || !is_array($cierre)) {
                 return [
                     "success" => false,
                     "message" => "Cierre de caja no encontrado"
                 ];
             }
 
-            // Decodificar JSON
-            $cierre['resumen_categorias'] = json_decode($cierre['resumen_categorias'], true);
-            $cierre['resumen_productos'] = json_decode($cierre['resumen_productos'], true);
-            $cierre['resumen_clientes'] = json_decode($cierre['resumen_clientes'], true);
+            // Decodificar JSON (con valores por defecto)
+            $cierre['resumen_categorias'] = isset($cierre['resumen_categorias']) ? 
+                json_decode($cierre['resumen_categorias'], true) : [];
+            $cierre['resumen_productos'] = isset($cierre['resumen_productos']) ? 
+                json_decode($cierre['resumen_productos'], true) : [];
+            $cierre['resumen_clientes'] = isset($cierre['resumen_clientes']) ? 
+                json_decode($cierre['resumen_clientes'], true) : [];
+
+            // Asegurar que sean arrays
+            if (!is_array($cierre['resumen_categorias'])) $cierre['resumen_categorias'] = [];
+            if (!is_array($cierre['resumen_productos'])) $cierre['resumen_productos'] = [];
+            if (!is_array($cierre['resumen_clientes'])) $cierre['resumen_clientes'] = [];
 
             // Obtener reporte detallado
             $reporte = $this->cierreCaja->obtenerReporteDetallado($id);
+            if (!is_array($reporte)) {
+                $reporte = [];
+            }
 
             return [
                 "success" => true,
@@ -529,12 +552,13 @@ class CierreCajaController
                     'reporte' => $reporte
                 ]
             ];
+            
         } catch (Exception $e) {
+            error_log("Error en obtenerDetalleCierre: " . $e->getMessage());
             return [
                 "success" => false,
                 "message" => "Error al obtener detalle del cierre: " . $e->getMessage()
             ];
         }
     }
-
 }
