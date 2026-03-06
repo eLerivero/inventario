@@ -132,6 +132,10 @@ if (!defined('PERMISO_HISTORIAL_STOCK')) {
     define('PERMISO_HISTORIAL_STOCK', 'acceso_historial_stock');
 }
 
+if (!defined('PERMISO_CAJA_CIERRE')) {
+    define('PERMISO_CAJA_CIERRE', 'acceso_caja_cierre');
+}
+
 // Permisos CRUD dentro de módulos
 if (!defined('PERMISO_CREAR')) {
     define('PERMISO_CREAR', 'crear');

@@ -356,9 +356,12 @@ public static function canAccessHistorialStock()
     
     $user_rol = $_SESSION['user_rol'] ?? '';
     $rol = strtolower(trim($user_rol));
-    
-    // Solo 'admin' puede acceder a tasas de cambio
-    return $rol === 'admin';
+
+        // Solo 'admin' puede acceder a tasas de cambio
+    //    return $rol === 'usuario';
+
+      return in_array($rol, ['admin', 'usuario']);
+   // return $rol === 'admin';
 }
 
 // Requerir acceso a usuarios
@@ -430,7 +433,7 @@ public static function requireAccessToHistorialStock()
 
 public static function requireAccessToCierreCaja()
 {
-    if (!self::canAccessHistorialStock()) {
+    if (!self::canAccessCierreCaja()) {
         $_SESSION['error'] = 'No tienes permisos para acceder al módulo de tipo de historial de stock';
         header("Location: " . self::getDashboardUrl());
         exit();
