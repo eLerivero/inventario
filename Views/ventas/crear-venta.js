@@ -13,11 +13,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Actualizar contadores de productos (solo si existen los elementos)
     actualizarContadoresProductos();
     
-    // Verificar tasa de cambio
-    if (!window.tasaInfo || !window.tasaInfo.success) {
-        showToast('error', 'No hay tasa de cambio configurada. Configure la tasa primero.');
-    }
-
     if (window.productosData && window.productosData.length === 0) {
         showToast('warning', 'No hay productos disponibles. Debes crear productos primero.');
     }

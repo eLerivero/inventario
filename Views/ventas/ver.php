@@ -9,6 +9,11 @@ $db = $database->getConnection();
 
 $controller = new VentaController($db);
 
+// ====================================================
+// CONSTANTES DE TIPOS DE PAGO - MISMA LÓGICA QUE EN INDEX
+// ====================================================
+define('TIPOS_PAGO_USD', [2, 7]);
+
 // Obtener ID de la venta
 $id = $_GET['id'] ?? '';
 if (!$id) {
@@ -24,15 +29,60 @@ if (!$result['success']) {
 } else {
     $venta = $result['data'];
 
-    // Los pagos ya vienen filtrados como completados desde el controlador
+    // Los pagos vienen del controlador
     $pagos = $venta['pagos'] ?? [];
 
-    // Calcular totales por moneda - mantener precisión exacta
-    $total_usd_pagado = $venta['total_pagado_usd'] ?? 0;
-    $total_bs_pagado = $venta['total_pagado_bs'] ?? 0;
-    $total_pagos = $venta['cantidad_pagos'] ?? 0;
-    $metodos_utilizados = $venta['metodos_utilizados'] ?? [];
-    $cantidad_metodos = $venta['cantidad_metodos'] ?? 0;
+    // ====================================================
+    // RECALCULAR TOTALES POR MONEDA CON LA MISMA LÓGICA
+    // ====================================================
+    $total_usd_pagado = 0;  // Total USD (solo IDs 2 y 7)
+    $total_bs_pagado = 0;   // Total Bs (todos los demás IDs)
+    $pagos_clasificados = [
+        'usd' => [],   // Pagos en USD (IDs 2 y 7)
+        'bs' => []     // Pagos en Bs (todos los demás)
+    ];
+    
+    foreach ($pagos as $pago) {
+        $tipo_pago_id = $pago['tipo_pago_id'];
+        
+        if (in_array($tipo_pago_id, TIPOS_PAGO_USD)) {
+            // Es pago en USD - usar monto_usd
+            $monto_usd = floatval($pago['monto_usd']);
+            $total_usd_pagado += $monto_usd;
+            
+            $pagos_clasificados['usd'][] = [
+                'id' => $pago['id'],
+                'tipo_pago_id' => $tipo_pago_id,
+                'nombre' => $pago['tipo_pago_nombre'] ?? 'Desconocido',
+                'monto' => $monto_usd,
+                'monto_bs' => floatval($pago['monto_bs']),
+                'fecha' => $pago['fecha_pago'] ?? $pago['created_at'] ?? $venta['fecha_hora']
+            ];
+        } else {
+            // Es pago en Bs - usar monto_bs
+            $monto_bs = floatval($pago['monto_bs']);
+            $total_bs_pagado += $monto_bs;
+            
+            $pagos_clasificados['bs'][] = [
+                'id' => $pago['id'],
+                'tipo_pago_id' => $tipo_pago_id,
+                'nombre' => $pago['tipo_pago_nombre'] ?? 'Desconocido',
+                'monto' => $monto_bs,
+                'monto_usd' => floatval($pago['monto_usd']),
+                'fecha' => $pago['fecha_pago'] ?? $pago['created_at'] ?? $venta['fecha_hora']
+            ];
+        }
+    }
+    
+    // Calcular total de pagos y métodos únicos
+    $total_pagos = count($pagos);
+    $metodos_utilizados = array_unique(array_column($pagos, 'tipo_pago_nombre'));
+    $cantidad_metodos = count($metodos_utilizados);
+    
+    // Determinar si tiene pagos mixtos
+    $tiene_pagos_usd = $total_usd_pagado > 0;
+    $tiene_pagos_bs = $total_bs_pagado > 0;
+    $es_pago_mixto = $tiene_pagos_usd && $tiene_pagos_bs;
 }
 
 /**
@@ -42,22 +92,28 @@ if (!$result['success']) {
 function formato_2_decimales($numero)
 {
     if ($numero == 0 || $numero === null) return '0.00';
-
+    
+    // Manejar números negativos
+    $negativo = $numero < 0;
+    $numero = abs($numero);
+    
     // Separar parte entera y decimal
     $numero_str = (string)$numero;
     if (strpos($numero_str, '.') === false) {
-        return $numero_str . '.00';
+        $resultado = $numero_str . '.00';
+    } else {
+        list($entero, $decimal) = explode('.', $numero_str);
+        
+        // Tomar solo los primeros 2 decimales (sin redondear)
+        $decimal = substr($decimal, 0, 2);
+        
+        // Si el decimal tiene menos de 2 dígitos, rellenar con ceros
+        $decimal = str_pad($decimal, 2, '0');
+        
+        $resultado = $entero . '.' . $decimal;
     }
-
-    list($entero, $decimal) = explode('.', $numero_str);
-
-    // Tomar solo los primeros 2 decimales (sin redondear)
-    $decimal = substr($decimal, 0, 2);
-
-    // Si el decimal tiene menos de 2 dígitos, rellenar con ceros
-    $decimal = str_pad($decimal, 2, '0');
-
-    return $entero . '.' . $decimal;
+    
+    return $negativo ? '-' . $resultado : $resultado;
 }
 
 /**
@@ -128,7 +184,7 @@ include '../layouts/header.php';
         letter-spacing: 0.5px;
     }
 
-    /* Estilos para pagos */
+    /* Estilos para pagos - CLASIFICADOS POR MONEDA */
     .pago-item {
         border-left: 4px solid transparent;
         transition: all 0.2s ease;
@@ -144,7 +200,7 @@ include '../layouts/header.php';
         background: #fff7ed;
     }
 
-    .pago-item.mixto {
+    .pago-item.mixto-individual {
         border-left-color: #7e22ce;
         background: #f3e8ff;
     }
@@ -178,6 +234,31 @@ include '../layouts/header.php';
 
     .text-success-dark {
         color: #059669;
+    }
+
+    /* Secciones separadas por moneda */
+    .section-usd {
+        border-top: 3px solid #0d9488;
+    }
+
+    .section-bs {
+        border-top: 3px solid #b45309;
+    }
+
+    .section-header-usd {
+        background: #f0fdfa;
+        color: #0d9488;
+        padding: 0.75rem 1rem;
+        border-radius: 8px 8px 0 0;
+        font-weight: 600;
+    }
+
+    .section-header-bs {
+        background: #fff7ed;
+        color: #b45309;
+        padding: 0.75rem 1rem;
+        border-radius: 8px 8px 0 0;
+        font-weight: 600;
     }
 
     /* Animaciones */
@@ -241,10 +322,12 @@ include '../layouts/header.php';
                         <i class="fas fa-layer-group me-1"></i>
                         <?php echo $cantidad_metodos; ?> métodos de pago
                     </span>
-                <?php elseif ($total_pagos == 1): ?>
-                    <span class="badge bg-success bg-opacity-10 text-success ms-2">
-                        <i class="fas fa-check-circle me-1"></i>
-                        Pago único
+                <?php endif; ?>
+                
+                <?php if ($es_pago_mixto): ?>
+                    <span class="badge ms-2" style="background: #f3e8ff; color: #7e22ce;">
+                        <i class="fas fa-dollar-sign me-1"></i><i class="fas fa-bolt me-1"></i>
+                        Pago Mixto
                     </span>
                 <?php endif; ?>
             <?php else: ?>
@@ -395,7 +478,7 @@ include '../layouts/header.php';
     </div>
 
     <!-- ================================================================== -->
-    <!-- SECCIÓN: DETALLE DE PAGOS COMPLETADOS (CON 2 DECIMALES FIJOS) -->
+    <!-- SECCIÓN: DETALLE DE PAGOS - CLASIFICADOS POR MONEDA -->
     <!-- ================================================================== -->
     <?php if (!empty($pagos)): ?>
         <div class="card mb-4 border-success fade-in">
@@ -409,14 +492,15 @@ include '../layouts/header.php';
                             <i class="fas fa-layer-group me-1"></i> <?php echo $cantidad_metodos; ?> métodos
                         </span>
                     <?php endif; ?>
-                    <?php if ($venta['estado'] === 'completada'): ?>
-                        <span class="badge bg-white text-success ms-2">
-                            <i class="fas fa-check-circle me-1"></i> Venta Completada
+                    <?php if ($es_pago_mixto): ?>
+                        <span class="badge bg-white text-success ms-2" style="color: #7e22ce !important;">
+                            <i class="fas fa-dollar-sign me-1"></i><i class="fas fa-bolt me-1"></i> Pago Mixto
                         </span>
                     <?php endif; ?>
                 </h5>
             </div>
             <div class="card-body">
+                <!-- Resumen de Totales por Moneda -->
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="resumen-pago">
@@ -428,10 +512,12 @@ include '../layouts/header.php';
                                 <div class="col-6">
                                     <small class="text-white-50 d-block">Total USD</small>
                                     <h3 class="text-white mb-0 monto-2dec">$<?php echo formato_2_decimales($total_usd_pagado); ?></h3>
+                                    <small class="text-white-50"><?php echo count($pagos_clasificados['usd']); ?> pago(s) en USD</small>
                                 </div>
                                 <div class="col-6">
                                     <small class="text-white-50 d-block">Total Bs</small>
                                     <h3 class="text-white mb-0 monto-2dec">Bs <?php echo formato_2_decimales($total_bs_pagado); ?></h3>
+                                    <small class="text-white-50"><?php echo count($pagos_clasificados['bs']); ?> pago(s) en Bs</small>
                                 </div>
                             </div>
 
@@ -469,26 +555,19 @@ include '../layouts/header.php';
                             <div class="w-100">
                                 <h6 class="text-muted mb-3">Distribución por Moneda</h6>
                                 <?php
-                                // Mantener todos los valores exactos sin redondeo
                                 $porcentaje_usd = '0';
                                 $porcentaje_bs = '0';
 
-                                // Usar los montos exactos como vienen de la base de datos
-                                $total_usd_exacto = $total_usd_pagado;
-                                $total_bs_exacto = $total_bs_pagado;
-
-                                if ($total_usd_exacto > 0 || $total_bs_exacto > 0) {
+                                if ($total_usd_pagado > 0 || $total_bs_pagado > 0) {
                                     $tasa = isset($venta['tasa_cambio_utilizada']) && $venta['tasa_cambio_utilizada'] > 0
                                         ? $venta['tasa_cambio_utilizada']
                                         : 1;
 
-                                    // Calcular Bs convertido a USD con toda la precisión
-                                    $bs_en_usd = $total_bs_exacto / $tasa;
-                                    $total_combinado = $total_usd_exacto + $bs_en_usd;
+                                    $bs_en_usd = $total_bs_pagado / $tasa;
+                                    $total_combinado = $total_usd_pagado + $bs_en_usd;
 
                                     if ($total_combinado > 0) {
-                                        // Calcular porcentajes con máxima precisión
-                                        $porcentaje_usd = ($total_usd_exacto / $total_combinado) * 100;
+                                        $porcentaje_usd = ($total_usd_pagado / $total_combinado) * 100;
                                         $porcentaje_bs = ($bs_en_usd / $total_combinado) * 100;
                                     }
                                 }
@@ -501,7 +580,7 @@ include '../layouts/header.php';
                                     <div class="progress" style="height: 8px;">
                                         <div class="progress-bar bg-success" style="width: <?php echo $porcentaje_usd; ?>%"></div>
                                     </div>
-                                    <small class="text-muted monto-2dec">$<?php echo formato_2_decimales($total_usd_exacto); ?></small>
+                                    <small class="text-muted monto-2dec">$<?php echo formato_2_decimales($total_usd_pagado); ?></small>
                                 </div>
                                 <div>
                                     <div class="d-flex justify-content-between mb-1">
@@ -511,105 +590,172 @@ include '../layouts/header.php';
                                     <div class="progress" style="height: 8px;">
                                         <div class="progress-bar bg-warning" style="width: <?php echo $porcentaje_bs; ?>%"></div>
                                     </div>
-                                    <small class="text-muted monto-2dec">Bs <?php echo formato_2_decimales($total_bs_exacto); ?></small>
+                                    <small class="text-muted monto-2dec">Bs <?php echo formato_2_decimales($total_bs_pagado); ?></small>
                                 </div>
-
-                                <?php if ($cantidad_metodos > 1): ?>
-                                    <div class="mt-3 pt-2 border-top">
-                                        <small class="text-muted">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            <strong><?php echo $cantidad_metodos; ?></strong> métodos de pago diferentes
-                                        </small>
-                                    </div>
-                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tabla de pagos completados (CON 2 DECIMALES FIJOS) -->
-                <h6 class="mb-3"><i class="fas fa-list-ul me-2"></i>Detalle por Método de Pago</h6>
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>#</th>
-                                <th>Método de Pago</th>
-                                <th class="text-end">Monto USD</th>
-                                <th class="text-end">Monto Bs</th>
-                                <th class="text-center">Tasa Aplicada</th>
-                                <th class="text-center">Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            $contador_pago = 1;
-                            foreach ($pagos as $pago):
-                                // Calcular tasa con toda la precisión
-                                $tasa_aplicada = $pago['monto_usd'] > 0 ? $pago['monto_bs'] / $pago['monto_usd'] : 0;
-                                $clase_pago = $pago['monto_usd'] > 0 && $pago['monto_bs'] > 0 ? 'mixto' : ($pago['monto_usd'] > 0 ? 'usd' : 'bs');
-                            ?>
-                                <tr class="pago-item <?php echo $clase_pago; ?>">
-                                    <td><?php echo $contador_pago++; ?></td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <?php if ($pago['monto_usd'] > 0 && $pago['monto_bs'] > 0): ?>
-                                                <i class="fas fa-layer-group me-2" style="color: #7e22ce;"></i>
-                                            <?php elseif ($pago['monto_usd'] > 0): ?>
-                                                <i class="fas fa-dollar-sign me-2 text-success"></i>
-                                            <?php else: ?>
-                                                <i class="fas fa-bolt me-2 text-warning"></i>
-                                            <?php endif; ?>
-                                            <div>
-                                                <strong><?php echo htmlspecialchars($pago['tipo_pago_nombre']); ?></strong>
-                                                <?php if ($pago['monto_usd'] > 0 && $pago['monto_bs'] > 0): ?>
-                                                    <br><small class="text-muted">Pago mixto</small>
-                                                <?php endif; ?>
-                                                <span class="badge bg-success bg-opacity-10 text-success ms-2">
-                                                    <i class="fas fa-check-circle"></i> Completado
+                <!-- ==================================================== -->
+                <!-- PAGOS EN USD (SOLO IDs 2 y 7) -->
+                <!-- ==================================================== -->
+                <?php if (!empty($pagos_clasificados['usd'])): ?>
+                    <div class="section-usd mb-4">
+                        <div class="section-header-usd d-flex justify-content-between align-items-center">
+                            <span>
+                                <i class="fas fa-dollar-sign me-2"></i>
+                                Pagos en Dólares (USD) - Tipo de Pago IDs: 2 y 7
+                            </span>
+                            <span class="badge bg-white text-success">
+                                Total: $<?php echo formato_2_decimales($total_usd_pagado); ?>
+                            </span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Método de Pago</th>
+                                        <th class="text-end">Monto USD</th>
+                                        <th class="text-end">Monto Bs (Equivalente)</th>
+                                        <th class="text-center">Tasa Aplicada</th>
+                                        <th class="text-center">Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $contador_usd = 1;
+                                    foreach ($pagos_clasificados['usd'] as $pago):
+                                        $tasa_aplicada = $pago['monto'] > 0 ? $pago['monto_bs'] / $pago['monto'] : 0;
+                                    ?>
+                                        <tr class="pago-item usd">
+                                            <td><?php echo $contador_usd++; ?></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-dollar-sign me-2 text-success"></i>
+                                                    <strong><?php echo htmlspecialchars($pago['nombre']); ?></strong>
+                                                    <span class="badge bg-success bg-opacity-10 text-success ms-2">
+                                                        <i class="fas fa-check-circle"></i> ID: <?php echo $pago['tipo_pago_id']; ?>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="text-end pago-monto-usd monto-2dec">
+                                                $<?php echo formato_2_decimales($pago['monto']); ?>
+                                            </td>
+                                            <td class="text-end text-muted monto-2dec">
+                                                Bs <?php echo formato_2_decimales($pago['monto_bs']); ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info bg-opacity-10 text-info monto-2dec">
+                                                    <?php echo formato_2_decimales($tasa_aplicada); ?> Bs/$
                                                 </span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-end pago-monto-usd monto-2dec">
-                                        $<?php echo formato_2_decimales($pago['monto_usd']); ?>
-                                    </td>
-                                    <td class="text-end pago-monto-bs monto-2dec">
-                                        Bs <?php echo formato_2_decimales($pago['monto_bs']); ?>
-                                    </td>
-                                    <td class="text-center">
-                                        <?php if ($tasa_aplicada > 0): ?>
-                                            <span class="badge bg-info bg-opacity-10 text-info monto-2dec"
-                                                data-bs-toggle="tooltip"
-                                                title="Tasa aplicada para este pago">
-                                                <?php echo formato_2_decimales($tasa_aplicada); ?> Bs/$
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="text-muted">—</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="text-center">
-                                        <small class="tooltip-custom" data-tooltip="<?php echo date('H:i:s', strtotime($pago['fecha_pago'] ?? $pago['created_at'] ?? $venta['fecha_hora'])); ?>">
-                                            <?php echo date('d/m/Y H:i', strtotime($pago['fecha_pago'] ?? $pago['created_at'] ?? $venta['fecha_hora'])); ?>
-                                        </small>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                        <tfoot class="table-light">
-                            <tr>
-                                <th colspan="2" class="text-end">Totales:</th>
-                                <th class="text-end pago-monto-usd monto-2dec">
-                                    $<?php echo formato_2_decimales($total_usd_pagado); ?>
-                                </th>
-                                <th class="text-end pago-monto-bs monto-2dec">
-                                    Bs <?php echo formato_2_decimales($total_bs_pagado); ?>
-                                </th>
-                                <th colspan="2"></th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <small>
+                                                    <?php echo date('d/m/Y H:i', strtotime($pago['fecha'])); ?>
+                                                </small>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th colspan="2" class="text-end">Total USD:</th>
+                                        <th class="text-end pago-monto-usd monto-2dec">
+                                            $<?php echo formato_2_decimales($total_usd_pagado); ?>
+                                        </th>
+                                        <th colspan="3"></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <!-- ==================================================== -->
+                <!-- PAGOS EN Bs (TODOS LOS DEMÁS IDs) -->
+                <!-- ==================================================== -->
+                <?php if (!empty($pagos_clasificados['bs'])): ?>
+                    <div class="section-bs">
+                        <div class="section-header-bs d-flex justify-content-between align-items-center">
+                            <span>
+                                <i class="fas fa-bolt me-2"></i>
+                                Pagos en Bolívares (Bs) - Tipo de Pago IDs: Todos excepto 2 y 7
+                            </span>
+                            <span class="badge bg-white text-warning">
+                                Total: Bs <?php echo formato_2_decimales($total_bs_pagado); ?>
+                            </span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Método de Pago</th>
+                                        <th class="text-end">Monto Bs</th>
+                                        <th class="text-end">Monto USD (Equivalente)</th>
+                                        <th class="text-center">Tasa Aplicada</th>
+                                        <th class="text-center">Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $contador_bs = 1;
+                                    foreach ($pagos_clasificados['bs'] as $pago):
+                                        $tasa_aplicada = $pago['monto_usd'] > 0 ? $pago['monto'] / $pago['monto_usd'] : 0;
+                                    ?>
+                                        <tr class="pago-item bs">
+                                            <td><?php echo $contador_bs++; ?></td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="fas fa-bolt me-2 text-warning"></i>
+                                                    <strong><?php echo htmlspecialchars($pago['nombre']); ?></strong>
+                                                    <span class="badge bg-warning bg-opacity-10 text-warning ms-2">
+                                                        <i class="fas fa-check-circle"></i> ID: <?php echo $pago['tipo_pago_id']; ?>
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="text-end pago-monto-bs monto-2dec">
+                                                Bs <?php echo formato_2_decimales($pago['monto']); ?>
+                                            </td>
+                                            <td class="text-end text-muted monto-2dec">
+                                                $<?php echo formato_2_decimales($pago['monto_usd']); ?>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info bg-opacity-10 text-info monto-2dec">
+                                                    <?php echo formato_2_decimales($tasa_aplicada); ?> Bs/$
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <small>
+                                                    <?php echo date('d/m/Y H:i', strtotime($pago['fecha'])); ?>
+                                                </small>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                                <tfoot class="table-light">
+                                    <tr>
+                                        <th colspan="2" class="text-end">Total Bs:</th>
+                                        <th class="text-end pago-monto-bs monto-2dec">
+                                            Bs <?php echo formato_2_decimales($total_bs_pagado); ?>
+                                        </th>
+                                        <th colspan="3"></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <!-- Mensaje si no hay pagos en alguna categoría -->
+                <?php if (empty($pagos_clasificados['usd']) && empty($pagos_clasificados['bs'])): ?>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No hay pagos registrados para esta venta.
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     <?php endif; ?>
@@ -626,7 +772,7 @@ include '../layouts/header.php';
                         <h6 class="text-muted mb-2">Total en Dólares</h6>
                         <h3 class="text-success mb-0 monto-2dec">$<?php echo formato_2_decimales($venta['total']); ?></h3>
                         <small class="text-muted">Monto total de la venta</small>
-                        <?php if ($total_usd_pagado < $venta['total']): ?>
+                        <?php if ($total_usd_pagado < $venta['total'] && $venta['estado'] !== 'completada'): ?>
                             <span class="badge bg-warning mt-2 monto-2dec">Pagado: $<?php echo formato_2_decimales($total_usd_pagado); ?></span>
                         <?php else: ?>
                             <span class="badge bg-success mt-2">Completado</span>
@@ -645,7 +791,7 @@ include '../layouts/header.php';
                         <h6 class="text-muted mb-2">Total en Bolívares</h6>
                         <h3 class="text-warning mb-0 monto-2dec">Bs <?php echo formato_2_decimales($venta['total_bs']); ?></h3>
                         <small class="text-muted">Monto total de la venta</small>
-                        <?php if ($total_bs_pagado < $venta['total_bs']): ?>
+                        <?php if ($total_bs_pagado < $venta['total_bs'] && $venta['estado'] !== 'completada'): ?>
                             <span class="badge bg-warning mt-2 monto-2dec">Pagado: Bs <?php echo formato_2_decimales($total_bs_pagado); ?></span>
                         <?php else: ?>
                             <span class="badge bg-success mt-2">Completado</span>
@@ -816,11 +962,9 @@ include '../layouts/header.php';
                         <i class="fas fa-box me-1"></i>
                         <?php echo count($venta['detalles']); ?> productos |
                         <i class="fas fa-dollar-sign me-1 ms-2"></i>
-                        $<?php echo formato_2_decimales($venta['total']); ?>
-                        <?php if ($total_usd_pagado > 0): ?>
-                            | <i class="fas fa-check-circle text-success me-1"></i>
-                            Pagado: $<?php echo formato_2_decimales($total_usd_pagado); ?>
-                        <?php endif; ?>
+                        $<?php echo formato_2_decimales($venta['total']); ?> |
+                        <i class="fas fa-bolt me-1"></i>
+                        Bs <?php echo formato_2_decimales($venta['total_bs']); ?>
                     </small>
                 </div>
             </div>
@@ -853,19 +997,32 @@ include '../layouts/header.php';
                             </div>
                         </li>
 
-                        <!-- Mostrar eventos de pago -->
+                        <!-- Mostrar eventos de pago CLASIFICADOS -->
                         <?php if (!empty($pagos)): ?>
-                            <?php foreach ($pagos as $index => $pago): ?>
+                            <?php foreach ($pagos as $index => $pago): 
+                                $tipo_pago_id = $pago['tipo_pago_id'];
+                                $es_usd = in_array($tipo_pago_id, TIPOS_PAGO_USD);
+                                $icono = $es_usd ? 'fa-dollar-sign' : 'fa-bolt';
+                                $color = $es_usd ? 'text-success' : 'text-warning';
+                                $bg_color = $es_usd ? 'bg-success' : 'bg-warning';
+                                $monto_mostrar = $es_usd 
+                                    ? '$' . formato_2_decimales($pago['monto_usd'])
+                                    : 'Bs ' . formato_2_decimales($pago['monto_bs']);
+                            ?>
                                 <li class="mb-3">
                                     <div class="d-flex">
-                                        <div class="timeline-icon bg-info text-white rounded-circle p-2 me-3">
-                                            <i class="fas fa-money-bill-wave"></i>
+                                        <div class="timeline-icon <?php echo $bg_color; ?> text-white rounded-circle p-2 me-3">
+                                            <i class="fas <?php echo $icono; ?>"></i>
                                         </div>
                                         <div>
                                             <h6 class="mb-1">Pago #<?php echo $index + 1; ?>: <?php echo htmlspecialchars($pago['tipo_pago_nombre']); ?></h6>
                                             <p class="text-muted mb-0 small monto-2dec">
-                                                $<?php echo formato_2_decimales($pago['monto_usd']); ?> /
-                                                Bs <?php echo formato_2_decimales($pago['monto_bs']); ?>
+                                                <span class="<?php echo $color; ?> fw-bold"><?php echo $monto_mostrar; ?></span>
+                                                <?php if ($es_usd && $pago['monto_bs'] > 0): ?>
+                                                    <br><small>(Equivale a Bs <?php echo formato_2_decimales($pago['monto_bs']); ?>)</small>
+                                                <?php elseif (!$es_usd && $pago['monto_usd'] > 0): ?>
+                                                    <br><small>(Equivale a $<?php echo formato_2_decimales($pago['monto_usd']); ?>)</small>
+                                                <?php endif; ?>
                                                 <br>
                                                 <?php echo date('d/m/Y H:i:s', strtotime($pago['fecha_pago'] ?? $pago['created_at'] ?? $venta['fecha_hora'])); ?>
                                             </p>
@@ -976,6 +1133,18 @@ include '../layouts/header.php';
                                 <div class="alert alert-info mt-3">
                                     <i class="fas fa-layer-group me-2"></i>
                                     <strong>Pagos Múltiples:</strong> Esta venta tiene <?php echo $cantidad_metodos; ?> métodos de pago diferentes (<?php echo $total_pagos; ?> pagos en total).
+                                    <br>
+                                    <small>
+                                        USD: $<?php echo formato_2_decimales($total_usd_pagado); ?> |
+                                        Bs: <?php echo formato_2_decimales($total_bs_pagado); ?>
+                                    </small>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if ($es_pago_mixto): ?>
+                                <div class="alert alert-info mt-3" style="background: #f3e8ff; color: #7e22ce;">
+                                    <i class="fas fa-dollar-sign me-1"></i><i class="fas fa-bolt me-1"></i>
+                                    <strong>Pago Mixto:</strong> Esta venta tiene pagos en ambas monedas.
                                 </div>
                             <?php endif; ?>
                         <?php endif; ?>
@@ -1000,27 +1169,27 @@ include '../layouts/header.php';
 
 <script>
     function imprimirRecibo() {
-        // Crear contenido para imprimir con el detalle de pagos
         <?php
-        // Generar el HTML para los pagos en el recibo
-        $pagos_html = '';
-        if (!empty($pagos)) {
-            foreach ($pagos as $pago) {
-                $tasa_aplicada = $pago['monto_usd'] > 0 ? $pago['monto_bs'] / $pago['monto_usd'] : 0;
-                $pagos_html .= '<div class="pago-row">';
-                $pagos_html .= '<div><strong>' . htmlspecialchars($pago['tipo_pago_nombre']) . '</strong>';
-                if ($pago['monto_usd'] > 0 && $pago['monto_bs'] > 0) {
-                    $pagos_html .= '<br><small>Pago mixto</small>';
-                }
-                $pagos_html .= '</div>';
-                $pagos_html .= '<div class="text-end">';
-                $pagos_html .= '<div>$' . formato_2_decimales($pago['monto_usd']) . '</div>';
-                $pagos_html .= '<div>Bs ' . formato_2_decimales($pago['monto_bs']) . '</div>';
-                if ($tasa_aplicada > 0) {
-                    $pagos_html .= '<small>Tasa: ' . formato_2_decimales($tasa_aplicada) . ' Bs/$</small>';
-                }
-                $pagos_html .= '</div></div>';
-            }
+        // Generar el HTML para los pagos en el recibo - CLASIFICADO
+        $pagos_usd_html = '';
+        $pagos_bs_html = '';
+        
+        foreach ($pagos_clasificados['usd'] as $pago) {
+            $pagos_usd_html .= '<tr>';
+            $pagos_usd_html .= '<td>' . htmlspecialchars($pago['nombre']) . '</td>';
+            $pagos_usd_html .= '<td class="text-end">$' . formato_2_decimales($pago['monto']) . '</td>';
+            $pagos_usd_html .= '<td class="text-end">Bs ' . formato_2_decimales($pago['monto_bs']) . '</td>';
+            $pagos_usd_html .= '<td class="text-center">USD (ID ' . $pago['tipo_pago_id'] . ')</td>';
+            $pagos_usd_html .= '</tr>';
+        }
+        
+        foreach ($pagos_clasificados['bs'] as $pago) {
+            $pagos_bs_html .= '<tr>';
+            $pagos_bs_html .= '<td>' . htmlspecialchars($pago['nombre']) . '</td>';
+            $pagos_bs_html .= '<td class="text-end">Bs ' . formato_2_decimales($pago['monto']) . '</td>';
+            $pagos_bs_html .= '<td class="text-end">$' . formato_2_decimales($pago['monto_usd']) . '</td>';
+            $pagos_bs_html .= '<td class="text-center">Bs (ID ' . $pago['tipo_pago_id'] . ')</td>';
+            $pagos_bs_html .= '</tr>';
         }
         ?>
 
@@ -1039,10 +1208,14 @@ include '../layouts/header.php';
                     th { background-color: #f8f9fa; }
                     .total { margin-top: 20px; text-align: right; font-size: 16px; font-weight: bold; }
                     .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
-                    .pagos-section { margin: 20px 0; padding: 10px; background: #f8f9fa; border-radius: 5px; }
-                    .pago-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #ddd; }
+                    .pagos-section { margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px; }
+                    .pagos-section h4 { margin-top: 0; color: #333; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
+                    .section-usd { background: #f0fdfa; padding: 10px; margin: 10px 0; border-left: 4px solid #0d9488; }
+                    .section-bs { background: #fff7ed; padding: 10px; margin: 10px 0; border-left: 4px solid #b45309; }
                     .monto-2dec { font-family: 'Courier New', monospace; }
                     .badge { padding: 3px 8px; border-radius: 3px; font-size: 12px; }
+                    .text-end { text-align: right; }
+                    .text-center { text-align: center; }
                 </style>
             </head>
             <body>
@@ -1059,22 +1232,61 @@ include '../layouts/header.php';
                     <?php endif; ?>
                     <div class="info-item"><strong>Estado:</strong> <?php echo ucfirst($venta['estado']); ?></div>
                     <div class="info-item"><strong>Tasa de Cambio:</strong> <?php echo formato_2_decimales($venta['tasa_cambio_utilizada']); ?> Bs/$</div>
+                    <?php if ($es_pago_mixto): ?>
+                        <div class="info-item"><strong>Tipo de Pago:</strong> Mixto (USD + Bs)</div>
+                    <?php endif; ?>
                 </div>
                 
-                <?php if (!empty($pagos_html)): ?>
+                <?php if (!empty($pagos)): ?>
                 <div class="pagos-section">
                     <h4>Detalle de Pagos Completados</h4>
-                    <?php echo $pagos_html; ?>
-                    <div class="pago-row" style="font-weight: bold; border-bottom: 2px solid #000; margin-top: 10px;">
-                        <div>TOTAL PAGADO</div>
-                        <div class="text-end">
-                            <div>$<?php echo formato_2_decimales($total_usd_pagado); ?></div>
-                            <div>Bs <?php echo formato_2_decimales($total_bs_pagado); ?></div>
-                        </div>
+                    
+                    <?php if (!empty($pagos_clasificados['usd'])): ?>
+                    <div class="section-usd">
+                        <h5 style="margin-top:0; color:#0d9488;">Pagos en Dólares (USD) - IDs: 2 y 7</h5>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Método</th>
+                                    <th class="text-end">Monto USD</th>
+                                    <th class="text-end">Monto Bs</th>
+                                    <th class="text-center">Tipo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php echo $pagos_usd_html; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <?php if (!empty($pagos_clasificados['bs'])): ?>
+                    <div class="section-bs">
+                        <h5 style="margin-top:0; color:#b45309;">Pagos en Bolívares (Bs) - Todos los demás IDs</h5>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Método</th>
+                                    <th class="text-end">Monto Bs</th>
+                                    <th class="text-end">Monto USD</th>
+                                    <th class="text-center">Tipo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php echo $pagos_bs_html; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <div style="margin-top: 15px; font-weight: bold; text-align: right;">
+                        <div>Total USD: $<?php echo formato_2_decimales($total_usd_pagado); ?></div>
+                        <div>Total Bs: Bs <?php echo formato_2_decimales($total_bs_pagado); ?></div>
                     </div>
                 </div>
                 <?php endif; ?>
                 
+                <h4>Productos Vendidos</h4>
                 <table>
                     <thead>
                         <tr>
@@ -1093,12 +1305,12 @@ include '../layouts/header.php';
                             <tr>
                                 <td><?php echo $contador++; ?></td>
                                 <td><?php echo htmlspecialchars($detalle['producto_nombre']); ?> (<?php echo htmlspecialchars($detalle['codigo_sku']); ?>)</td>
-                                <td><?php echo $detalle['cantidad']; ?></td>
-                                <td class="monto-2dec">
+                                <td class="text-center"><?php echo $detalle['cantidad']; ?></td>
+                                <td class="text-end monto-2dec">
                                     $<?php echo formato_2_decimales($detalle['precio_unitario']); ?><br>
                                     <small>Bs <?php echo formato_2_decimales($detalle['precio_unitario_bs']); ?></small>
                                 </td>
-                                <td class="monto-2dec">
+                                <td class="text-end monto-2dec">
                                     $<?php echo formato_2_decimales($detalle['subtotal']); ?><br>
                                     <small>Bs <?php echo formato_2_decimales($detalle['subtotal_bs']); ?></small>
                                 </td>
@@ -1110,9 +1322,9 @@ include '../layouts/header.php';
                 <div class="total monto-2dec">
                     <div><strong>Total USD:</strong> $<?php echo formato_2_decimales($venta['total']); ?></div>
                     <div><strong>Total Bs:</strong> Bs <?php echo formato_2_decimales($venta['total_bs']); ?></div>
-                    <?php if ($total_usd_pagado > 0): ?>
-                        <div><strong>Pagado:</strong> $<?php echo formato_2_decimales($total_usd_pagado); ?></div>
-                    <?php endif; ?>
+                    <hr>
+                    <div><strong>Pagado USD:</strong> $<?php echo formato_2_decimales($total_usd_pagado); ?></div>
+                    <div><strong>Pagado Bs:</strong> Bs <?php echo formato_2_decimales($total_bs_pagado); ?></div>
                 </div>
                 
                 <?php if (!empty($venta['observaciones'])): ?>
