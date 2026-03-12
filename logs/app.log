@@ -545,3 +545,4 @@
 [2026-03-07 15:53:26] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en D:\wamp64\www\inventario\Views\ventas\ver.php línea 462 
 [2026-03-07 15:53:26] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en D:\wamp64\www\inventario\Views\ventas\ver.php línea 462 
 [2026-03-07 15:53:26] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en D:\wamp64\www\inventario\Views\ventas\ver.php línea 1234 
+[2026-03-12 16:22:30] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 466 
