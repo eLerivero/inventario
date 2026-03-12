@@ -1,180 +1,142 @@
 <?php
-// Views/layouts/sidebar.php
+// Views/layouts/header.php
 
-// Verificar que el usuario esté autenticado
-if (!isset($current_user)) {
-    die("Error: Usuario no autenticado");
+// Iniciar sesión si no está iniciada
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-$current_page = basename($_SERVER['PHP_SELF']);
+// Usar rutas absolutas para evitar problemas de inclusión
+$configPath = __DIR__ . '/../../Config/Config.php';
+$constantsPath = __DIR__ . '/../../Config/Constants.php';
+$authPath = __DIR__ . '/../../Utils/Auth.php';
 
-// Determinar la ruta base CORREGIDA
-$relative_path = '../'; // Desde layouts va a Views/
+if (!file_exists($configPath)) {
+    die("Error: No se puede encontrar el archivo de configuración en: $configPath");
+}
 
-// Intentar obtener tasa actual para mostrar
-$tasaActual = ['success' => false];
-try {
-    $tasaControllerPath = __DIR__ . '/../../Controllers/TasaCambioController.php';
-    if (file_exists($tasaControllerPath)) {
-        require_once $tasaControllerPath;
-        require_once __DIR__ . '/../../Config/Database.php';
+require_once $configPath;
 
-        $database = new Database();
-        $db = $database->getConnection();
-        $tasaController = new TasaCambioController($db);
-        $tasaActual = $tasaController->obtenerTasaActual();
+// Cargar constantes si existe el archivo
+if (file_exists($constantsPath)) {
+    require_once $constantsPath;
+}
+
+// Cargar Auth si existe el archivo
+if (file_exists($authPath)) {
+    require_once $authPath;
+} else {
+    die("Error: No se puede encontrar el archivo de autenticación en: $authPath");
+}
+
+// Verificar autenticación
+if (!Auth::check()) {
+    // Guardar la URL actual para redirigir después del login
+    $_SESSION['redirect_url'] = $_SERVER['REQUEST_URI'];
+    
+    // Usar rutas relativas para evitar problemas con BASE_URL
+    $login_url = '/inventario/Views/auth/login.php';
+    
+    // Redirigir al login
+    header("Location: $login_url");
+    exit();
+}
+
+// Obtener usuario actual
+$current_user = Auth::user();
+
+// Determinar la ruta base para assets
+$current_path = $_SERVER['PHP_SELF'];
+
+// Calcular la ruta relativa correcta para assets
+$path_parts = explode('/', $current_path);
+$inventario_index = array_search('inventario', $path_parts);
+
+if ($inventario_index !== false) {
+    $relative_path = '';
+    // Contar cuántos niveles necesitamos retroceder
+    $levels_from_inventario = count($path_parts) - $inventario_index - 2;
+    for ($i = 0; $i < $levels_from_inventario; $i++) {
+        $relative_path .= '../';
     }
-} catch (Exception $e) {
-    // Silenciar error, no es crítico para el sidebar
+} else {
+    // Fallback: asumir que estamos en la raíz
+    $relative_path = './';
+}
+
+// Definir rutas de assets
+$css_path = $relative_path . 'Public/css/';
+$js_path = $relative_path . 'Public/js/';
+
+// Definir título de página si no está definido
+if (!isset($page_title)) {
+    $page_title = 'Sistema de Inventario';
+}
+
+// Definir SITE_NAME si no está definido
+if (!defined('SITE_NAME')) {
+    define('SITE_NAME', 'Sistema de Inventario');
 }
 ?>
-<!-- Sidebar -->
-<nav class="sidebar">
-    <div class="position-sticky pt-3">
-        <div class="text-center mb-4">
-            <h4 class="text-white">
-                <i class="fas fa-boxes"></i>
-                <span class="sidebar-text"><?php echo SITE_NAME; ?></span>
-            </h4>
-            <small class="text-white-50 sidebar-text">v<?php echo SITE_VERSION; ?></small>
+<!DOCTYPE html>
+<html lang="es">
 
-            <!-- Mostrar tasa actual en el sidebar -->
-            <?php if ($tasaActual['success'] && Auth::isAdmin()): ?>
-                <div class="mt-2 p-2 bg-primary bg-opacity-25 rounded">
-                    <small class="text-white">
-                        <i class="fas fa-exchange-alt me-1"></i>
-                        1 USD = <?php echo number_format($tasaActual['data']['tasa_cambio'], 2); ?> Bs
-                    </small>
-                    <br>
-                    <small class="text-white-50">
-                        <?php echo date('d/m', strtotime($tasaActual['data']['fecha_actualizacion'])); ?>
-                    </small>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo htmlspecialchars($page_title); ?> - <?php echo SITE_NAME; ?></title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="<?php echo $css_path; ?>layouts.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Container -->
+        <div class="sidebar-container">
+            <?php
+            // Incluir sidebar con la ruta correcta
+            $sidebar_path = __DIR__ . '/sidebar.php';
+            if (file_exists($sidebar_path)) {
+                include $sidebar_path;
+            } else {
+                echo "<!-- Sidebar not found: $sidebar_path -->";
+            }
+            ?>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Header Container -->
+            <div class="header-container">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+                    <h1 class="h2"><?php echo htmlspecialchars($page_title); ?></h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="sidebarToggle">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                        </div>
+                        <div class="btn-group me-2">
+                            <span class="btn btn-sm btn-outline-secondary">
+                                <i class="fas fa-user me-1"></i>
+                                <?php echo htmlspecialchars($current_user['nombre'] ?? 'Usuario'); ?>
+                            </span>
+                        </div>
+                    </div>
                 </div>
-            <?php endif; ?>
-        </div>
-
-        <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link <?php echo ($current_page == 'index.php' && strpos($_SERVER['REQUEST_URI'], 'dashboard') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>dashboard/index.php">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span class="sidebar-text">Dashboard</span>
-                </a>
-            </li>
-
-            <!-- Menú de Administración (solo para admin) -->
-            <?php if (Auth::isAdmin()): ?>
-                <li class="nav-item mt-3">
-                    <small class="text-white-50 sidebar-text px-3">ADMINISTRACIÓN</small>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'usuarios') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>usuarios/index.php">
-                        <i class="fas fa-users-cog"></i>
-                        <span class="sidebar-text">Usuarios</span>
-                    </a>
-                    <!-- Cierre de Caja (solo para admin) -->
-                </li>
-            <?php endif; ?>
-
-            <?php if (Auth::canAccessCierreCaja()): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'cierres-caja') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>cierres-caja/index.php">
-                        <i class="fas fa-lock me-2"></i>
-                        <span class="sidebar-text">Cierre de Caja</span>
-                    </a>
-                </li>
-            <?php endif; ?>
-
-            <!-- Menú Principal -->
-            <li class="nav-item mt-3">
-                <small class="text-white-50 sidebar-text px-3">INVENTARIO</small>
-            </li>
-
-            <!-- Productos (solo para admin) -->
-            <?php if (Auth::canAccessProductos()): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'productos') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>productos/index.php">
-                        <i class="fas fa-box"></i>
-                        <span class="sidebar-text">Productos</span>
-                    </a>
-                </li>
-            <?php endif; ?>
-
-            <!-- Categorías (solo para admin) -->
-            <?php if (Auth::canAccessCategorias()): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'categorias') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>categorias/index.php">
-                        <i class="fas fa-tags"></i>
-                        <span class="sidebar-text">Categorías</span>
-                    </a>
-                </li>
-            <?php endif; ?>
-
-            <!-- Clientes (admin y usuario) -->
-            <?php if (Auth::canAccessClientes()): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'clientes') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>clientes/index.php">
-                        <i class="fas fa-users"></i>
-                        <span class="sidebar-text">Clientes</span>
-                    </a>
-                </li>
-            <?php endif; ?>
-
-            <!-- Ventas (admin y usuario) -->
-            <?php if (Auth::canAccessVentas()): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'ventas') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>ventas/index.php">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="sidebar-text">Ventas</span>
-                    </a>
-                </li>
-            <?php endif; ?>
-
-            <!-- Tasas de Cambio (solo para admin) -->
-            <?php if (Auth::canAccessTasasCambio()): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'tasas-cambio') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>tasas-cambio/index.php">
-                        <i class="fas fa-exchange-alt"></i>
-                        <span class="sidebar-text">Tasas de Cambio</span>
-                    </a>
-                </li>
-            <?php endif; ?>
-
-            <!-- Tipos de Pago (solo para admin) -->
-            <?php if (Auth::canAccessTiposPago()): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'tipos-pago') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>tipos-pago/index.php">
-                        <i class="fas fa-credit-card"></i>
-                        <span class="sidebar-text">Tipos de Pago</span>
-                    </a>
-                </li>
-            <?php endif; ?>
-
-            <!-- Historial Stock (solo para admin) -->
-            <?php if (Auth::canAccessHistorialStock()): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'historial-stock') !== false) ? 'active' : ''; ?>" href="<?php echo $relative_path; ?>historial-stock/index.php">
-                        <i class="fas fa-history"></i>
-                        <span class="sidebar-text">Historial Stock</span>
-                    </a>
-                </li>
-            <?php endif; ?>
-        </ul>
-
-        <div class="mt-5 p-3 border-top border-secondary">
-            <div class="text-white small mb-2">
-                <i class="fas fa-user me-2"></i>
-                <span class="sidebar-text"><?php echo htmlspecialchars($current_user['username'] ?? 'Usuario'); ?></span>
-                <br>
-                <small class="text-white-50 sidebar-text">
-                    <?php
-                    $rol_text = htmlspecialchars($current_user['rol'] ?? 'usuario');
-                    echo ($rol_text === 'admin') ? 'Administrador' : 'Usuario';
-                    ?>
-                </small>
             </div>
-            <a href="<?php echo $relative_path; ?>auth/logout.php" class="btn btn-outline-light btn-sm w-100" onclick="return confirm('¿Estás seguro de que deseas cerrar sesión?')">
-                <i class="fas fa-sign-out-alt me-1"></i> <span class="sidebar-text">Cerrar Sesión</span>
-            </a>
-        </div>
-    </div>
-</nav>
+
+            <div class="content-area">
+                <div class="px-md-4">
+                    <!-- Page Content Start -->
+                    <div class="content-wrapper">
