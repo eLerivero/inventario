@@ -546,3 +546,27 @@
 [2026-03-07 15:53:26] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en D:\wamp64\www\inventario\Views\ventas\ver.php línea 462 
 [2026-03-07 15:53:26] [ERROR] WARNING: Undefined array key "tasa_cambio_utilizada" en D:\wamp64\www\inventario\Views\ventas\ver.php línea 1234 
 [2026-03-12 16:22:30] [ERROR] DEPRECATED: Function strftime() is deprecated since 8.1, use IntlDateFormatter::format() instead en C:\wamp64\www\inventario\Views\ventas\index.php línea 466 
+[2026-03-14 19:18:09] [ERROR] NOTICE: session_start(): Ignoring session_start() because a session is already active (started from C:\wamp64\www\inventario\config\Config.php on line 146) en C:\wamp64\www\inventario\index.php línea 349 
+[2026-03-14 23:18:17] Intento de login - Usuario: admin
+[2026-03-14 23:18:17] Intentando autenticar usuario: admin
+[2026-03-14 23:18:17] AuthController: AuthController inicializado
+[2026-03-14 23:18:17] Username recibido: admin
+[2026-03-14 23:18:17] Password recibido: @dm...
+[2026-03-14 23:18:17] AuthController: Iniciando login para: admin
+[2026-03-14 23:18:17] AuthController: Username recibido: admin
+[2026-03-14 23:18:17] AuthController: Password recibido (primeros 3 chars): @dm...
+[2026-03-14 23:18:17] AuthController: Password completo: @dmin123.
+[2026-03-14 23:18:17] AuthController: Buscando usuario por username: admin
+[2026-03-14 23:18:17] AuthController: Usuario encontrado: {"id":1,"username":"admin","activo":true,"hash_length":60}
+[2026-03-14 23:18:17] AuthController: Hash en BD: $2y$10$xuyfNI4CNFy1YZ7ECE/jp.NV87gbUuFwBnezJZM2wfdck5pQ1Ufd.
+[2026-03-14 23:18:17] AuthController: Password a verificar: @dmin123.
+[2026-03-14 23:18:17] AuthController: Verificando contraseña...
+[2026-03-14 23:18:17] AuthController: === PRUEBA DE VERIFICACIÓN ===
+[2026-03-14 23:18:17] AuthController: password_verify resultado: TRUE
+[2026-03-14 23:18:17] AuthController: ✓ Contraseña verificada correctamente
+[2026-03-14 23:18:17] AuthController: Actualizando último login para usuario ID: 1
+[2026-03-14 23:18:17] AuthController: Login exitoso para: admin
+[2026-03-14 23:18:17] Resultado del login: {"success":true,"user":{"id":1,"username":"admin","nombre":"Administrador","email":"admin@inventario.com","rol":"admin"}}
+[2026-03-14 23:18:17] Login exitoso para usuario: admin
+[2026-03-14 23:18:21] [DEBUG] Todas las categorías obtenidas {"total":4}
+[2026-03-14 23:18:25] [DEBUG] Todas las categorías obtenidas {"total":4}
