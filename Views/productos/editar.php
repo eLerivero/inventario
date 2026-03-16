@@ -4,16 +4,13 @@ require_once '../../Controllers/ProductoController.php';
 require_once '../../Controllers/CategoriaController.php';
 require_once '../../Controllers/TasaCambioController.php';
 require_once '../../Config/Database.php';
-
 require_once __DIR__ . '/../../Utils/Auth.php';
-
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 // Verificar acceso específico a productos (solo admin)
 Auth::requireAccessToProductos();
-
 
 $database = new Database();
 $db = $database->getConnection();
@@ -28,6 +25,7 @@ $tasaActual = $tasaController->obtenerTasaActual();
 $mensaje = '';
 $tipoMensaje = '';
 $producto = null;
+$stockOriginal = 0;
 
 $producto_id = $_GET['id'] ?? null;
 
@@ -38,7 +36,6 @@ if (!$producto_id) {
     $result = $productoController->obtener($producto_id);
     if ($result['success']) {
         $producto = $result['data'];
-        // Guardar stock original para comparaciones
         $stockOriginal = $producto['stock_actual'];
     } else {
         $mensaje = $result['message'];
@@ -54,16 +51,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $producto) {
             'descripcion' => trim($_POST['descripcion'] ?? ''),
             'precio' => floatval($_POST['precio'] ?? 0),
             'precio_bs' => floatval($_POST['precio_bs'] ?? 0),
+            'precio_por_kilo_usd' => floatval($_POST['precio_por_kilo_usd'] ?? 0),
+            'precio_por_kilo_bs' => floatval($_POST['precio_por_kilo_bs'] ?? 0),
             'precio_costo' => floatval($_POST['precio_costo'] ?? 0),
             'precio_costo_bs' => floatval($_POST['precio_costo_bs'] ?? 0),
             'usar_precio_fijo_bs' => isset($_POST['usar_precio_fijo_bs']) ? true : false,
-            'stock_actual' => intval($_POST['stock_actual'] ?? 0),
-            'stock_minimo' => intval($_POST['stock_minimo'] ?? 0),
-            'categoria_id' => $_POST['categoria_id'] ?? null,
+            'stock_actual' => floatval($_POST['stock_actual'] ?? 0),
+            'stock_minimo' => floatval($_POST['stock_minimo'] ?? 0),
+            'categoria_id' => $_POST['categoria_id'] ? intval($_POST['categoria_id']) : null,
             'activo' => isset($_POST['activo']) ? true : false
         ];
 
-        // Validaciones
+        // Validaciones básicas
         if (empty($data['nombre'])) {
             throw new Exception("El nombre del producto es obligatorio");
         }
@@ -72,14 +71,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $producto) {
             throw new Exception("El stock no puede ser negativo");
         }
 
-        // Validación de precios según configuración
-        if ($data['usar_precio_fijo_bs']) {
-            if ($data['precio_bs'] <= 0) {
-                throw new Exception("Para precio fijo, el precio en Bs debe ser mayor a 0");
+        // Validaciones según tipo de venta
+        $tipo_venta = $producto['tipo_venta'] ?? 'unidad';
+
+        if ($tipo_venta === 'peso') {
+            if (isset($data['precio_por_kilo_usd']) && $data['precio_por_kilo_usd'] <= 0) {
+                throw new Exception("El precio por kilo en USD debe ser mayor a 0");
+            }
+
+            if ($data['usar_precio_fijo_bs'] && isset($data['precio_por_kilo_bs']) && $data['precio_por_kilo_bs'] <= 0) {
+                throw new Exception("Para precio fijo, el precio por kilo en Bs debe ser mayor a 0");
             }
         } else {
-            if ($data['precio'] <= 0) {
-                throw new Exception("El precio en USD debe ser mayor a 0");
+            if ($data['usar_precio_fijo_bs']) {
+                if ($data['precio_bs'] <= 0) {
+                    throw new Exception("Para precio fijo, el precio en Bs debe ser mayor a 0");
+                }
+            } else {
+                if ($data['precio'] <= 0) {
+                    throw new Exception("El precio en USD debe ser mayor a 0");
+                }
             }
         }
 
@@ -93,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $producto) {
             $result = $productoController->obtener($producto_id);
             if ($result['success']) {
                 $producto = $result['data'];
-                $stockOriginal = $producto['stock_actual']; // Actualizar stock original
+                $stockOriginal = $producto['stock_actual'];
             }
 
             // Redirigir después de 2 segundos
@@ -113,7 +124,6 @@ require_once '../layouts/header.php';
 ?>
 
 <div class="content-wrapper crear-producto-content">
-
     <!-- Header de la página -->
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 class="h2">
@@ -149,7 +159,11 @@ require_once '../layouts/header.php';
         </div>
     <?php endif; ?>
 
-    <?php if ($producto): ?>
+    <?php if ($producto):
+        $tipo_venta = $producto['tipo_venta'] ?? 'unidad';
+        $unidad_medida = $producto['unidad_medida'] ?? 'kg';
+        $es_precio_fijo = isset($producto['usar_precio_fijo_bs']) && $producto['usar_precio_fijo_bs'] == 1;
+    ?>
         <!-- Alertas de éxito/error después de enviar el formulario -->
         <?php if ($mensaje): ?>
             <div class="alert alert-<?php echo $tipoMensaje; ?> alert-dismissible fade show" role="alert">
@@ -180,7 +194,13 @@ require_once '../layouts/header.php';
                     </div>
                     <div class="col-md-3">
                         <strong><i class="fas fa-boxes me-1"></i>Stock Actual:</strong>
-                        <p class="mb-2"><?php echo htmlspecialchars($producto['stock_actual']); ?> unidades</p>
+                        <p class="mb-2">
+                            <?php if ($tipo_venta === 'peso'): ?>
+                                <?php echo number_format($producto['stock_actual'], 2); ?> <?php echo $unidad_medida; ?>
+                            <?php else: ?>
+                                <?php echo intval($producto['stock_actual']); ?> unidades
+                            <?php endif; ?>
+                        </p>
                     </div>
                     <div class="col-md-3">
                         <strong><i class="fas fa-calendar me-1"></i>Creado:</strong>
@@ -189,6 +209,20 @@ require_once '../layouts/header.php';
                     <div class="col-md-3">
                         <strong><i class="fas fa-sync-alt me-1"></i>Actualizado:</strong>
                         <p class="mb-2"><?php echo date('d/m/Y H:i', strtotime($producto['updated_at'])); ?></p>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-12">
+                        <strong><i class="fas fa-balance-scale me-1"></i>Tipo de Venta:</strong>
+                        <?php if ($tipo_venta === 'peso'): ?>
+                            <span class="badge bg-info">Por Peso (<?php echo $unidad_medida; ?>)</span>
+                        <?php else: ?>
+                            <span class="badge bg-secondary">Por Unidad</span>
+                        <?php endif; ?>
+
+                        <?php if ($es_precio_fijo): ?>
+                            <span class="badge bg-warning ms-2"><i class="fas fa-lock me-1"></i>Precio Fijo en Bs</span>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -216,8 +250,7 @@ require_once '../layouts/header.php';
                                     name="nombre"
                                     value="<?php echo htmlspecialchars($_POST['nombre'] ?? $producto['nombre']); ?>"
                                     required
-                                    maxlength="255"
-                                    placeholder="Ej: Laptop Dell Inspiron 15">
+                                    maxlength="255">
                                 <?php if (isset($_POST['nombre']) && empty($_POST['nombre'])): ?>
                                     <div class="invalid-feedback">
                                         El nombre del producto es obligatorio.
@@ -248,237 +281,334 @@ require_once '../layouts/header.php';
                             id="descripcion"
                             name="descripcion"
                             rows="3"
-                            maxlength="500"
-                            placeholder="Describe las características del producto..."><?php echo htmlspecialchars($_POST['descripcion'] ?? $producto['descripcion']); ?></textarea>
+                            maxlength="500"><?php echo htmlspecialchars($_POST['descripcion'] ?? $producto['descripcion']); ?></textarea>
                         <div class="form-text">
                             Máximo 500 caracteres.
                             <span id="charCount" class="char-counter-info"><?php echo strlen($_POST['descripcion'] ?? $producto['descripcion']); ?></span>/500
                         </div>
                     </div>
 
-                    <!-- Configuración de Precio Fijo -->
+                    <?php if ($tipo_venta === 'peso'): ?>
+                        <!-- SECCIÓN PARA PRODUCTOS POR PESO -->
+                        <div class="card mb-3 border-info">
+                            <div class="card-header bg-info text-white">
+                                <i class="fas fa-weight me-2"></i>Configuración para Venta por Peso
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">
+                                                <i class="fas fa-ruler me-1"></i>Unidad de Medida
+                                            </label>
+                                            <select class="form-select" name="unidad_medida" id="unidad_medida">
+                                                <option value="kg" <?php echo (($producto['unidad_medida'] ?? 'kg') === 'kg') ? 'selected' : ''; ?>>Kilogramos (kg)</option>
+                                                <option value="g" <?php echo (($producto['unidad_medida'] ?? '') === 'g') ? 'selected' : ''; ?>>Gramos (g)</option>
+                                                <option value="lb" <?php echo (($producto['unidad_medida'] ?? '') === 'lb') ? 'selected' : ''; ?>>Libras (lb)</option>
+                                            </select>
+                                            <div class="form-text">Unidad base para mostrar en la interfaz</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">
+                                                <i class="fas fa-dollar-sign me-1"></i>Precio por Kilo (USD) <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number"
+                                                    class="form-control"
+                                                    name="precio_por_kilo_usd"
+                                                    id="precio_por_kilo_usd"
+                                                    value="<?php echo number_format($_POST['precio_por_kilo_usd'] ?? ($producto['precio_por_kilo_usd'] ?? $producto['precio']), 2, '.', ''); ?>"
+                                                    min="0"
+                                                    step="0.01"
+                                                    placeholder="0.00"
+                                                    required
+                                                    onchange="calcularPrecioPorKiloBs()">
+                                            </div>
+                                            <div class="form-text">Precio de venta por kilogramo en USD</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">
+                                                <i class="fas fa-money-bill-wave me-1"></i>Precio por Kilo (Bs)
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">Bs</span>
+                                                <input type="number"
+                                                    class="form-control"
+                                                    name="precio_por_kilo_bs"
+                                                    id="precio_por_kilo_bs"
+                                                    value="<?php echo number_format($_POST['precio_por_kilo_bs'] ?? ($producto['precio_por_kilo_bs'] ?? $producto['precio_bs']), 2, '.', ''); ?>"
+                                                    min="0"
+                                                    step="0.01"
+                                                    placeholder="0.00"
+                                                    <?php echo $es_precio_fijo ? '' : 'readonly'; ?>>
+                                            </div>
+                                            <small class="text-muted" id="info_precio_kilo_bs">
+                                                <?php if ($es_precio_fijo): ?>
+                                                    Precio fijo - puedes editarlo manualmente
+                                                <?php else: ?>
+                                                    Se calcula automáticamente con la tasa de cambio
+                                                <?php endif; ?>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- STOCK PARA PRODUCTOS POR PESO -->
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">
+                                                <i class="fas fa-weight me-1"></i>Stock Actual (<?php echo $unidad_medida; ?>) *
+                                            </label>
+                                            <div class="input-group">
+                                                <input type="number"
+                                                    class="form-control"
+                                                    id="stock_actual_peso"
+                                                    name="stock_actual"
+                                                    value="<?php echo number_format($_POST['stock_actual'] ?? $producto['stock_actual'], 3, '.', ''); ?>"
+                                                    min="0"
+                                                    step="0.001"
+                                                    placeholder="0.000"
+                                                    required>
+                                                <span class="input-group-text"><?php echo $unidad_medida; ?></span>
+                                            </div>
+                                            <div class="form-text">Cantidad disponible en <?php echo $unidad_medida; ?></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>Stock Mínimo (<?php echo $unidad_medida; ?>)
+                                            </label>
+                                            <div class="input-group">
+                                                <input type="number"
+                                                    class="form-control"
+                                                    id="stock_minimo_peso"
+                                                    name="stock_minimo"
+                                                    value="<?php echo number_format($_POST['stock_minimo'] ?? $producto['stock_minimo'], 3, '.', ''); ?>"
+                                                    min="0"
+                                                    step="0.001"
+                                                    placeholder="2.000">
+                                                <span class="input-group-text"><?php echo $unidad_medida; ?></span>
+                                            </div>
+                                            <div class="form-text">Alerta cuando el stock llegue a este nivel</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Switch de Precio Fijo -->
+                                <div class="row mt-3">
+                                    <div class="col-md-12">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input"
+                                                type="checkbox"
+                                                id="usar_precio_fijo_bs"
+                                                name="usar_precio_fijo_bs"
+                                                value="1"
+                                                <?php echo $es_precio_fijo ? 'checked' : ''; ?>
+                                                onchange="togglePrecioFijoPeso()">
+                                            <label class="form-check-label" for="usar_precio_fijo_bs">
+                                                Usar precio fijo en Bolívares para este producto
+                                            </label>
+                                        </div>
+                                        <div class="form-text">
+                                            Cuando está activado, el precio por kilo en Bs no cambiará con la tasa de cambio.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <!-- SECCIÓN PARA PRODUCTOS POR UNIDAD (original) -->
+                        <!-- Configuración de Precio Fijo -->
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="usar_precio_fijo_bs" class="form-label">
+                                        <i class="fas fa-lock me-1"></i>Configuración de Precio en Bolívares
+                                    </label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input"
+                                            type="checkbox"
+                                            id="usar_precio_fijo_bs"
+                                            name="usar_precio_fijo_bs"
+                                            value="1"
+                                            <?php echo $es_precio_fijo ? 'checked' : ''; ?>
+                                            onchange="togglePrecioFijoUnidad()">
+                                        <label class="form-check-label" for="usar_precio_fijo_bs">
+                                            Usar precio fijo en Bolívares
+                                        </label>
+                                    </div>
+                                    <div class="form-text">
+                                        Cuando está activado, el precio en Bs no cambiará con la tasa de cambio y los campos USD serán opcionales.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3" id="precio-fijo-container" style="<?php echo $es_precio_fijo ? 'display: block;' : 'display: none;'; ?>">
+                                    <label for="precio_bs" class="form-label">
+                                        <i class="fas fa-money-bill-wave me-1"></i>Precio Fijo en Bolívares <span class="text-danger precio-bs-required">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Bs</span>
+                                        <input type="number"
+                                            class="form-control"
+                                            id="precio_bs"
+                                            name="precio_bs"
+                                            value="<?php echo number_format($_POST['precio_bs'] ?? $producto['precio_bs'], 2, '.', ''); ?>"
+                                            step="0.01"
+                                            min="0"
+                                            placeholder="Precio fijo en Bs"
+                                            onchange="calcularPreciosYMargenes()">
+                                    </div>
+                                    <div class="form-text">Este precio no se actualizará automáticamente con la tasa de cambio</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección de Precios -->
+                        <div class="row">
+                            <!-- Campo Precio de Venta (USD) -->
+                            <div class="col-md-4" id="precio-usd-container" style="<?php echo $es_precio_fijo ? 'display: none;' : 'display: block;'; ?>">
+                                <div class="mb-3">
+                                    <label for="precio" class="form-label">
+                                        <i class="fas fa-dollar-sign me-1"></i>Precio de Venta (USD) <span id="precioRequired" class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number"
+                                            class="form-control precio-usd"
+                                            id="precio"
+                                            name="precio"
+                                            value="<?php echo number_format($_POST['precio'] ?? $producto['precio'], 2, '.', ''); ?>"
+                                            min="0"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            onchange="calcularPreciosYMargenes()">
+                                    </div>
+                                    <div class="form-text">Precio de venta al público en USD</div>
+                                </div>
+                            </div>
+
+                            <!-- Campo Precio de Costo (USD) -->
+                            <div class="col-md-4" id="precio-costo-usd-container" style="<?php echo $es_precio_fijo ? 'display: none;' : 'display: block;'; ?>">
+                                <div class="mb-3">
+                                    <label for="precio_costo" class="form-label">
+                                        <i class="fas fa-receipt me-1"></i>Precio de Costo (USD)
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number"
+                                            class="form-control precio-usd"
+                                            id="precio_costo"
+                                            name="precio_costo"
+                                            value="<?php echo number_format($_POST['precio_costo'] ?? $producto['precio_costo'], 2, '.', ''); ?>"
+                                            min="0"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            onchange="calcularPreciosYMargenes()">
+                                    </div>
+                                    <div class="form-text">Precio de compra al proveedor en USD</div>
+                                </div>
+                            </div>
+
+                            <!-- Campo Precio de Costo (Bs) - solo visible para precio fijo -->
+                            <div class="col-md-4" id="precio-costo-bs-container" style="<?php echo $es_precio_fijo ? 'display: block;' : 'display: none;'; ?>">
+                                <div class="mb-3">
+                                    <label for="precio_costo_bs" class="form-label">
+                                        <i class="fas fa-money-bill-wave me-1"></i>Precio de Costo (Bs)
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Bs</span>
+                                        <input type="number"
+                                            class="form-control"
+                                            id="precio_costo_bs"
+                                            name="precio_costo_bs"
+                                            value="<?php echo number_format($_POST['precio_costo_bs'] ?? $producto['precio_costo_bs'], 2, '.', ''); ?>"
+                                            min="0"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            onchange="calcularPreciosYMargenes()">
+                                    </div>
+                                    <div class="form-text">Costo en bolívares (solo para precio fijo)</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-calculator me-1"></i>Precio Actual en Bolívares
+                                    </label>
+                                    <div class="card bg-light">
+                                        <div class="card-body py-2">
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <small class="text-muted">Venta:</small><br>
+                                                    <strong id="precioBsCalculado" class="text-success">Bs <?php echo number_format($producto['precio_bs'], 2); ?></strong>
+                                                </div>
+                                                <div class="col-6">
+                                                    <small class="text-muted">Costo:</small><br>
+                                                    <strong id="precioCostoBsCalculado" class="text-muted">Bs <?php echo number_format($producto['precio_costo_bs'], 2); ?></strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STOCK PARA PRODUCTOS POR UNIDAD -->
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="stock_actual_unidad" class="form-label">
+                                        <i class="fas fa-boxes me-1"></i>Stock Actual (unidades) *
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="number"
+                                            class="form-control"
+                                            id="stock_actual_unidad"
+                                            name="stock_actual"
+                                            value="<?php echo intval($_POST['stock_actual'] ?? $producto['stock_actual']); ?>"
+                                            min="0"
+                                            step="1"
+                                            placeholder="0"
+                                            required>
+                                        <span class="input-group-text">und</span>
+                                    </div>
+                                    <div class="form-text">Cantidad disponible en unidades</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="stock_minimo_unidad" class="form-label">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Stock Mínimo
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="number"
+                                            class="form-control"
+                                            id="stock_minimo_unidad"
+                                            name="stock_minimo"
+                                            value="<?php echo intval($_POST['stock_minimo'] ?? $producto['stock_minimo']); ?>"
+                                            min="0"
+                                            step="1"
+                                            placeholder="5">
+                                        <span class="input-group-text">und</span>
+                                    </div>
+                                    <div class="form-text">Alerta cuando el stock llegue a este nivel</div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- Categoría (común para ambos tipos) -->
                     <div class="row mt-3">
                         <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="usar_precio_fijo_bs" class="form-label">
-                                    <i class="fas fa-lock me-1"></i>Configuración de Precio en Bolívares
-                                </label>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input"
-                                        type="checkbox"
-                                        id="usar_precio_fijo_bs"
-                                        name="usar_precio_fijo_bs"
-                                        value="1"
-                                        <?php echo (isset($_POST['usar_precio_fijo_bs']) ? $_POST['usar_precio_fijo_bs'] : $producto['usar_precio_fijo_bs']) ? 'checked' : ''; ?>
-                                        onchange="togglePrecioFijo()">
-                                    <label class="form-check-label" for="usar_precio_fijo_bs">
-                                        Usar precio fijo en Bolívares
-                                    </label>
-                                </div>
-                                <div class="form-text">
-                                    Cuando está activado, el precio en Bs no cambiará con la tasa de cambio y los campos USD serán opcionales.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="mb-3" id="precio-fijo-container" style="<?php echo $producto['usar_precio_fijo_bs'] ? 'display: block;' : 'display: none;'; ?>">
-                                <label for="precio_bs" class="form-label">
-                                    <i class="fas fa-money-bill-wave me-1"></i>Precio Fijo en Bolívares <span class="text-danger precio-bs-required">*</span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">Bs</span>
-                                    <input type="number"
-                                        class="form-control <?php echo isset($_POST['precio_bs']) && (empty($_POST['precio_bs']) || $_POST['precio_bs'] <= 0) ? 'is-invalid' : ''; ?>"
-                                        id="precio_bs"
-                                        name="precio_bs"
-                                        value="<?php echo number_format($_POST['precio_bs'] ?? $producto['precio_bs'], 2, '.', ''); ?>"
-                                        step="0.01"
-                                        min="0"
-                                        placeholder="Precio fijo en Bs"
-                                        onchange="calcularPreciosYMargenes()">
-                                    <?php if (isset($_POST['precio_bs']) && (empty($_POST['precio_bs']) || $_POST['precio_bs'] <= 0)): ?>
-                                        <div class="invalid-feedback">
-                                            El precio fijo en Bs debe ser mayor a 0.
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="form-text">Este precio no se actualizará automáticamente con la tasa de cambio</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sección de Precios -->
-                    <div class="row">
-                        <!-- Campo Precio de Venta (USD) -->
-                        <div class="col-md-4" id="precio-usd-container" style="<?php echo $producto['usar_precio_fijo_bs'] ? 'display: none;' : 'display: block;'; ?>">
-                            <div class="mb-3">
-                                <label for="precio" class="form-label">
-                                    <i class="fas fa-dollar-sign me-1"></i>Precio de Venta (USD) <span id="precioRequired" class="text-danger">*</span>
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input type="number"
-                                        class="form-control precio-usd <?php echo isset($_POST['precio']) && (empty($_POST['precio']) || $_POST['precio'] <= 0) ? 'is-invalid' : ''; ?>"
-                                        id="precio"
-                                        name="precio"
-                                        value="<?php echo number_format($_POST['precio'] ?? $producto['precio'], 2, '.', ''); ?>"
-                                        min="0"
-                                        step="0.01"
-                                        placeholder="0.00"
-                                        onchange="calcularPreciosYMargenes()">
-                                    <?php if (isset($_POST['precio']) && (empty($_POST['precio']) || $_POST['precio'] <= 0)): ?>
-                                        <div class="invalid-feedback">
-                                            El precio debe ser mayor a 0.
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="form-text">Precio de venta al público en USD</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Campo Precio de Costo (USD) -->
-                        <div class="col-md-4" id="precio-costo-usd-container" style="<?php echo $producto['usar_precio_fijo_bs'] ? 'display: none;' : 'display: block;'; ?>">
-                            <div class="mb-3">
-                                <label for="precio_costo" class="form-label">
-                                    <i class="fas fa-receipt me-1"></i>Precio de Costo (USD)
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input type="number"
-                                        class="form-control precio-usd"
-                                        id="precio_costo"
-                                        name="precio_costo"
-                                        value="<?php echo number_format($_POST['precio_costo'] ?? $producto['precio_costo'], 2, '.', ''); ?>"
-                                        min="0"
-                                        step="0.01"
-                                        placeholder="0.00"
-                                        onchange="calcularPreciosYMargenes()">
-                                </div>
-                                <div class="form-text">Precio de compra al proveedor en USD</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Campo Precio de Costo (Bs) - solo visible para precio fijo -->
-                        <div class="col-md-4" id="precio-costo-bs-container" style="<?php echo $producto['usar_precio_fijo_bs'] ? 'display: block;' : 'display: none;'; ?>">
-                            <div class="mb-3">
-                                <label for="precio_costo_bs" class="form-label">
-                                    <i class="fas fa-money-bill-wave me-1"></i>Precio de Costo (Bs)
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">Bs</span>
-                                    <input type="number"
-                                        class="form-control"
-                                        id="precio_costo_bs"
-                                        name="precio_costo_bs"
-                                        value="<?php echo number_format($_POST['precio_costo_bs'] ?? $producto['precio_costo_bs'], 2, '.', ''); ?>"
-                                        min="0"
-                                        step="0.01"
-                                        placeholder="0.00"
-                                        onchange="calcularPreciosYMargenes()">
-                                </div>
-                                <div class="form-text">Costo en bolívares (solo para precio fijo)</div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">
-                                    <i class="fas fa-calculator me-1"></i>Precio Actual en Bolívares
-                                </label>
-                                <div class="card bg-light">
-                                    <div class="card-body py-2">
-                                        <div class="row">
-                                            <div class="col-6">
-                                                <small class="text-muted">Venta:</small><br>
-                                                <strong id="precioBsCalculado" class="text-success">Bs <?php echo number_format($producto['precio_bs'], 2, ',', '.'); ?></strong>
-                                            </div>
-                                            <div class="col-6">
-                                                <small class="text-muted">Costo:</small><br>
-                                                <strong id="precioCostoBsCalculado" class="text-muted">Bs <?php echo number_format($producto['precio_costo_bs'], 2, ',', '.'); ?></strong>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Información de Margen -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="card bg-light">
-                                <div class="card-body py-3">
-                                    <div class="row text-center">
-                                        <div class="col-md-4">
-                                            <small class="text-muted">Margen de Ganancia</small>
-                                            <div>
-                                                <span id="margenGanancia" class="badge bg-info">0%</span>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <small class="text-muted">Ganancia por Unidad (USD)</small>
-                                            <div>
-                                                <strong id="gananciaNetaUSD">$0.00</strong>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <small class="text-muted">Ganancia por Unidad (Bs)</small>
-                                            <div>
-                                                <strong id="gananciaNetaBS">Bs 0.00</strong>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sección de Stock -->
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="stock_minimo" class="form-label">
-                                    <i class="fas fa-exclamation-triangle me-1"></i>Stock Mínimo
-                                </label>
-                                <input type="number"
-                                    class="form-control"
-                                    id="stock_minimo"
-                                    name="stock_minimo"
-                                    value="<?php echo htmlspecialchars($_POST['stock_minimo'] ?? $producto['stock_minimo']); ?>"
-                                    min="0"
-                                    step="1"
-                                    placeholder="5">
-                                <div class="form-text">Alerta cuando el stock llegue a este nivel</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="stock_actual" class="form-label">
-                                    <i class="fas fa-boxes me-1"></i>Stock Actual *
-                                </label>
-                                <input type="number"
-                                    class="form-control <?php echo isset($_POST['stock_actual']) && $_POST['stock_actual'] < 0 ? 'is-invalid' : ''; ?>"
-                                    id="stock_actual"
-                                    name="stock_actual"
-                                    value="<?php echo htmlspecialchars($_POST['stock_actual'] ?? $producto['stock_actual']); ?>"
-                                    required
-                                    min="0"
-                                    step="1"
-                                    placeholder="0"
-                                    onchange="validarStock()">
-                                <?php if (isset($_POST['stock_actual']) && $_POST['stock_actual'] < 0): ?>
-                                    <div class="invalid-feedback">
-                                        El stock no puede ser negativo.
-                                    </div>
-                                <?php endif; ?>
-                                <div class="form-text">
-                                    <i class="fas fa-info-circle me-1"></i>
-                                    Cantidad actual disponible en inventario.
-                                    <span id="cambioStockInfo" class="text-muted"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="categoria_id" class="form-label">
                                     <i class="fas fa-tags me-1"></i>Categoría
@@ -495,9 +625,6 @@ require_once '../layouts/header.php';
                                 <div class="form-text">Asigna una categoría al producto</div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="activo" class="form-label">
@@ -519,6 +646,44 @@ require_once '../layouts/header.php';
                         </div>
                     </div>
 
+                    <!-- Información de Margen (solo para productos por unidad) -->
+                    <?php if ($tipo_venta !== 'peso'): ?>
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card bg-light">
+                                    <div class="card-body py-3">
+                                        <div class="row text-center">
+                                            <div class="col-md-4">
+                                                <small class="text-muted">Margen de Ganancia</small>
+                                                <div>
+                                                    <span id="margenGanancia" class="badge bg-info">0%</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted">Ganancia por Unidad (USD)</small>
+                                                <div>
+                                                    <strong id="gananciaNetaUSD">$0.00</strong>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <small class="text-muted">Ganancia por Unidad (Bs)</small>
+                                                <div>
+                                                    <strong id="gananciaNetaBS">Bs 0.00</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <!-- Información para productos por peso -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Producto por peso:</strong> El margen se calcula por kilogramo en el módulo de ventas.
+                        </div>
+                    <?php endif; ?>
+
                     <div class="row">
                         <div class="col-12">
                             <button type="submit" class="btn btn-primary">
@@ -527,411 +692,230 @@ require_once '../layouts/header.php';
                             <a href="index.php" class="btn btn-secondary">
                                 <i class="fas fa-times me-1"></i> Cancelar
                             </a>
-                            <button type="button" class="btn btn-outline-info" onclick="limpiarFormulario()">
-                                <i class="fas fa-broom me-1"></i> Restaurar Valores
-                            </button>
-                            <a href="javascript:void(0)" class="btn btn-outline-danger float-end" onclick="confirmarEliminacion()">
-                                <i class="fas fa-trash me-1"></i> Eliminar Producto
-                            </a>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
-
     <?php endif; ?>
 </div>
 
 <script>
-    // Variables globales
     let tasaActual = <?php echo $tasaActual['success'] ? $tasaActual['data']['tasa_cambio'] : 36.5; ?>;
-    let productoOriginal = <?php echo json_encode($producto ?? []); ?>;
-    let stockOriginal = <?php echo $stockOriginal ?? 0; ?>;
+    let tipoVenta = '<?php echo $tipo_venta ?? 'unidad'; ?>';
+    let esPrecioFijo = <?php echo ($es_precio_fijo ?? false) ? 'true' : 'false'; ?>;
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const descripcion = document.getElementById('descripcion');
-        const charCount = document.getElementById('charCount');
+    // Función para toggle de precio fijo en productos por peso
+    function togglePrecioFijoPeso() {
+        const usarPrecioFijo = document.getElementById('usar_precio_fijo_bs').checked;
+        const precioKiloBs = document.getElementById('precio_por_kilo_bs');
+        const infoPrecio = document.getElementById('info_precio_kilo_bs');
 
-        // Contador de caracteres
-        descripcion.addEventListener('input', function() {
-            const length = this.value.length;
-            charCount.textContent = length;
+        if (usarPrecioFijo) {
+            precioKiloBs.readOnly = false;
+            infoPrecio.innerHTML = 'Precio fijo - puedes editarlo manualmente';
 
-            if (length > 450) {
-                charCount.className = 'char-counter-warning';
-            } else if (length > 400) {
-                charCount.className = 'text-warning';
-            } else {
-                charCount.className = 'char-counter-info';
+            if (!precioKiloBs.value || precioKiloBs.value == '0' || precioKiloBs.value == '0.00') {
+                const precioUSD = parseFloat(document.getElementById('precio_por_kilo_usd').value) || 0;
+                precioKiloBs.value = (precioUSD * tasaActual).toFixed(2);
             }
-        });
-
-        // Calcular márgenes inicialmente
-        calcularPreciosYMargenes();
-        
-        // Validar stock inicialmente
-        validarStock();
-
-        // Configurar toggle de precio fijo
-        const usarPrecioFijoCheckbox = document.getElementById('usar_precio_fijo_bs');
-        if (usarPrecioFijoCheckbox) {
-            usarPrecioFijoCheckbox.addEventListener('change', togglePrecioFijo);
+        } else {
+            precioKiloBs.readOnly = true;
+            infoPrecio.innerHTML = 'Se calcula automáticamente con la tasa de cambio';
+            calcularPrecioPorKiloBs();
         }
+    }
 
-        // Validación del formulario
-        const form = document.getElementById('formProducto');
-        const nombreInput = document.getElementById('nombre');
-        const precioInput = document.getElementById('precio');
-        const precioBsInput = document.getElementById('precio_bs');
-        const stockInput = document.getElementById('stock_actual');
-
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const nombre = nombreInput.value.trim();
-            const precioVal = parseFloat(precioInput.value);
-            const stockVal = parseInt(stockInput.value);
-            const usarPrecioFijo = document.getElementById('usar_precio_fijo_bs')?.checked || false;
-            const precioBsVal = parseFloat(precioBsInput.value);
-            
-            let isValid = true;
-            let errorMessage = '';
-
-            // Limpiar validaciones anteriores
-            nombreInput.classList.remove('is-invalid', 'is-valid');
-            precioInput.classList.remove('is-invalid', 'is-valid');
-            precioBsInput.classList.remove('is-invalid', 'is-valid');
-            stockInput.classList.remove('is-invalid', 'is-valid');
-
-            // Validación del nombre
-            if (!nombre) {
-                nombreInput.classList.add('is-invalid');
-                isValid = false;
-                errorMessage = 'El nombre del producto es obligatorio.';
-            }
-
-            // Validación del stock
-            if (isNaN(stockVal) || stockVal < 0) {
-                stockInput.classList.add('is-invalid');
-                isValid = false;
-                errorMessage = errorMessage || 'El stock debe ser un número positivo o cero.';
-            }
-
-            // Validación según tipo de precio
-            if (usarPrecioFijo) {
-                if (isNaN(precioBsVal) || precioBsVal <= 0) {
-                    precioBsInput.classList.add('is-invalid');
-                    isValid = false;
-                    errorMessage = errorMessage || 'Para precio fijo, el precio en Bs debe ser mayor a 0.';
-                }
-            } else {
-                if (isNaN(precioVal) || precioVal <= 0) {
-                    precioInput.classList.add('is-invalid');
-                    isValid = false;
-                    errorMessage = errorMessage || 'El precio en USD debe ser mayor a 0.';
-                }
-            }
-
-            if (!isValid) {
-                showToast('error', errorMessage || 'Por favor, completa todos los campos obligatorios correctamente.');
-                return false;
-            }
-
-            // Mostrar confirmación
-            if (confirm('¿Estás seguro de que deseas actualizar este producto?')) {
-                // Mostrar indicador de carga
-                const submitBtn = form.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Actualizando...';
-                
-                // Enviar formulario
-                form.submit();
-                
-                // Restaurar botón después de 3 segundos (por si hay error)
-                setTimeout(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                }, 3000);
-            }
-        });
-
-        // Validación en tiempo real
-        nombreInput.addEventListener('input', function() {
-            if (this.value.trim()) {
-                this.classList.remove('is-invalid');
-                this.classList.add('is-valid');
-            } else {
-                this.classList.remove('is-valid');
-            }
-        });
-
-        precioInput.addEventListener('input', function() {
-            const valor = parseFloat(this.value);
-            if (valor && valor > 0) {
-                this.classList.remove('is-invalid');
-                this.classList.add('is-valid');
-            } else {
-                this.classList.remove('is-valid');
-            }
-            calcularPreciosYMargenes();
-        });
-
-        stockInput.addEventListener('input', function() {
-            validarStock();
-        });
-    });
-
-    function togglePrecioFijo() {
+    // Función para toggle de precio fijo en productos por unidad
+    function togglePrecioFijoUnidad() {
         const usarPrecioFijo = document.getElementById('usar_precio_fijo_bs').checked;
         const precioBsContainer = document.getElementById('precio-fijo-container');
-        const precioCostoBsContainer = document.getElementById('precio-costo-bs-container');
         const precioUSDContainer = document.getElementById('precio-usd-container');
         const precioCostoUSDContainer = document.getElementById('precio-costo-usd-container');
+        const precioCostoBsContainer = document.getElementById('precio-costo-bs-container');
         const precioBsInput = document.getElementById('precio_bs');
-        const precioCostoBsInput = document.getElementById('precio_costo_bs');
-        const precioUSDInput = document.getElementById('precio');
-        const precioCostoUSDInput = document.getElementById('precio_costo');
         const precioRequiredLabel = document.getElementById('precioRequired');
 
         if (usarPrecioFijo) {
             precioBsContainer.style.display = 'block';
-            precioCostoBsContainer.style.display = 'block';
-            
-            // Ocultar campos USD
             precioUSDContainer.style.display = 'none';
             precioCostoUSDContainer.style.display = 'none';
-            
-            // Para precio fijo, los campos en USD no son obligatorios
-            precioUSDInput.required = false;
-            precioCostoUSDInput.required = false;
-            
-            // Mostrar validación para precio_bs
-            precioBsInput.required = true;
-            precioCostoBsInput.required = false;
-            
-            // Ocultar asterisco rojo en precio USD
+            if (precioCostoBsContainer) precioCostoBsContainer.style.display = 'block';
+
             if (precioRequiredLabel) {
                 precioRequiredLabel.style.display = 'none';
             }
 
-            // Si no hay valor en precio_bs, calcular basado en precio USD actual
             if (!precioBsInput.value || precioBsInput.value == '0' || precioBsInput.value == '0.00') {
-                const precioUSD = parseFloat(precioUSDInput.value) || 0;
+                const precioUSD = parseFloat(document.getElementById('precio').value) || 0;
                 precioBsInput.value = (precioUSD * tasaActual).toFixed(2);
             }
         } else {
             precioBsContainer.style.display = 'none';
-            precioCostoBsContainer.style.display = 'none';
-            
-            // Mostrar campos USD
             precioUSDContainer.style.display = 'block';
             precioCostoUSDContainer.style.display = 'block';
-            
-            // Para precio NO fijo, el precio USD es obligatorio
-            precioUSDInput.required = true;
-            precioCostoUSDInput.required = false;
-            
-            // Quitar requerido de precio_bs
-            precioBsInput.required = false;
-            precioCostoBsInput.required = false;
+            if (precioCostoBsContainer) precioCostoBsContainer.style.display = 'none';
 
-            // Mostrar asterisco rojo en precio USD
             if (precioRequiredLabel) {
                 precioRequiredLabel.style.display = 'inline';
             }
         }
 
-        // Recalcular márgenes
         calcularPreciosYMargenes();
     }
 
-    function calcularPreciosYMargenes() {
-        const usarPrecioFijo = document.getElementById('usar_precio_fijo_bs')?.checked || false;
-        const precioBsInput = document.getElementById('precio_bs');
-        const precioCostoBsInput = document.getElementById('precio_costo_bs');
-        const precioUSDInput = document.getElementById('precio');
-        const precioCostoUSDInput = document.getElementById('precio_costo');
+    function calcularPrecioPorKiloBs() {
+        const precioUsd = parseFloat(document.getElementById('precio_por_kilo_usd')?.value) || 0;
+        const precioFijo = document.getElementById('usar_precio_fijo_bs')?.checked || false;
+        const precioKiloBs = document.getElementById('precio_por_kilo_bs');
 
-        let precioBsCalculado, precioCostoBsCalculado;
-        let precioUSD, precioCostoUSD;
-
-        if (usarPrecioFijo) {
-            // Para precio fijo, usar los valores de los campos
-            precioBsCalculado = parseFloat(precioBsInput.value) || 0;
-            precioCostoBsCalculado = parseFloat(precioCostoBsInput.value) || 0;
-            precioUSD = parseFloat(precioUSDInput.value) || 0;
-            precioCostoUSD = parseFloat(precioCostoUSDInput.value) || 0;
-            
-            // Si no se ingresó costo en Bs pero sí en USD, calcular
-            if (precioCostoBsCalculado === 0 && precioCostoUSD > 0) {
-                precioCostoBsCalculado = precioCostoUSD * tasaActual;
-            }
-            
-            // Si no se ingresó precio en Bs pero sí en USD, calcular
-            if (precioBsCalculado === 0 && precioUSD > 0) {
-                precioBsCalculado = precioUSD * tasaActual;
-                precioBsInput.value = precioBsCalculado.toFixed(2);
-            }
-        } else {
-            // Para precio NO fijo, calcular basado en tasa
-            precioUSD = parseFloat(precioUSDInput.value) || 0;
-            precioCostoUSD = parseFloat(precioCostoUSDInput.value) || 0;
-            precioBsCalculado = precioUSD * tasaActual;
-            precioCostoBsCalculado = precioCostoUSD * tasaActual;
-            
-            // Actualizar campo oculto de precio_bs
-            if (precioBsInput) {
-                precioBsInput.value = precioBsCalculado.toFixed(2);
-            }
-            if (precioCostoBsInput) {
-                precioCostoBsInput.value = precioCostoBsCalculado.toFixed(2);
-            }
-        }
-
-        // Actualizar campos de visualización con formato
-        document.getElementById('precioBsCalculado').textContent = 'Bs ' + precioBsCalculado.toLocaleString('es-VE', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        
-        document.getElementById('precioCostoBsCalculado').textContent = 'Bs ' + precioCostoBsCalculado.toLocaleString('es-VE', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-
-        // Calcular márgenes
-        const gananciaUSD = precioUSD - precioCostoUSD;
-        const gananciaBS = precioBsCalculado - precioCostoBsCalculado;
-        const margen = precioCostoUSD > 0 ? ((gananciaUSD / precioCostoUSD) * 100) : 0;
-
-        // Actualizar información de márgenes
-        document.getElementById('margenGanancia').textContent = margen.toFixed(2) + '%';
-        document.getElementById('gananciaNetaUSD').textContent = '$' + gananciaUSD.toFixed(2);
-        document.getElementById('gananciaNetaBS').textContent = 'Bs ' + gananciaBS.toFixed(2);
-
-        // Cambiar color según el margen
-        const margenElement = document.getElementById('margenGanancia');
-        if (margen < 0) {
-            margenElement.className = 'badge bg-danger';
-        } else if (margen < 10) {
-            margenElement.className = 'badge bg-warning';
-        } else if (margen < 25) {
-            margenElement.className = 'badge bg-info';
-        } else {
-            margenElement.className = 'badge bg-success';
+        if (!precioFijo && precioKiloBs) {
+            precioKiloBs.value = (precioUsd * tasaActual).toFixed(2);
         }
     }
 
-    function validarStock() {
-        const stockInput = document.getElementById('stock_actual');
-        const stockVal = parseInt(stockInput.value);
-        const cambioStockInfo = document.getElementById('cambioStockInfo');
-        
-        if (isNaN(stockVal) || stockVal < 0) {
-            stockInput.classList.add('is-invalid');
-            stockInput.classList.remove('is-valid');
-            cambioStockInfo.textContent = '';
+    function calcularPreciosYMargenes() {
+        if (tipoVenta === 'unidad') {
+            const usarPrecioFijo = document.getElementById('usar_precio_fijo_bs')?.checked || false;
+            const precioUSD = parseFloat(document.getElementById('precio')?.value) || 0;
+            const precioCostoUSD = parseFloat(document.getElementById('precio_costo')?.value) || 0;
+
+            let precioBsCalculado;
+            let precioCostoBsCalculado;
+
+            if (usarPrecioFijo) {
+                precioBsCalculado = parseFloat(document.getElementById('precio_bs')?.value) || 0;
+                precioCostoBsCalculado = parseFloat(document.getElementById('precio_costo_bs')?.value) || 0;
+            } else {
+                precioBsCalculado = precioUSD * tasaActual;
+                precioCostoBsCalculado = precioCostoUSD * tasaActual;
+
+                const precioBsInput = document.getElementById('precio_bs');
+                if (precioBsInput) {
+                    precioBsInput.value = precioBsCalculado.toFixed(2);
+                }
+            }
+
+            document.getElementById('precioBsCalculado').textContent = 'Bs ' + (precioBsCalculado || 0).toFixed(2);
+            document.getElementById('precioCostoBsCalculado').textContent = 'Bs ' + (precioCostoBsCalculado || 0).toFixed(2);
+
+            const gananciaUSD = precioUSD - precioCostoUSD;
+            const gananciaBS = precioBsCalculado - precioCostoBsCalculado;
+            const margen = precioCostoUSD > 0 ? ((gananciaUSD / precioCostoUSD) * 100) : 0;
+
+            document.getElementById('margenGanancia').textContent = margen.toFixed(1) + '%';
+            document.getElementById('gananciaNetaUSD').textContent = '$' + gananciaUSD.toFixed(2);
+            document.getElementById('gananciaNetaBS').textContent = 'Bs ' + gananciaBS.toFixed(2);
+
+            const margenElement = document.getElementById('margenGanancia');
+            if (margen < 10) {
+                margenElement.className = 'badge bg-danger';
+            } else if (margen < 25) {
+                margenElement.className = 'badge bg-warning';
+            } else {
+                margenElement.className = 'badge bg-success';
+            }
+        }
+    }
+
+    function validarFormulario() {
+        const nombre = document.querySelector('input[name="nombre"]').value.trim();
+
+        if (!nombre) {
+            alert('El nombre del producto es obligatorio');
             return false;
         }
-        
-        stockInput.classList.remove('is-invalid');
-        stockInput.classList.add('is-valid');
-        
-        // Mostrar información del cambio
-        const diferencia = stockVal - stockOriginal;
-        if (diferencia > 0) {
-            cambioStockInfo.textContent = `(Incremento: +${diferencia} unidades)`;
-            cambioStockInfo.className = 'text-success';
-        } else if (diferencia < 0) {
-            cambioStockInfo.textContent = `(Disminución: ${diferencia} unidades)`;
-            cambioStockInfo.className = 'text-danger';
-        } else {
-            cambioStockInfo.textContent = '(Sin cambios)';
-            cambioStockInfo.className = 'text-muted';
-        }
-        
+
+        <?php if ($tipo_venta === 'peso'): ?>
+            const precioKiloUsd = parseFloat(document.getElementById('precio_por_kilo_usd').value);
+            if (!precioKiloUsd || precioKiloUsd <= 0) {
+                alert('El precio por kilo en USD es obligatorio');
+                return false;
+            }
+
+            const stockActual = parseFloat(document.getElementById('stock_actual_peso').value);
+            if (stockActual < 0) {
+                alert('El stock no puede ser negativo');
+                return false;
+            }
+
+            const usarPrecioFijo = document.getElementById('usar_precio_fijo_bs').checked;
+            if (usarPrecioFijo) {
+                const precioKiloBs = parseFloat(document.getElementById('precio_por_kilo_bs').value);
+                if (!precioKiloBs || precioKiloBs <= 0) {
+                    alert('El precio por kilo en Bs es obligatorio cuando usa precio fijo');
+                    return false;
+                }
+            }
+        <?php else: ?>
+            const usarPrecioFijo = document.getElementById('usar_precio_fijo_bs').checked;
+
+            if (!usarPrecioFijo) {
+                const precio = parseFloat(document.getElementById('precio').value);
+                if (!precio || precio <= 0) {
+                    alert('El precio en USD debe ser mayor a 0 para productos sin precio fijo');
+                    return false;
+                }
+            } else {
+                const precioBs = parseFloat(document.getElementById('precio_bs').value);
+                if (!precioBs || precioBs <= 0) {
+                    alert('El precio en Bs debe ser mayor a 0 para productos con precio fijo');
+                    return false;
+                }
+            }
+
+            const stockActual = parseInt(document.getElementById('stock_actual_unidad').value);
+            if (stockActual < 0) {
+                alert('El stock no puede ser negativo');
+                return false;
+            }
+        <?php endif; ?>
+
         return true;
     }
 
-    function limpiarFormulario() {
-        if (confirm('¿Estás seguro de que deseas restaurar los valores originales? Se perderán los cambios no guardados.')) {
-            // Restaurar valores originales del producto
-            document.getElementById('nombre').value = productoOriginal.nombre || '';
-            document.getElementById('descripcion').value = productoOriginal.descripcion || '';
-            document.getElementById('precio').value = productoOriginal.precio ? parseFloat(productoOriginal.precio).toFixed(2) : '';
-            document.getElementById('precio_bs').value = productoOriginal.precio_bs ? parseFloat(productoOriginal.precio_bs).toFixed(2) : '';
-            document.getElementById('precio_costo').value = productoOriginal.precio_costo ? parseFloat(productoOriginal.precio_costo).toFixed(2) : '';
-            document.getElementById('precio_costo_bs').value = productoOriginal.precio_costo_bs ? parseFloat(productoOriginal.precio_costo_bs).toFixed(2) : '';
-            document.getElementById('stock_actual').value = productoOriginal.stock_actual || '0';
-            document.getElementById('stock_minimo').value = productoOriginal.stock_minimo || '5';
-            document.getElementById('categoria_id').value = productoOriginal.categoria_id || '';
-            document.getElementById('activo').checked = productoOriginal.activo || true;
+    document.addEventListener('DOMContentLoaded', function() {
+        const descripcion = document.getElementById('descripcion');
+        const charCount = document.getElementById('charCount');
 
-            // Restaurar estado del precio fijo
-            const usarPrecioFijoCheckbox = document.getElementById('usar_precio_fijo_bs');
-            if (usarPrecioFijoCheckbox) {
-                usarPrecioFijoCheckbox.checked = productoOriginal.usar_precio_fijo_bs || false;
-                togglePrecioFijo();
+        if (descripcion) {
+            descripcion.addEventListener('input', function() {
+                const length = this.value.length;
+                charCount.textContent = length;
+
+                if (length > 450) {
+                    charCount.className = 'char-counter-warning';
+                } else if (length > 400) {
+                    charCount.className = 'text-warning';
+                } else {
+                    charCount.className = 'char-counter-info';
+                }
+            });
+        }
+
+        <?php if ($tipo_venta === 'peso'): ?>
+            const precioKiloUsd = document.getElementById('precio_por_kilo_usd');
+            if (precioKiloUsd) {
+                precioKiloUsd.addEventListener('input', calcularPrecioPorKiloBs);
             }
+        <?php else: ?>
+            const precioInput = document.getElementById('precio');
+            const precioCosto = document.getElementById('precio_costo');
+            if (precioInput) precioInput.addEventListener('input', calcularPreciosYMargenes);
+            if (precioCosto) precioCosto.addEventListener('input', calcularPreciosYMargenes);
+        <?php endif; ?>
 
-            // Actualizar contador de caracteres
-            const descripcion = document.getElementById('descripcion');
-            const charCount = document.getElementById('charCount');
-            charCount.textContent = descripcion.value.length;
-
-            // Recalcular y validar
+        <?php if ($tipo_venta === 'peso'): ?>
+            if (esPrecioFijo) {
+                togglePrecioFijoPeso();
+            }
+        <?php else: ?>
+            if (esPrecioFijo) {
+                togglePrecioFijoUnidad();
+            }
             calcularPreciosYMargenes();
-            validarStock();
-
-            showToast('info', 'Valores restaurados correctamente.');
-        }
-    }
-
-    function confirmarEliminacion() {
-        if (confirm('¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.')) {
-            // Redirigir a la función de eliminación
-            window.location.href = `eliminar.php?id=<?php echo $producto_id; ?>`;
-        }
-    }
-
-    function showToast(type, message) {
-        // Crear toast dinámicamente
-        const toastContainer = document.getElementById('toastContainer') || createToastContainer();
-        const toast = document.createElement('div');
-
-        toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} border-0`;
-        toast.setAttribute('role', 'alert');
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        `;
-
-        toastContainer.appendChild(toast);
-
-        // Mostrar toast
-        const bsToast = new bootstrap.Toast(toast);
-        bsToast.show();
-
-        // Remover toast después de ocultar
-        toast.addEventListener('hidden.bs.toast', function() {
-            toast.remove();
-        });
-    }
-
-    function createToastContainer() {
-        const container = document.createElement('div');
-        container.id = 'toastContainer';
-        container.className = 'toast-container position-fixed top-0 end-0 p-3';
-        container.style.zIndex = '9999';
-        document.body.appendChild(container);
-        return container;
-    }
+        <?php endif; ?>
+    });
 </script>
 
 <style>
@@ -947,42 +931,33 @@ require_once '../layouts/header.php';
     .precio-bs-required {
         font-weight: bold;
     }
-    
+
     .crear-producto-content {
         padding: 20px;
     }
-    
+
     .card {
         margin-bottom: 20px;
-        border: 1px solid #dee2e6;
-        border-radius: 0.375rem;
     }
-    
-    .card-header {
-        background-color: #f8f9fa;
-        border-bottom: 1px solid #dee2e6;
-        padding: 1rem 1.25rem;
-    }
-    
+
     .form-check-input:checked {
         background-color: #0d6efd;
         border-color: #0d6efd;
     }
-    
+
     .badge {
         font-size: 0.85em;
         padding: 0.35em 0.65em;
     }
-    
+
     .input-group-text {
         background-color: #e9ecef;
-        border: 1px solid #ced4da;
     }
-    
+
     .is-valid {
         border-color: #198754 !important;
     }
-    
+
     .is-invalid {
         border-color: #dc3545 !important;
     }

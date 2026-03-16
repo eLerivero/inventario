@@ -1,11 +1,11 @@
 <?php
+// Views/productos/index.php
 require_once '../../Controllers/ProductoController.php';
 require_once '../../Controllers/CategoriaController.php';
 require_once '../../Controllers/TasaCambioController.php';
 require_once '../../Helpers/TasaCambioHelper.php';
 require_once '../../Config/Database.php';
 require_once __DIR__ . '/../../Utils/Auth.php';
-
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -50,8 +50,11 @@ require_once '../layouts/header.php';
             <i class="fas fa-box me-2"></i>Gestión de Productos
         </h1>
         <div class="btn-toolbar mb-2 mb-md-0">
-            <a href="crear.php" class="btn btn-success">
+            <a href="crear.php" class="btn btn-success me-2">
                 <i class="fas fa-plus me-2"></i>Nuevo Producto
+            </a>
+            <a href="../ventas/venta-rapida-por-peso.php" class="btn btn-warning">
+                <i class="fas fa-weight me-2"></i>Venta Rápida por Peso
             </a>
         </div>
     </div>
@@ -94,9 +97,55 @@ require_once '../layouts/header.php';
         </div>
     <?php endif; ?>
 
+    <!-- Filtros Rápidos -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" class="form-control" id="search" placeholder="SKU, nombre o descripción">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Categoría</label>
+                    <select class="form-select" id="categoria">
+                        <option value="">Todas</option>
+                        <?php foreach ($categorias as $categoria): ?>
+                            <option value="<?php echo $categoria['id']; ?>"><?php echo htmlspecialchars($categoria['nombre']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Tipo de Venta</label>
+                    <select class="form-select" id="tipo_venta">
+                        <option value="">Todos</option>
+                        <option value="unidad">Por Unidad</option>
+                        <option value="peso">Por Peso</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Stock</label>
+                    <select class="form-select" id="stock">
+                        <option value="">Todos</option>
+                        <option value="bajo">Bajo Stock</option>
+                        <option value="sin">Sin Stock</option>
+                        <option value="normal">Stock Normal</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-outline-primary me-2" onclick="exportarExcel()">
+                        <i class="fas fa-file-excel me-1"></i> Excel
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="imprimirLista()">
+                        <i class="fas fa-print me-1"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Estadísticas Rápidas -->
     <div class="row mb-4">
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="card bg-primary text-white card-stat">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
@@ -111,29 +160,51 @@ require_once '../layouts/header.php';
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="card bg-success text-white card-stat">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h6 class="card-title">Activos</h6>
+                            <h6 class="card-title">Por Unidad</h6>
                             <h4><strong>
                                     <?php
-                                    $activos = array_filter($productos, function ($prod) {
-                                        return isset($prod['activo']) && $prod['activo'] == 1;
+                                    $unidad = array_filter($productos, function ($p) {
+                                        return ($p['tipo_venta'] ?? 'unidad') === 'unidad';
                                     });
-                                    echo count($activos);
+                                    echo count($unidad);
                                     ?>
                                 </strong></h4>
                         </div>
                         <div class="align-self-center">
-                            <i class="fas fa-check-circle fa-2x"></i>
+                            <i class="fas fa-cube fa-2x"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
+            <div class="card bg-info text-white card-stat">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Por Peso</h6>
+                            <h4><strong>
+                                    <?php
+                                    $peso = array_filter($productos, function ($p) {
+                                        return ($p['tipo_venta'] ?? 'unidad') === 'peso';
+                                    });
+                                    echo count($peso);
+                                    ?>
+                                </strong></h4>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-weight fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
             <div class="card bg-warning text-white card-stat">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
@@ -141,11 +212,10 @@ require_once '../layouts/header.php';
                             <h6 class="card-title">Bajo Stock</h6>
                             <h4><strong>
                                     <?php
-                                    $bajo_stock = array_filter($productos, function ($prod) {
-                                        return isset($prod['stock_actual']) &&
-                                            isset($prod['stock_minimo']) &&
-                                            $prod['stock_actual'] > 0 &&
-                                            $prod['stock_actual'] <= $prod['stock_minimo'];
+                                    $bajo_stock = array_filter($productos, function ($p) {
+                                        $stock = floatval($p['stock_actual'] ?? 0);
+                                        $minimo = floatval($p['stock_minimo'] ?? 5);
+                                        return $stock > 0 && $stock <= $minimo;
                                     });
                                     echo count($bajo_stock);
                                     ?>
@@ -158,16 +228,38 @@ require_once '../layouts/header.php';
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white card-stat">
+        <div class="col-md-2">
+            <div class="card bg-danger text-white card-stat">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title">Sin Stock</h6>
+                            <h4><strong>
+                                    <?php
+                                    $sin_stock = array_filter($productos, function ($p) {
+                                        return floatval($p['stock_actual'] ?? 0) == 0;
+                                    });
+                                    echo count($sin_stock);
+                                    ?>
+                                </strong></h4>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-times-circle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card bg-secondary text-white card-stat">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="card-title">Precio Fijo</h6>
                             <h4><strong>
                                     <?php
-                                    $precio_fijo = array_filter($productos, function ($prod) {
-                                        return isset($prod['usar_precio_fijo_bs']) && $prod['usar_precio_fijo_bs'] == 1;
+                                    $precio_fijo = array_filter($productos, function ($p) {
+                                        return isset($p['usar_precio_fijo_bs']) && $p['usar_precio_fijo_bs'] == 1;
                                     });
                                     echo count($precio_fijo);
                                     ?>
@@ -202,9 +294,9 @@ require_once '../layouts/header.php';
                                 <th>SKU</th>
                                 <th>Nombre</th>
                                 <th>Categoría</th>
+                                <th>Tipo</th>
                                 <th>Precio USD</th>
                                 <th>Precio Bs</th>
-                                <th>Tipo</th>
                                 <th>Stock</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
@@ -215,35 +307,45 @@ require_once '../layouts/header.php';
                                 // Obtener tasa de cambio actual para cálculos
                                 $tasa_cambio = $tasaActual['success'] ? $tasaActual['data']['tasa_cambio'] : 1.0;
 
-                                // Determinar si es precio fijo
+                                // Determinar tipo de venta
+                                $tipo_venta = $producto['tipo_venta'] ?? 'unidad';
+                                $unidad_medida = $producto['unidad_medida'] ?? 'kg';
                                 $es_precio_fijo = isset($producto['usar_precio_fijo_bs']) && $producto['usar_precio_fijo_bs'] == 1;
 
-                                // Calcular margen (devuelve array con 'porcentaje', 'monto', 'mensaje')
-                                $margenData = TasaCambioHelper::calcularMargenGanancia(
-                                    $producto['precio'],
-                                    $producto['precio_costo']
-                                );
-                                $porcentajeMargen = $margenData['porcentaje'];
+                                // Calcular precios según tipo de venta
+                                if ($tipo_venta === 'peso') {
+                                    // Producto por peso - usar precio por kilo
+                                    $precio_usd = $producto['precio_por_kilo_usd'] > 0 ? $producto['precio_por_kilo_usd'] : $producto['precio'];
 
-                                // Obtener clase CSS para el margen
-                                $claseMargen = TasaCambioHelper::obtenerClaseMargen($porcentajeMargen);
+                                    if ($es_precio_fijo && $producto['precio_por_kilo_bs'] > 0) {
+                                        $precio_bs = $producto['precio_por_kilo_bs'];
+                                    } else {
+                                        $precio_bs = $precio_usd * $tasa_cambio;
+                                    }
 
-                                // Obtener precio en Bs considerando precio fijo
-                                if ($es_precio_fijo && $producto['precio_bs'] > 0) {
-                                    // Para precio fijo, usar el precio_bs directamente
-                                    $precioBS = $producto['precio_bs'];
-                                    $tipo_precio = 'Fijo';
-                                    $clase_tipo = 'badge bg-info';
+                                    $precio_label = "/$unidad_medida";
+                                    $tipo_texto = 'Por Peso';
+                                    $tipo_clase = 'badge bg-info';
                                 } else {
-                                    // Para precio variable, calcular basado en tasa
-                                    $precioBS = $producto['precio'] * $tasa_cambio;
-                                    $tipo_precio = 'Variable';
-                                    $clase_tipo = 'badge bg-secondary';
+                                    // Producto por unidad - precio por unidad
+                                    $precio_usd = $producto['precio'] ?? 0;
+
+                                    if ($es_precio_fijo && $producto['precio_bs'] > 0) {
+                                        $precio_bs = $producto['precio_bs'];
+                                    } else {
+                                        $precio_bs = $precio_usd * $tasa_cambio;
+                                    }
+
+                                    $precio_label = "/unidad";
+                                    $tipo_texto = 'Por Unidad';
+                                    $tipo_clase = 'badge bg-secondary';
                                 }
 
-                                // Obtener costo en Bs
-                                $costoUSD = $producto['precio_costo'] ?? 0;
-                                $costoBS = $costoUSD * $tasa_cambio;
+                                // Calcular margen
+                                $precio_costo = $producto['precio_costo'] ?? 0;
+                                $margenData = TasaCambioHelper::calcularMargenGanancia($precio_usd, $precio_costo);
+                                $porcentajeMargen = $margenData['porcentaje'];
+                                $claseMargen = TasaCambioHelper::obtenerClaseMargen($porcentajeMargen);
                             ?>
                                 <tr>
                                     <td>
@@ -271,17 +373,32 @@ require_once '../layouts/header.php';
                                         echo htmlspecialchars($categoria_nombre);
                                         ?>
                                     </td>
-                                    <td class="precio-usd">
-                                        <?php if ($es_precio_fijo && $producto['precio'] == 0): ?>
-                                            <span class="badge bg-light text-dark">N/A</span>
-                                        <?php else: ?>
-                                            <strong>$<?php echo number_format($producto['precio'] ?? 0, 2); ?></strong>
+                                    <td>
+                                        <span class="<?php echo $tipo_clase; ?>">
+                                            <?php if ($tipo_venta === 'peso'): ?>
+                                                <i class="fas fa-weight me-1"></i>
+                                            <?php else: ?>
+                                                <i class="fas fa-cube me-1"></i>
+                                            <?php endif; ?>
+                                            <?php echo $tipo_texto; ?>
+                                        </span>
+                                        <?php if ($tipo_venta === 'peso'): ?>
+                                            <br>
+                                            <small class="text-muted"><?php echo $unidad_medida; ?></small>
                                         <?php endif; ?>
-
-                                        <?php if ($producto['precio_costo'] > 0): ?>
+                                        <?php if ($es_precio_fijo): ?>
                                             <br>
                                             <small class="text-muted">
-                                                Costo: $<?php echo number_format($producto['precio_costo'], 2); ?>
+                                                <i class="fas fa-lock"></i> Fijo
+                                            </small>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="precio-usd">
+                                        <strong>$<?php echo number_format($precio_usd, 2); ?></strong><?php echo $precio_label; ?>
+                                        <?php if ($precio_costo > 0): ?>
+                                            <br>
+                                            <small class="text-muted">
+                                                Costo: $<?php echo number_format($precio_costo, 2); ?>
                                             </small>
                                             <br>
                                             <span class="badge <?php echo $claseMargen; ?>" title="<?php echo $margenData['mensaje']; ?>">
@@ -290,31 +407,27 @@ require_once '../layouts/header.php';
                                         <?php endif; ?>
                                     </td>
                                     <td class="precio-bs">
-                                        <strong>
-                                            Bs <?php echo number_format($precioBS, 2); ?>
-                                        </strong>
-                                        <?php if ($producto['precio_costo'] > 0): ?>
+                                        <strong>Bs <?php echo number_format($precio_bs, 2); ?></strong><?php echo $precio_label; ?>
+                                        <?php if ($precio_costo > 0): ?>
                                             <br>
                                             <small class="text-muted">
-                                                Costo: Bs <?php echo number_format($costoBS, 2); ?>
-                                            </small>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <span class="<?php echo $clase_tipo; ?>">
-                                            <?php echo $tipo_precio; ?>
-                                        </span>
-                                        <?php if ($es_precio_fijo && $producto['precio_bs'] > 0): ?>
-                                            <br>
-                                            <small class="text-muted">
-                                                <i class="fas fa-info-circle"></i> Fijo en Bs
+                                                Costo: Bs <?php echo number_format($precio_costo * $tasa_cambio, 2); ?>
                                             </small>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <?php
-                                        $stock_actual = $producto['stock_actual'] ?? 0;
-                                        $stock_minimo = $producto['stock_minimo'] ?? 0;
+                                        $stock_actual = floatval($producto['stock_actual'] ?? 0);
+                                        $stock_minimo = floatval($producto['stock_minimo'] ?? 5);
+
+                                        if ($tipo_venta === 'peso') {
+                                            $stock_texto = number_format($stock_actual, 2) . ' ' . $unidad_medida;
+                                            $minimo_texto = number_format($stock_minimo, 2) . ' ' . $unidad_medida;
+                                        } else {
+                                            $stock_texto = intval($stock_actual) . ' und';
+                                            $minimo_texto = intval($stock_minimo) . ' und';
+                                        }
+
                                         $badge_class = 'bg-';
                                         if ($stock_actual == 0) {
                                             $badge_class .= 'danger';
@@ -325,9 +438,9 @@ require_once '../layouts/header.php';
                                         }
                                         ?>
                                         <span class="badge <?php echo $badge_class; ?>">
-                                            <?php echo $stock_actual; ?>
+                                            <?php echo $stock_texto; ?>
                                         </span>
-                                        / <?php echo $stock_minimo; ?>
+                                        / <?php echo $minimo_texto; ?>
                                         <?php if ($stock_actual <= $stock_minimo && $stock_actual > 0): ?>
                                             <br>
                                             <small class="text-warning">
@@ -359,6 +472,14 @@ require_once '../layouts/header.php';
                                                 data-bs-toggle="tooltip">
                                                 <i class="fas fa-edit"></i>
                                             </a>
+                                            <?php if ($tipo_venta === 'peso'): ?>
+                                                <a href="../ventas/venta-rapida-por-peso.php?producto=<?php echo $producto['id']; ?>"
+                                                    class="btn btn-outline-success"
+                                                    title="Vender por peso"
+                                                    data-bs-toggle="tooltip">
+                                                    <i class="fas fa-weight"></i>
+                                                </a>
+                                            <?php endif; ?>
                                             <button type="button"
                                                 class="btn btn-outline-danger btn-eliminar"
                                                 title="Eliminar producto"
@@ -454,11 +575,10 @@ require_once '../layouts/header.php';
                 {
                     searchable: false,
                     targets: [0, 2, 3, 4, 5, 6, 7, 8]
-                } // Deshabilitar búsqueda en algunas columnas
+                }
             ],
             dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
             initComplete: function() {
-                // Añadir clase para mejorar el estilo
                 $('.dataTables_filter input').addClass('form-control form-control-sm');
                 $('.dataTables_length select').addClass('form-control form-control-sm');
             }
@@ -491,176 +611,68 @@ require_once '../layouts/header.php';
             }
         });
 
+        $('#tipo_venta').on('change', function() {
+            const valor = $(this).val();
+
+            if (valor === '') {
+                // Mostrar todos - eliminar filtros
+                $.fn.dataTable.ext.search = [];
+            } else {
+                $.fn.dataTable.ext.search.push(
+                    function(settings, data, dataIndex) {
+                        const tipoText = $(data[3]).text();
+                        return tipoText.includes(valor === 'peso' ? 'Por Peso' : 'Por Unidad');
+                    }
+                );
+            }
+
+            table.draw();
+            if (valor !== '') {
+                $.fn.dataTable.ext.search.pop();
+            }
+        });
+
         $('#stock').on('change', function() {
             const valor = $(this).val();
 
+            $.fn.dataTable.ext.search = [];
+
             if (valor === 'bajo') {
-                // Filtrar productos con stock bajo (stock_actual <= stock_minimo pero > 0)
                 $.fn.dataTable.ext.search.push(
                     function(settings, data, dataIndex) {
-                        const stockText = $(data[6]).text();
-                        const stockActual = parseInt(stockText.match(/\d+/)[0]);
-                        const stockMinimo = parseInt(stockText.split('/')[1]);
-                        return stockActual > 0 && stockActual <= stockMinimo;
+                        const stockCell = $(data[6]);
+                        const stockText = stockCell.find('.badge').text().trim();
+                        const stockNumero = parseFloat(stockText.match(/[\d.]+/)[0]);
+                        const minimoText = stockCell.text().split('/')[1].trim();
+                        const minimoNumero = parseFloat(minimoText.match(/[\d.]+/)[0]);
+
+                        return stockNumero > 0 && stockNumero <= minimoNumero;
                     }
                 );
             } else if (valor === 'sin') {
-                // Filtrar productos sin stock (stock_actual = 0)
                 $.fn.dataTable.ext.search.push(
                     function(settings, data, dataIndex) {
-                        const stockText = $(data[6]).text();
-                        const stockActual = parseInt(stockText.match(/\d+/)[0]);
-                        return stockActual === 0;
+                        const stockCell = $(data[6]);
+                        const stockText = stockCell.find('.badge').text().trim();
+                        const stockNumero = parseFloat(stockText.match(/[\d.]+/)[0]);
+                        return stockNumero === 0;
                     }
                 );
             } else if (valor === 'normal') {
-                // Filtrar productos con stock normal (stock_actual > stock_minimo)
                 $.fn.dataTable.ext.search.push(
                     function(settings, data, dataIndex) {
-                        const stockText = $(data[6]).text();
-                        const stockActual = parseInt(stockText.match(/\d+/)[0]);
-                        const stockMinimo = parseInt(stockText.split('/')[1]);
-                        return stockActual > stockMinimo;
+                        const stockCell = $(data[6]);
+                        const stockText = stockCell.find('.badge').text().trim();
+                        const stockNumero = parseFloat(stockText.match(/[\d.]+/)[0]);
+                        const minimoText = stockCell.text().split('/')[1].trim();
+                        const minimoNumero = parseFloat(minimoText.match(/[\d.]+/)[0]);
+
+                        return stockNumero > minimoNumero;
                     }
                 );
-            } else {
-                // Mostrar todos - eliminar filtros de stock
-                $.fn.dataTable.ext.search = [];
             }
 
             table.draw();
-            // Limpiar filtro después de aplicar
-            if (valor !== '') {
-                $.fn.dataTable.ext.search.pop();
-            }
-        });
-
-        $('#tipo_precio').on('change', function() {
-            const valor = $(this).val();
-
-            if (valor === 'fijo') {
-                // Filtrar productos con precio fijo
-                $.fn.dataTable.ext.search.push(
-                    function(settings, data, dataIndex) {
-                        const tipoText = $(data[5]).text();
-                        return tipoText.includes('Fijo');
-                    }
-                );
-            } else if (valor === 'variable') {
-                // Filtrar productos con precio variable
-                $.fn.dataTable.ext.search.push(
-                    function(settings, data, dataIndex) {
-                        const tipoText = $(data[5]).text();
-                        return tipoText.includes('Variable');
-                    }
-                );
-            } else {
-                // Mostrar todos - eliminar filtros de tipo
-                $.fn.dataTable.ext.search = [];
-            }
-
-            table.draw();
-            // Limpiar filtro después de aplicar
-            if (valor !== '') {
-                $.fn.dataTable.ext.search.pop();
-            }
-        });
-
-        // Botón exportar
-        $('#btnExportar').on('click', function() {
-            // Crear un archivo CSV con los datos
-            const data = table.rows({
-                search: 'applied'
-            }).data();
-            let csvContent = "SKU,Nombre,Categoría,Precio USD,Precio Bs,Tipo,Stock,Estado\n";
-
-            data.each(function(value, index) {
-                const row = [
-                    $(value[0]).text().trim(),
-                    $(value[1]).find('strong').text().trim(),
-                    $(value[2]).text().trim(),
-                    $(value[3]).find('strong').text().trim().replace('$', ''),
-                    $(value[4]).find('strong').text().trim().replace('Bs ', ''),
-                    $(value[5]).find('.badge').text().trim(),
-                    $(value[6]).text().trim(),
-                    $(value[7]).text().trim()
-                ].map(cell => `"${cell}"`).join(',');
-
-                csvContent += row + '\n';
-            });
-
-            // Descargar el archivo
-            const blob = new Blob([csvContent], {
-                type: 'text/csv;charset=utf-8;'
-            });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", "productos_" + new Date().toISOString().slice(0, 10) + ".csv");
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-
-        // Botón imprimir
-        $('#btnImprimir').on('click', function() {
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write('<html><head><title>Lista de Productos</title>');
-            printWindow.document.write('<style>');
-            printWindow.document.write('body { font-family: Arial, sans-serif; }');
-            printWindow.document.write('table { width: 100%; border-collapse: collapse; margin: 20px 0; }');
-            printWindow.document.write('th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }');
-            printWindow.document.write('th { background-color: #f2f2f2; }');
-            printWindow.document.write('.text-center { text-align: center; }');
-            printWindow.document.write('.badge { padding: 2px 6px; border-radius: 3px; font-size: 12px; }');
-            printWindow.document.write('.bg-success { background-color: #28a745; color: white; }');
-            printWindow.document.write('.bg-warning { background-color: #ffc107; color: black; }');
-            printWindow.document.write('.bg-danger { background-color: #dc3545; color: white; }');
-            printWindow.document.write('.bg-info { background-color: #17a2b8; color: white; }');
-            printWindow.document.write('.bg-secondary { background-color: #6c757d; color: white; }');
-            printWindow.document.write('</style>');
-            printWindow.document.write('</head><body>');
-
-            printWindow.document.write('<h1 class="text-center">Lista de Productos</h1>');
-            printWindow.document.write('<p class="text-center">Fecha: ' + new Date().toLocaleDateString() + '</p>');
-
-            printWindow.document.write('<table>');
-            printWindow.document.write('<thead><tr>');
-            printWindow.document.write('<th>SKU</th>');
-            printWindow.document.write('<th>Nombre</th>');
-            printWindow.document.write('<th>Categoría</th>');
-            printWindow.document.write('<th>Precio USD</th>');
-            printWindow.document.write('<th>Precio Bs</th>');
-            printWindow.document.write('<th>Tipo</th>');
-            printWindow.document.write('<th>Stock</th>');
-            printWindow.document.write('<th>Estado</th>');
-            printWindow.document.write('</tr></thead><tbody>');
-
-            table.rows({
-                search: 'applied'
-            }).every(function() {
-                const data = this.data();
-                printWindow.document.write('<tr>');
-                printWindow.document.write('<td>' + $(data[0]).text().trim() + '</td>');
-                printWindow.document.write('<td>' + $(data[1]).find('strong').text().trim() + '</td>');
-                printWindow.document.write('<td>' + $(data[2]).text().trim() + '</td>');
-                printWindow.document.write('<td>' + $(data[3]).find('strong').text().trim() + '</td>');
-                printWindow.document.write('<td>' + $(data[4]).find('strong').text().trim() + '</td>');
-                printWindow.document.write('<td>' + $(data[5]).find('.badge').text().trim() + '</td>');
-                printWindow.document.write('<td>' + $(data[6]).text().trim() + '</td>');
-                printWindow.document.write('<td>' + $(data[7]).text().trim() + '</td>');
-                printWindow.document.write('</tr>');
-            });
-
-            printWindow.document.write('</tbody></table>');
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.focus();
-            setTimeout(() => {
-                printWindow.print();
-                printWindow.close();
-            }, 250);
         });
 
         // Auto-ocultar alertas después de 5 segundos
@@ -672,6 +684,46 @@ require_once '../layouts/header.php';
             }, 5000);
         });
     });
+
+    function exportarExcel() {
+        const table = $('#tablaProductos').DataTable();
+        const data = table.rows({
+            search: 'applied'
+        }).data();
+
+        let csvContent = "SKU,Nombre,Categoría,Tipo,Precio USD,Precio Bs,Stock,Estado\n";
+
+        data.each(function(value) {
+            const row = [
+                $(value[0]).text().trim(),
+                $(value[1]).find('strong').text().trim(),
+                $(value[2]).text().trim(),
+                $(value[3]).find('.badge').text().trim(),
+                $(value[4]).find('strong').text().trim().replace('$', ''),
+                $(value[5]).find('strong').text().trim().replace('Bs', '').trim(),
+                $(value[6]).find('.badge').text().trim(),
+                $(value[7]).text().trim()
+            ].map(cell => `"${cell}"`).join(',');
+
+            csvContent += row + '\n';
+        });
+
+        const blob = new Blob([csvContent], {
+            type: 'text/csv;charset=utf-8;'
+        });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "productos_" + new Date().toISOString().slice(0, 10) + ".csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function imprimirLista() {
+        window.print();
+    }
 </script>
 
 <style>
@@ -711,12 +763,12 @@ require_once '../layouts/header.php';
         .alert,
         #search,
         #categoria,
+        #tipo_venta,
         #stock,
-        #tipo_precio,
         label[for="search"],
         label[for="categoria"],
-        label[for="stock"],
-        label[for="tipo_precio"] {
+        label[for="tipo_venta"],
+        label[for="stock"] {
             display: none !important;
         }
 

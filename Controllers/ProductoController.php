@@ -55,10 +55,10 @@ class ProductoController
         }
     }
 
-    public function crearOLD($data)
+    public function crear($data)
     {
         try {
-            // Validar datos requeridos
+            // Validar datos requeridos básicos
             if (empty($data['codigo_sku'])) {
                 throw new Exception("El código SKU es obligatorio");
             }
@@ -67,65 +67,44 @@ class ProductoController
                 throw new Exception("El nombre del producto es obligatorio");
             }
 
-            // Validar que el SKU sea único
+            // Validar SKU único
             $producto_existente = $this->producto->obtenerPorSku($data['codigo_sku']);
             if ($producto_existente) {
                 throw new Exception("El código SKU ya existe");
             }
 
-            if (isset($data['usar_precio_fijo_bs']) && $data['usar_precio_fijo_bs']) {
-                // Para precio fijo en Bs, el precio_bs es obligatorio
-                if (empty($data['precio_bs']) || $data['precio_bs'] <= 0) {
-                    throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
+            // Determinar tipo de venta
+            $tipo_venta = $data['tipo_venta'] ?? 'unidad';
+
+            // Validaciones según tipo de venta
+            if ($tipo_venta === 'peso') {
+                // Para productos por peso, validar precio por kilo
+                if (empty($data['precio_por_kilo_usd']) || $data['precio_por_kilo_usd'] <= 0) {
+                    throw new Exception("El precio por kilo en USD es obligatorio para productos por peso");
                 }
-                // Para precio fijo, los precios en USD no son obligatorios
-                // Si no se proporcionan, se pueden establecer en 0
-                if (empty($data['precio']) || $data['precio'] < 0) {
-                    $data['precio'] = 0;
+
+                // Si es precio fijo, validar precio por kilo en Bs
+                if (isset($data['usar_precio_fijo_bs']) && $data['usar_precio_fijo_bs']) {
+                    if (empty($data['precio_por_kilo_bs']) || $data['precio_por_kilo_bs'] <= 0) {
+                        throw new Exception("El precio por kilo en Bs es obligatorio cuando usa precio fijo");
+                    }
                 }
-            } else {
-                // Para precio NO fijo, el precio en USD es obligatorio
-                if (empty($data['precio']) || $data['precio'] <= 0) {
-                    throw new Exception("El precio en USD debe ser mayor a 0 para productos sin precio fijo");
-                }
+
+                // Para peso, el precio unitario USD puede ser 0
+                $data['precio'] = $data['precio_por_kilo_usd'] ?? 0;
             }
 
-            return $this->producto->crear($data);
-        } catch (Exception $e) {
-            return [
-                "success" => false,
-                "message" => "Error al crear producto: " . $e->getMessage()
-            ];
-        }
-    }
-
-        public function crear($data)
-    {
-        try {
-            // Validar datos requeridos
-            if (empty($data['codigo_sku'])) {
-                throw new Exception("El código SKU es obligatorio");
-            }
-
-            if (empty($data['nombre'])) {
-                throw new Exception("El nombre del producto es obligatorio");
-            }
-
-            // Validar que el SKU sea único
-            $producto_existente = $this->producto->obtenerPorSku($data['codigo_sku']);
-            if ($producto_existente) {
-                throw new Exception("El código SKU ya existe");
-            }
-
+            // Validaciones de precio fijo (comunes)
             $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
 
             if ($usarPrecioFijo) {
-                // Para precio fijo en Bs, el precio_bs es obligatorio
-                if (empty($data['precio_bs']) || $data['precio_bs'] <= 0) {
-                    throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
+                if ($tipo_venta !== 'peso') {
+                    // Para unidad, validar precio_bs
+                    if (empty($data['precio_bs']) || $data['precio_bs'] <= 0) {
+                        throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
+                    }
                 }
-                // Para precio fijo, los precios en USD son OPCIONALES
-                // Si no se proporcionan, se establecen en 0
+
                 if (empty($data['precio']) || $data['precio'] < 0) {
                     $data['precio'] = 0;
                 }
@@ -133,11 +112,13 @@ class ProductoController
                     $data['precio_costo'] = 0;
                 }
             } else {
-                // Para precio NO fijo, el precio en USD es obligatorio
-                if (empty($data['precio']) || $data['precio'] <= 0) {
-                    throw new Exception("El precio en USD debe ser mayor a 0 para productos sin precio fijo");
+                if ($tipo_venta !== 'peso') {
+                    // Para unidad sin precio fijo, validar precio USD
+                    if (empty($data['precio']) || $data['precio'] <= 0) {
+                        throw new Exception("El precio en USD debe ser mayor a 0 para productos sin precio fijo");
+                    }
                 }
-                // El precio de costo es opcional
+
                 if (empty($data['precio_costo']) || $data['precio_costo'] < 0) {
                     $data['precio_costo'] = 0;
                 }
@@ -152,28 +133,86 @@ class ProductoController
         }
     }
 
-    public function actualizarOLD($id, $data)
+    public function actualizar($id, $data)
     {
         try {
-            // Validar datos requeridos
             if (empty($data['nombre'])) {
                 throw new Exception("El nombre del producto es obligatorio");
             }
 
-            // MODIFICACIÓN: Manejar validación según tipo de precio
-            if (isset($data['usar_precio_fijo_bs']) && $data['usar_precio_fijo_bs']) {
-                // Para precio fijo en Bs, el precio_bs es obligatorio
-                if (empty($data['precio_bs']) || $data['precio_bs'] <= 0) {
+            // No permitir modificar SKU
+            if (isset($data['codigo_sku'])) {
+                unset($data['codigo_sku']);
+            }
+
+            // Obtener producto actual para conocer tipo_venta
+            $producto_actual = $this->producto->obtenerPorId($id);
+            if (!$producto_actual) {
+                throw new Exception("Producto no encontrado");
+            }
+
+            $tipo_venta = $producto_actual['tipo_venta'] ?? 'unidad';
+            $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : (bool)($producto_actual['usar_precio_fijo_bs'] ?? false);
+
+            // Validaciones según tipo de venta
+            if ($tipo_venta === 'peso') {
+                if (isset($data['precio_por_kilo_usd']) && $data['precio_por_kilo_usd'] <= 0) {
+                    throw new Exception("El precio por kilo en USD debe ser mayor a 0");
+                }
+
+                if ($usarPrecioFijo && isset($data['precio_por_kilo_bs']) && $data['precio_por_kilo_bs'] <= 0) {
+                    throw new Exception("El precio por kilo en Bs debe ser mayor a 0 para precio fijo");
+                }
+            }
+
+            // Validaciones de precio fijo
+            if ($usarPrecioFijo) {
+                if ($tipo_venta !== 'peso' && isset($data['precio_bs']) && $data['precio_bs'] <= 0) {
                     throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
                 }
-                // Para precio fijo, el precio en USD puede ser 0
-                if (empty($data['precio']) || $data['precio'] < 0) {
+
+                if (isset($data['precio']) && $data['precio'] < 0) {
                     $data['precio'] = 0;
                 }
+                if (isset($data['precio_costo']) && $data['precio_costo'] < 0) {
+                    $data['precio_costo'] = 0;
+                }
+                if (isset($data['precio_costo_bs']) && $data['precio_costo_bs'] < 0) {
+                    $data['precio_costo_bs'] = 0;
+                }
             } else {
-                // Para precio NO fijo, el precio en USD es obligatorio
-                if (empty($data['precio']) || $data['precio'] <= 0) {
+                if ($tipo_venta !== 'peso' && isset($data['precio']) && $data['precio'] <= 0) {
                     throw new Exception("El precio en USD debe ser mayor a 0 para productos sin precio fijo");
+                }
+                if (isset($data['precio_costo']) && $data['precio_costo'] < 0) {
+                    $data['precio_costo'] = 0;
+                }
+                if (isset($data['precio_costo_bs'])) {
+                    unset($data['precio_costo_bs']);
+                }
+            }
+
+            // Validar stock
+            if (isset($data['stock_actual'])) {
+                $stock_actual = floatval($data['stock_actual']);
+                if ($stock_actual < 0) {
+                    throw new Exception("El stock no puede ser negativo");
+                }
+                $data['stock_actual'] = $stock_actual;
+
+                // Registrar en historial si cambió
+                if ($producto_actual['stock_actual'] != $stock_actual) {
+                    $diferencia = $stock_actual - $producto_actual['stock_actual'];
+                    $historialData = [
+                        'producto_id' => $id,
+                        'cantidad_anterior' => $producto_actual['stock_actual'],
+                        'cantidad_nueva' => $stock_actual,
+                        'diferencia' => $diferencia,
+                        'tipo_movimiento' => 'Edición de Productos',
+                        'observaciones' => 'Ajuste manual desde edición de producto',
+                        'usuario_id' => $_SESSION['usuario_id'] ?? 1
+                    ];
+                    $this->registrarCambioStock($historialData);
                 }
             }
 
@@ -186,127 +225,41 @@ class ProductoController
         }
     }
 
-    public function actualizar($id, $data)
-{
-    try {
-        // Validar datos requeridos
-        if (empty($data['nombre'])) {
-            throw new Exception("El nombre del producto es obligatorio");
+    private function registrarCambioStock($data)
+    {
+        try {
+            $query = "INSERT INTO historial_stock 
+                      (producto_id, cantidad_anterior, cantidad_nueva, diferencia, 
+                       tipo_movimiento, observaciones, usuario_id) 
+                      VALUES 
+                      (:producto_id, :cantidad_anterior, :cantidad_nueva, :diferencia,
+                       :tipo_movimiento, :observaciones, :usuario_id)";
+
+            $stmt = $this->db->prepare($query);
+
+            $stmt->bindParam(":producto_id", $data['producto_id']);
+            $stmt->bindParam(":cantidad_anterior", $data['cantidad_anterior']);
+            $stmt->bindParam(":cantidad_nueva", $data['cantidad_nueva']);
+            $stmt->bindParam(":diferencia", $data['diferencia']);
+            $stmt->bindParam(":tipo_movimiento", $data['tipo_movimiento']);
+            $stmt->bindParam(":observaciones", $data['observaciones']);
+            $stmt->bindParam(":usuario_id", $data['usuario_id']);
+
+            return $stmt->execute();
+        } catch (Exception $e) {
+            error_log("Error al registrar cambio de stock: " . $e->getMessage());
+            return false;
         }
-
-        $usarPrecioFijo = isset($data['usar_precio_fijo_bs']) ? (bool)$data['usar_precio_fijo_bs'] : false;
-
-        if ($usarPrecioFijo) {
-            // Para precio fijo en Bs, el precio_bs es obligatorio
-            if (empty($data['precio_bs']) || $data['precio_bs'] <= 0) {
-                throw new Exception("Debe proporcionar el precio en bolívares cuando marca precio fijo");
-            }
-            // Para precio fijo, los precios en USD son OPCIONALES
-            if (empty($data['precio']) || $data['precio'] < 0) {
-                $data['precio'] = 0;
-            }
-            if (empty($data['precio_costo']) || $data['precio_costo'] < 0) {
-                $data['precio_costo'] = 0;
-            }
-            if (empty($data['precio_costo_bs']) || $data['precio_costo_bs'] < 0) {
-                $data['precio_costo_bs'] = 0;
-            }
-        } else {
-            // Para precio NO fijo, el precio en USD es obligatorio
-            if (empty($data['precio']) || $data['precio'] <= 0) {
-                throw new Exception("El precio en USD debe ser mayor a 0 para productos sin precio fijo");
-            }
-            if (empty($data['precio_costo']) || $data['precio_costo'] < 0) {
-                $data['precio_costo'] = 0;
-            }
-            // Para precio no fijo, NO permitir modificar precio_costo_bs directamente
-            // Se calculará automáticamente
-            if (isset($data['precio_costo_bs'])) {
-                unset($data['precio_costo_bs']); // No permitir modificar directamente
-            }
-        }
-
-        // ¡IMPORTANTE! NO permitir modificar el código SKU
-        if (isset($data['codigo_sku'])) {
-            unset($data['codigo_sku']);
-        }
-
-        // ¡IMPORTANTE! AHORA SÍ permitir modificar el stock_actual
-        // Pero validar que sea un número válido
-        if (isset($data['stock_actual'])) {
-            $stock_actual = intval($data['stock_actual']);
-            if ($stock_actual < 0) {
-                throw new Exception("El stock actual no puede ser negativo");
-            }
-            $data['stock_actual'] = $stock_actual;
-            
-            // Registrar en historial de stock (solo si cambió)
-            $producto_actual = $this->producto->obtenerPorId($id);
-            if ($producto_actual && $producto_actual['stock_actual'] != $stock_actual) {
-                $diferencia = $stock_actual - $producto_actual['stock_actual'];
-                
-                // Registrar en historial de stock
-                $historialData = [
-                    'producto_id' => $id,
-                    'cantidad_anterior' => $producto_actual['stock_actual'],
-                    'cantidad_nueva' => $stock_actual,
-                    'diferencia' => $diferencia,
-                    'tipo_movimiento' => 'Edición de Productos',
-                    'observaciones' => 'Ajuste manual desde edición de producto',
-                    'usuario_id' => $_SESSION['usuario_id'] ?? 1
-                ];
-                
-                $this->registrarCambioStock($historialData);
-            }
-        }
-
-        return $this->producto->actualizar($id, $data);
-    } catch (Exception $e) {
-        return [
-            "success" => false,
-            "message" => "Error al actualizar producto: " . $e->getMessage()
-        ];
     }
-}
-
-// Nuevo método para registrar cambios de stock
-private function registrarCambioStock($data)
-{
-    try {
-        $query = "INSERT INTO historial_stock 
-                  (producto_id, cantidad_anterior, cantidad_nueva, diferencia, 
-                   tipo_movimiento, observaciones, usuario_id) 
-                  VALUES 
-                  (:producto_id, :cantidad_anterior, :cantidad_nueva, :diferencia,
-                   :tipo_movimiento, :observaciones, :usuario_id)";
-
-        $stmt = $this->db->prepare($query);
-        
-        $stmt->bindParam(":producto_id", $data['producto_id']);
-        $stmt->bindParam(":cantidad_anterior", $data['cantidad_anterior']);
-        $stmt->bindParam(":cantidad_nueva", $data['cantidad_nueva']);
-        $stmt->bindParam(":diferencia", $data['diferencia']);
-        $stmt->bindParam(":tipo_movimiento", $data['tipo_movimiento']);
-        $stmt->bindParam(":observaciones", $data['observaciones']);
-        $stmt->bindParam(":usuario_id", $data['usuario_id']);
-        
-        return $stmt->execute();
-    } catch (Exception $e) {
-        error_log("Error al registrar cambio de stock: " . $e->getMessage());
-        return false;
-    }
-}
 
     public function eliminar($id)
     {
         try {
-            // Verificar si el producto existe
             $producto = $this->producto->obtenerPorId($id);
             if (!$producto) {
                 throw new Exception("Producto no encontrado");
             }
 
-            // Verificar si el producto tiene ventas asociadas
             $query = "SELECT COUNT(*) as total FROM detalle_ventas WHERE producto_id = :producto_id";
             $stmt = $this->db->prepare($query);
             $stmt->bindParam(":producto_id", $id);
@@ -390,7 +343,6 @@ private function registrarCambioStock($data)
         }
     }
 
-    // Método de búsqueda existente (mantener compatibilidad)
     public function buscar($search)
     {
         try {
@@ -423,21 +375,14 @@ private function registrarCambioStock($data)
     public function buscarProductosAvanzado($searchTerm = '', $categoria = '')
     {
         try {
-            // Obtener tasa de cambio actual
             $tasaCambio = $this->obtenerTasaCambioActual();
 
             $query = "SELECT 
-                        p.id,
-                        p.codigo_sku,
-                        p.nombre,
-                        p.descripcion,
-                        p.precio,
-                        p.precio_bs,
-                        p.usar_precio_fijo_bs,
-                        p.activo,
-                        p.categoria_id,
-                        c.nombre as categoria_nombre,
-                        p.stock_actual
+                        p.id, p.codigo_sku, p.nombre, p.descripcion, 
+                        p.precio, p.precio_bs, p.usar_precio_fijo_bs,
+                        p.activo, p.categoria_id, c.nombre as categoria_nombre,
+                        p.stock_actual, p.tipo_venta, p.unidad_medida,
+                        p.precio_por_kilo_usd, p.precio_por_kilo_bs
                     FROM productos p
                     LEFT JOIN categorias c ON p.categoria_id = c.id
                     WHERE p.activo = TRUE";
@@ -474,19 +419,29 @@ private function registrarCambioStock($data)
             $productos = [];
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 // Calcular precio en bolívares según tipo
-                if ($row['usar_precio_fijo_bs'] && $row['precio_bs'] > 0) {
-                    // Precio fijo en bolívares (ya viene del modelo)
-                    $row['precio_bs'] = floatval($row['precio_bs']);
+                if ($row['tipo_venta'] === 'peso') {
+                    if ($row['usar_precio_fijo_bs'] && $row['precio_por_kilo_bs'] > 0) {
+                        $row['precio_bs_mostrar'] = floatval($row['precio_por_kilo_bs']);
+                    } else {
+                        $precio_kilo_usd = $row['precio_por_kilo_usd'] > 0 ? $row['precio_por_kilo_usd'] : $row['precio'];
+                        $row['precio_bs_mostrar'] = floatval($precio_kilo_usd) * $tasaCambio;
+                    }
+                    $row['precio_usd_mostrar'] = floatval($row['precio_por_kilo_usd'] > 0 ? $row['precio_por_kilo_usd'] : $row['precio']);
                 } else {
-                    // Conversión automática con tasa actual
-                    $row['precio_bs'] = floatval($row['precio']) * $tasaCambio;
+                    if ($row['usar_precio_fijo_bs'] && $row['precio_bs'] > 0) {
+                        $row['precio_bs_mostrar'] = floatval($row['precio_bs']);
+                    } else {
+                        $row['precio_bs_mostrar'] = floatval($row['precio']) * $tasaCambio;
+                    }
+                    $row['precio_usd_mostrar'] = floatval($row['precio']);
                 }
 
-                // Asegurar tipos de datos correctos
-                $row['stock_actual'] = intval($row['stock_actual']);
+                $row['stock_actual'] = floatval($row['stock_actual']);
                 $row['precio'] = floatval($row['precio']);
+                $row['precio_bs'] = floatval($row['precio_bs']);
                 $row['usar_precio_fijo_bs'] = (bool)$row['usar_precio_fijo_bs'];
                 $row['activo'] = (bool)$row['activo'];
+                $row['tipo_venta'] = $row['tipo_venta'] ?? 'unidad';
 
                 $productos[] = $row;
             }
@@ -505,7 +460,6 @@ private function registrarCambioStock($data)
         }
     }
 
-    // Método auxiliar para obtener tasa de cambio actual
     private function obtenerTasaCambioActual()
     {
         try {
@@ -519,40 +473,42 @@ private function registrarCambioStock($data)
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            if ($result && isset($result['tasa_cambio'])) {
-                return floatval($result['tasa_cambio']);
-            }
-
-            // Si no hay tasa activa, usar un valor por defecto
-            return 35.00;
+            return $result ? floatval($result['tasa_cambio']) : 35.00;
         } catch (Exception $e) {
-            // En caso de error, retornar un valor por defecto
             return 35.00;
         }
     }
 
-    // Método para obtener productos con información completa (usado en ventas)
     public function obtenerProductosConInfoCompleta()
     {
         try {
-            // Usar el método del modelo
             $productos = $this->producto->obtenerProductosConInfoCompleta();
-
-            // Obtener tasa de cambio para calcular precios en bolívares
             $tasaCambio = $this->obtenerTasaCambioActual();
 
-            // Procesar productos para calcular precios en BS si no son fijos
             foreach ($productos as &$producto) {
-                if (!$producto['usar_precio_fijo_bs'] || $producto['precio_bs'] <= 0) {
-                    $producto['precio_bs'] = floatval($producto['precio']) * $tasaCambio;
+                if ($producto['tipo_venta'] === 'peso') {
+                    if (!$producto['usar_precio_fijo_bs'] || $producto['precio_por_kilo_bs'] <= 0) {
+                        $precio_kilo_usd = $producto['precio_por_kilo_usd'] > 0 ? $producto['precio_por_kilo_usd'] : $producto['precio'];
+                        $producto['precio_bs_mostrar'] = floatval($precio_kilo_usd) * $tasaCambio;
+                    } else {
+                        $producto['precio_bs_mostrar'] = floatval($producto['precio_por_kilo_bs']);
+                    }
+                    $producto['precio_usd_mostrar'] = floatval($producto['precio_por_kilo_usd'] > 0 ? $producto['precio_por_kilo_usd'] : $producto['precio']);
+                } else {
+                    if (!$producto['usar_precio_fijo_bs'] || $producto['precio_bs'] <= 0) {
+                        $producto['precio_bs_mostrar'] = floatval($producto['precio']) * $tasaCambio;
+                    } else {
+                        $producto['precio_bs_mostrar'] = floatval($producto['precio_bs']);
+                    }
+                    $producto['precio_usd_mostrar'] = floatval($producto['precio']);
                 }
 
-                // Asegurar tipos de datos
-                $producto['stock_actual'] = intval($producto['stock_actual']);
+                $producto['stock_actual'] = floatval($producto['stock_actual']);
                 $producto['precio'] = floatval($producto['precio']);
                 $producto['precio_bs'] = floatval($producto['precio_bs']);
                 $producto['usar_precio_fijo_bs'] = (bool)$producto['usar_precio_fijo_bs'];
                 $producto['activo'] = (bool)$producto['activo'];
+                $producto['tipo_venta'] = $producto['tipo_venta'] ?? 'unidad';
             }
 
             return [
@@ -578,6 +534,7 @@ private function registrarCambioStock($data)
                         SUM(CASE WHEN stock_actual = 0 THEN 1 ELSE 0 END) as productos_sin_stock,
                         SUM(CASE WHEN stock_actual <= stock_minimo AND stock_actual > 0 THEN 1 ELSE 0 END) as productos_bajo_stock,
                         SUM(CASE WHEN usar_precio_fijo_bs = TRUE THEN 1 ELSE 0 END) as productos_precio_fijo,
+                        SUM(CASE WHEN tipo_venta = 'peso' THEN 1 ELSE 0 END) as productos_por_peso,
                         AVG(precio) as precio_promedio,
                         SUM(stock_actual * precio_costo) as valor_inventario_costo,
                         SUM(stock_actual * precio) as valor_inventario_venta
@@ -595,6 +552,64 @@ private function registrarCambioStock($data)
             return [
                 "success" => false,
                 "message" => "Error al obtener estadísticas: " . $e->getMessage()
+            ];
+        }
+    }
+
+    public function calcularPrecioPorPeso($producto_id, $gramos)
+    {
+        try {
+            $tasa_cambio = $this->obtenerTasaCambioActual();
+            $resultado = $this->producto->calcularPrecioPorGramos($producto_id, $gramos, $tasa_cambio);
+
+            if ($resultado['success']) {
+                return [
+                    "success" => true,
+                    "data" => [
+                        'producto' => $resultado['producto'],
+                        'gramos' => $resultado['gramos'],
+                        'kilos' => $resultado['kilos'],
+                        'precio_usd' => $resultado['precio_usd'],
+                        'precio_bs' => $resultado['precio_bs'],
+                        'precio_kilo_usd' => $resultado['precio_kilo_usd'],
+                        'precio_kilo_bs' => $resultado['precio_kilo_bs']
+                    ]
+                ];
+            }
+
+            return $resultado;
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al calcular precio: " . $e->getMessage()
+            ];
+        }
+    }
+
+    public function obtenerProductosPorPesoParaVenta()
+    {
+        try {
+            $productos = $this->producto->obtenerProductosPorPeso();
+            $tasa_cambio = $this->obtenerTasaCambioActual();
+
+            foreach ($productos as &$producto) {
+                if (!$producto['usar_precio_fijo_bs'] || $producto['precio_por_kilo_bs'] <= 0) {
+                    $precio_kilo_usd = $producto['precio_por_kilo_usd'] > 0 ? $producto['precio_por_kilo_usd'] : $producto['precio'];
+                    $producto['precio_por_kilo_bs'] = $precio_kilo_usd * $tasa_cambio;
+                }
+                $producto['precio_por_kilo_usd'] = floatval($producto['precio_por_kilo_usd'] > 0 ? $producto['precio_por_kilo_usd'] : $producto['precio']);
+                $producto['stock_actual_kg'] = floatval($producto['stock_actual']);
+            }
+
+            return [
+                "success" => true,
+                "data" => $productos,
+                "tasa_cambio" => $tasaCambio
+            ];
+        } catch (Exception $e) {
+            return [
+                "success" => false,
+                "message" => "Error al obtener productos por peso: " . $e->getMessage()
             ];
         }
     }
