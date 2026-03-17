@@ -97,52 +97,6 @@ require_once '../layouts/header.php';
         </div>
     <?php endif; ?>
 
-    <!-- Filtros Rápidos -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-3">
-                    <label class="form-label">Buscar</label>
-                    <input type="text" class="form-control" id="search" placeholder="SKU, nombre o descripción">
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Categoría</label>
-                    <select class="form-select" id="categoria">
-                        <option value="">Todas</option>
-                        <?php foreach ($categorias as $categoria): ?>
-                            <option value="<?php echo $categoria['id']; ?>"><?php echo htmlspecialchars($categoria['nombre']); ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Tipo de Venta</label>
-                    <select class="form-select" id="tipo_venta">
-                        <option value="">Todos</option>
-                        <option value="unidad">Por Unidad</option>
-                        <option value="peso">Por Peso</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Stock</label>
-                    <select class="form-select" id="stock">
-                        <option value="">Todos</option>
-                        <option value="bajo">Bajo Stock</option>
-                        <option value="sin">Sin Stock</option>
-                        <option value="normal">Stock Normal</option>
-                    </select>
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button class="btn btn-outline-primary me-2" onclick="exportarExcel()">
-                        <i class="fas fa-file-excel me-1"></i> Excel
-                    </button>
-                    <button class="btn btn-outline-secondary" onclick="imprimirLista()">
-                        <i class="fas fa-print me-1"></i> Imprimir
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Estadísticas Rápidas -->
     <div class="row mb-4">
         <div class="col-md-2">

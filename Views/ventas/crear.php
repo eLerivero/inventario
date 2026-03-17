@@ -421,9 +421,17 @@ include __DIR__ . '/../layouts/header.php';
                 <div class="card-body">
                     <!-- Barra de progreso del pago -->
                     <div class="mb-3">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span>Progreso del pago:</span>
-                            <span id="progreso-pago-texto">$0.00 de $0.00 (0%)</span>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span><strong>Progreso del pago:</strong></span>
+
+                            <span id="progreso-pago-texto" class="text-muted">
+                                $0.00 de $0.00 (0%)
+                            </span>
+
+                            <div-wrapper>
+                                <span class="fw-bold">Pendiente:</span>
+                                <span id="vuelto" class="text-info font-monospace">$0.00</span>
+                            </div-wrapper>
                         </div>
                         <div class="progress" style="height: 25px;">
                             <div id="progreso-pago-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
@@ -461,16 +469,16 @@ include __DIR__ . '/../layouts/header.php';
                                     <label for="nuevo_pago_tipo" class="form-label">Tipo de Pago *</label>
                                     <select class="form-control" id="nuevo_pago_tipo">
                                         <option value="">Seleccionar...</option>
-                                        <?php 
+                                        <?php
                                         // Filtrar solo tipos de pago activos
-                                        $tiposPagoActivos = array_filter($tiposPago_data, function($tipo) {
+                                        $tiposPagoActivos = array_filter($tiposPago_data, function ($tipo) {
                                             return isset($tipo['activo']) && $tipo['activo'] == true;
                                         });
-                                        foreach ($tiposPagoActivos as $tipoPago): 
+                                        foreach ($tiposPagoActivos as $tipoPago):
                                         ?>
-                                            <option value="<?php echo $tipoPago['id']; ?>" 
-                                                    data-nombre="<?php echo htmlspecialchars($tipoPago['nombre']); ?>"
-                                                    data-moneda="<?php echo (in_array($tipoPago['id'], [2, 7])) ? 'USD' : (($tipoPago['id'] == 1) ? 'BS' : 'MIXTO'); ?>">
+                                            <option value="<?php echo $tipoPago['id']; ?>"
+                                                data-nombre="<?php echo htmlspecialchars($tipoPago['nombre']); ?>"
+                                                data-moneda="<?php echo (in_array($tipoPago['id'], [2, 7])) ? 'USD' : (($tipoPago['id'] == 1) ? 'BS' : 'MIXTO'); ?>">
                                                 <?php echo htmlspecialchars($tipoPago['nombre']); ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -480,25 +488,25 @@ include __DIR__ . '/../layouts/header.php';
                                     <label for="nuevo_pago_monto_usd" class="form-label">Monto en USD *</label>
                                     <div class="input-group">
                                         <span class="input-group-text">$</span>
-                                        <input type="number" 
-                                               class="form-control" 
-                                               id="nuevo_pago_monto_usd" 
-                                               min="0.01" 
-                                               step="0.01" 
-                                               placeholder="0.00"
-                                               value="0.00">
+                                        <input type="number"
+                                            class="form-control"
+                                            id="nuevo_pago_monto_usd"
+                                            min="0.01"
+                                            step="0.01"
+                                            placeholder="0.00"
+                                            value="0.00">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <label for="nuevo_pago_monto_bs" class="form-label">Equivalente en Bs</label>
                                     <div class="input-group">
                                         <span class="input-group-text">Bs</span>
-                                        <input type="text" 
-                                               class="form-control" 
-                                               id="nuevo_pago_monto_bs" 
-                                               readonly
-                                               placeholder="Se calcula automáticamente"
-                                               value="0.00">
+                                        <input type="text"
+                                            class="form-control"
+                                            id="nuevo_pago_monto_bs"
+                                            readonly
+                                            placeholder="Se calcula automáticamente"
+                                            value="0.00">
                                     </div>
                                 </div>
                                 <div class="col-md-2 d-flex align-items-end">
@@ -511,7 +519,7 @@ include __DIR__ . '/../layouts/header.php';
                                 <div class="col-12">
                                     <small class="text-muted">
                                         <i class="fas fa-info-circle me-1"></i>
-                                        Para pagos en efectivo USD o divisa, el monto en Bs se calcula automáticamente. 
+                                        Para pagos en efectivo USD o divisa, el monto en Bs se calcula automáticamente.
                                         Para pagos en BS, ingresa el monto en USD y se calculará su equivalente en Bs.
                                     </small>
                                 </div>
